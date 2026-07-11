@@ -1,0 +1,48 @@
+{
+  "id": "dp_hothead_calm",
+  "prompt": "Alex is boiling mad. How do you help?",
+  "inputMode": "both",
+  "themeSensitivity": "standard",
+  "selSkills": ["calm", "empathy"],
+  "options": [
+    {
+      "id": "opt_breathe",
+      "label": "Want to take three slow breaths with me before we talk?",
+      "selScore": "strong"
+    },
+    {
+      "id": "opt_space",
+      "label": "I'll give you a minute. I'm here when you're ready.",
+      "selScore": "partial"
+    },
+    {
+      "id": "opt_yell",
+      "label": "Stop being dramatic — it's just a game!",
+      "selScore": "poor"
+    }
+  ],
+  "companionContext": {
+    "situation": "Peer showing anger after losing a game",
+    "npcEmotion": "anger",
+    "ageBand": "8-10"
+  },
+  "consequences": [
+    { "band": "strong", "sceneId": "c2", "meterDeltas": { "calm": 1.0, "empathy": 0.35 } },
+    { "band": "partial", "sceneId": "c2", "meterDeltas": { "calm": 0.4 } },
+    { "band": "poor", "sceneId": "c1", "repairAction": "sit-with" }
+  ],
+  "emotionalArc": {
+    "childStateEntering": "alert, wanting to help",
+    "childStateExiting": {
+      "strong": "steady, co-regulating",
+      "partial": "patient, respectful of space",
+      "poor": "guided away from shame"
+    },
+    "companionStance": {
+      "strong": "calm modeling, soft glow",
+      "partial": "quiet presence",
+      "poor": "interposes gently, models repair"
+    },
+    "recoveryCadence": "poor → companion models breath → retry"
+  }
+}

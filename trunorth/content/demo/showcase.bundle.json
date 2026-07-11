@@ -1,0 +1,61 @@
+{
+  "version": "1.0.0",
+  "responses": {
+    "w1:dp_robin_encounter:strong": {
+      "scoreBand": "strong",
+      "skill": "empathy",
+      "confidence": 1,
+      "companionLine": "You walked over gently — that takes real heart.",
+      "redirect": false,
+      "safetyFlag": "none"
+    },
+    "w1:dp_robin_encounter:partial": {
+      "scoreBand": "partial",
+      "skill": "empathy",
+      "confidence": 1,
+      "companionLine": "Waiting can be okay too. Want to try saying hello?",
+      "redirect": false,
+      "safetyFlag": "none"
+    },
+    "w2:dp_robin_ladder:strong": {
+      "scoreBand": "strong",
+      "skill": "worry_brave",
+      "confidence": 1,
+      "companionLine": "You said the scared part out loud — that helps it feel smaller.",
+      "redirect": false,
+      "safetyFlag": "none"
+    },
+    "w2:dp_robin_ladder:partial": {
+      "scoreBand": "partial",
+      "skill": "worry_brave",
+      "confidence": 1,
+      "companionLine": "It's okay to want a different plan. Robin still needs a friend nearby.",
+      "redirect": false,
+      "safetyFlag": "none"
+    },
+    "w2:dp_robin_ladder:poor": {
+      "scoreBand": "poor",
+      "skill": "worry_brave",
+      "confidence": 1,
+      "companionLine": "Let's try again. Robin's feelings matter — we can go slower together.",
+      "redirect": false,
+      "safetyFlag": "none"
+    },
+    "w4:dp_climb_celebration:strong": {
+      "scoreBand": "strong",
+      "skill": "courage",
+      "confidence": 1,
+      "companionLine": "You did it! Robin climbed because you believed in them.",
+      "redirect": false,
+      "safetyFlag": "none"
+    },
+    "w4:dp_climb_celebration:partial": {
+      "scoreBand": "partial",
+      "skill": "worry_brave",
+      "confidence": 1,
+      "companionLine": "One more step — you've got this!",
+      "redirect": false,
+      "safetyFlag": "none"
+    }
+  }
+}

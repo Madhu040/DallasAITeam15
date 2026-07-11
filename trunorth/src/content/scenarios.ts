@@ -1,0 +1,48 @@
+import type { ScenarioMeta } from "../types/index.js";
+
+export const SCENARIOS: ScenarioMeta[] = [
+  {
+    id: "ch1",
+    audience: "child",
+    title: "The Empty Bench",
+    subtitle: "Empathy & Friendship",
+    description: "Jamie sits alone at recess. Practice noticing loneliness and offering belonging.",
+    startSceneId: "e1",
+    ageBand: "5-7",
+    skills: ["empathy", "friendship_repair", "courage"],
+    estimatedMinutes: 4,
+  },
+  {
+    id: "ch2",
+    audience: "child",
+    title: "Robin & the Ladder",
+    subtitle: "Worry & Brave",
+    description: "Robin is scared to climb. Practice naming fear and taking one brave step together.",
+    startSceneId: "w1",
+    ageBand: "8-10",
+    skills: ["worry_brave", "empathy", "courage"],
+    estimatedMinutes: 5,
+  },
+  {
+    id: "ch3",
+    audience: "child",
+    title: "Big Feelings, Soft Tools",
+    subtitle: "Calm & Repair",
+    description: "Alex is boiling mad after a game. Practice calm tools and friendship repair.",
+    startSceneId: "c1",
+    ageBand: "8-10",
+    skills: ["calm", "friendship_repair", "self_worth"],
+    estimatedMinutes: 4,
+  },
+  {
+    id: "parent_coach",
+    audience: "parent",
+    title: "Parent Coach Corner",
+    subtitle: "Reflect & Guide",
+    description: "Review your child’s journey with counselor-style insights and home practice tips.",
+    startSceneId: "parent_hub",
+    ageBand: "8-10",
+    skills: ["empathy", "calm", "courage"],
+    estimatedMinutes: 6,
+  },
+];

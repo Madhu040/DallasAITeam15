@@ -1,0 +1,18 @@
+{
+  "id": "e1",
+  "chapterId": "ch1",
+  "order": 1,
+  "movementTier": "A",
+  "background": "bg_playground",
+  "narration": "At recess, Jamie sits alone on the bench while others play. Your companion notices Jamie looking left out.",
+  "characters": [
+    { "assetRef": "char_leftout", "id": "leftout", "position": [1100, 760], "expression": "sad" },
+    { "assetRef": "char_companion_fox", "id": "companion", "position": [520, 780], "expression": "neutral" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [700, 800], "expression": "neutral" }
+  ],
+  "triggers": [
+    { "id": "jamie_trigger", "bounds": [1000, 640, 200, 180], "action": "startDecision", "target": "dp_leftout_bench" }
+  ],
+  "collectibles": [],
+  "decisionPoints": ["dp_leftout_bench"]
+}

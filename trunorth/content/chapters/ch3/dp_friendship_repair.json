@@ -1,0 +1,48 @@
+{
+  "id": "dp_friendship_repair",
+  "prompt": "Alex feels better. How do you repair the friendship?",
+  "inputMode": "choice",
+  "themeSensitivity": "standard",
+  "selSkills": ["friendship_repair", "self_worth"],
+  "options": [
+    {
+      "id": "opt_sorry",
+      "label": "Thanks for cooling down. Want to try a rematch with kinder rules?",
+      "selScore": "strong"
+    },
+    {
+      "id": "opt_later",
+      "label": "We can play again tomorrow if today still feels big.",
+      "selScore": "partial"
+    },
+    {
+      "id": "opt_blame",
+      "label": "You ruined the game. Don't play with us again.",
+      "selScore": "poor"
+    }
+  ],
+  "companionContext": {
+    "situation": "After calm-down, repairing peer connection",
+    "npcEmotion": "relieved",
+    "ageBand": "8-10"
+  },
+  "consequences": [
+    { "band": "strong", "sceneId": "c2", "fx": ["celebration"], "meterDeltas": { "friendship_repair": 1.0, "self_worth": 0.4 } },
+    { "band": "partial", "sceneId": "c2", "meterDeltas": { "friendship_repair": 0.4 } },
+    { "band": "poor", "sceneId": "c2", "repairAction": "offer-hand" }
+  ],
+  "emotionalArc": {
+    "childStateEntering": "hopeful",
+    "childStateExiting": {
+      "strong": "connected, proud of repair",
+      "partial": "respectful of timing",
+      "poor": "redirected toward kindness"
+    },
+    "companionStance": {
+      "strong": "celebrating repair",
+      "partial": "patient",
+      "poor": "soft correction without shame"
+    },
+    "recoveryCadence": "poor → companion models repair language → celebration"
+  }
+}

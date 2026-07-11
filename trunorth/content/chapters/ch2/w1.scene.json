@@ -1,0 +1,21 @@
+{
+  "id": "w1",
+  "chapterId": "ch2",
+  "order": 1,
+  "movementTier": "B",
+  "background": "bg_clearing_day",
+  "narration": "You and Pip arrive at the sunny clearing. Robin is sitting alone near the treehouse ladder, looking worried.",
+  "characters": [
+    { "assetRef": "char_robin", "id": "robin", "position": [1200, 720], "expression": "worried" },
+    { "assetRef": "char_companion_fox", "id": "companion", "position": [480, 780], "expression": "neutral" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [640, 800], "expression": "neutral" }
+  ],
+  "triggers": [
+    { "id": "robin_trigger", "bounds": [1120, 640, 160, 160], "action": "startDecision", "target": "dp_robin_encounter" }
+  ],
+  "collectibles": [
+    { "id": "spark_w1", "assetRef": "collectible_spark", "position": [300, 800], "kind": "kindness_spark" }
+  ],
+  "decisionPoints": ["dp_robin_encounter"],
+  "nextSceneId": "w2"
+}

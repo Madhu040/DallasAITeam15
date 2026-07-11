@@ -1,0 +1,18 @@
+{
+  "id": "c1",
+  "chapterId": "ch3",
+  "order": 1,
+  "movementTier": "A",
+  "background": "bg_classroom",
+  "narration": "Alex's face is hot. The game didn't go their way and their fists are clenched. Your companion whispers: big feelings need calm tools.",
+  "characters": [
+    { "assetRef": "char_hothead", "id": "hothead", "position": [1080, 760], "expression": "worried" },
+    { "assetRef": "char_companion_fox", "id": "companion", "position": [560, 780], "expression": "neutral" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [720, 800], "expression": "neutral" }
+  ],
+  "triggers": [
+    { "id": "alex_trigger", "bounds": [980, 640, 200, 180], "action": "startDecision", "target": "dp_hothead_calm" }
+  ],
+  "collectibles": [],
+  "decisionPoints": ["dp_hothead_calm"]
+}

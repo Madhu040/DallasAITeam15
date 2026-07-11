@@ -1,0 +1,17 @@
+{
+  "id": "w4",
+  "chapterId": "ch2",
+  "order": 4,
+  "movementTier": "A",
+  "background": "bg_treehouse_rung",
+  "narration": "Time to climb! Tap each rung together with Robin.",
+  "characters": [
+    { "assetRef": "char_robin", "id": "robin", "position": [960, 680], "expression": "relieved_grin" },
+    { "assetRef": "char_companion_fox", "id": "companion", "position": [720, 780], "expression": "excited_glow" }
+  ],
+  "triggers": [
+    { "id": "climb_trigger", "bounds": [860, 400, 200, 300], "action": "startDecision", "target": "dp_climb_celebration" }
+  ],
+  "collectibles": [],
+  "decisionPoints": ["dp_climb_celebration"]
+}

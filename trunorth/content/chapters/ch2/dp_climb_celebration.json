@@ -1,0 +1,41 @@
+{
+  "id": "dp_climb_celebration",
+  "prompt": "Tap each rung to climb together! (3 taps)",
+  "inputMode": "choice",
+  "themeSensitivity": "standard",
+  "selSkills": ["worry_brave", "courage"],
+  "options": [
+    { "id": "tap_1", "label": "Tap rung 1", "selScore": "partial" },
+    { "id": "tap_2", "label": "Tap rung 2", "selScore": "partial" },
+    { "id": "tap_3", "label": "Tap rung 3 — We made it!", "selScore": "strong" }
+  ],
+  "companionContext": {
+    "situation": "Celebration climb at treehouse",
+    "npcEmotion": "brave",
+    "ageBand": "8-10"
+  },
+  "consequences": [
+    {
+      "band": "strong",
+      "sceneId": "w4",
+      "fx": ["celebration"],
+      "meterDeltas": { "worry_brave": 0.5, "courage": 0.5 }
+    },
+    { "band": "partial", "sceneId": "w4", "meterDeltas": { "worry_brave": 0.25 } },
+    { "band": "poor", "sceneId": "w4", "repairAction": "tap-kind-action" }
+  ],
+  "emotionalArc": {
+    "childStateEntering": "excited, ready",
+    "childStateExiting": {
+      "strong": "triumphant, joyful",
+      "partial": "proud, still climbing",
+      "poor": "encouraged, safe"
+    },
+    "companionStance": {
+      "strong": "glowing, celebrating",
+      "partial": "cheering on",
+      "poor": "patient, supportive"
+    },
+    "recoveryCadence": "celebration always ends positively"
+  }
+}
