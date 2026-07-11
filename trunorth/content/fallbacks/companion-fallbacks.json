@@ -1,0 +1,51 @@
+{
+  "dp_robin_encounter": {
+    "strong": "You walked over gently — that takes real heart.",
+    "partial": "Waiting can be okay too. Want to try saying hello?",
+    "poor": "Everyone feels unsure sometimes. Let's try a kind hello together.",
+    "timeout": "Take your time. I'm right here with you.",
+    "safety": "Let's keep our adventure safe and kind. A grown-up can help if you need."
+  },
+  "dp_robin_ladder": {
+    "strong": "You said the scared part out loud — that helps it feel smaller.",
+    "partial": "It's okay to want a different plan. Robin still needs a friend nearby.",
+    "poor": "Let's try again. Robin's feelings matter — we can go slower together.",
+    "timeout": "No rush. Feelings are big sometimes — we can sit with that.",
+    "safety": "If something feels really hard, a trusted grown-up can help. You're not alone."
+  },
+  "dp_climb_celebration": {
+    "strong": "You did it! Robin climbed because you believed in them.",
+    "partial": "One more step — you've got this!",
+    "poor": "Every try counts. Let's tap together!",
+    "timeout": "Ready when you are!",
+    "safety": "You're safe here. A grown-up is always there if you need extra help."
+  },
+  "dp_leftout_bench": {
+    "strong": "You made room for Jamie — belonging starts with one kind invite.",
+    "partial": "Sitting nearby helps. A short invitation can open the door even more.",
+    "poor": "We can turn back and try a welcome. Friendship grows in the retry.",
+    "timeout": "Noticing is the first step. I'm with you.",
+    "safety": "If loneliness feels too big, a trusted grown-up can help."
+  },
+  "dp_ask_grownup": {
+    "strong": "Asking a grown-up for help is brave — that keeps everyone safer.",
+    "partial": "Starting small is okay. Sharing with a grown-up is another brave option.",
+    "poor": "Hurts shouldn't stay secret. Trusted grown-ups are part of the team.",
+    "timeout": "You can take your time choosing what to share.",
+    "safety": "Hard feelings get help. You're not alone."
+  },
+  "dp_hothead_calm": {
+    "strong": "Breathing first gives big feelings a soft landing.",
+    "partial": "Space can be kind — checking back later completes the care.",
+    "poor": "Shame heats anger up. Calm words help the fire cool.",
+    "timeout": "Big feelings need a minute. I'm right here.",
+    "safety": "If anger feels unsafe, find a trusted grown-up right away."
+  },
+  "dp_friendship_repair": {
+    "strong": "Repair restores belonging — that was a strong friendship move.",
+    "partial": "Timing matters. Keeping the door open is still friendship.",
+    "poor": "Exclusion isn't repair. Let's try a kinder invitation.",
+    "timeout": "Friendships can pause and restart gently.",
+    "safety": "If a conflict still hurts, a grown-up can help you both."
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "id": "dp_robin_ladder",
+  "prompt": "Robin is scared to climb. What do you do?",
+  "inputMode": "both",
+  "themeSensitivity": "standard",
+  "selSkills": ["worry_brave", "empathy"],
+  "pivotLockMs": 2000,
+  "options": [
+    {
+      "id": "opt_a",
+      "label": "It's okay to feel scared. Want to try just the first step together?",
+      "icon": "icon_helping_hand",
+      "selScore": "strong"
+    },
+    {
+      "id": "opt_b",
+      "label": "Just climb already — it's not that high!",
+      "selScore": "poor"
+    },
+    {
+      "id": "opt_c",
+      "label": "Maybe we can find something else to do instead.",
+      "selScore": "partial"
+    }
+  ],
+  "companionContext": {
+    "situation": "Robin frozen at ladder, worry cloud visible",
+    "npcEmotion": "anxiety",
+    "ageBand": "8-10"
+  },
+  "consequences": [
+    {
+      "band": "strong",
+      "sceneId": "w3a",
+      "fx": ["worry_cloud_shrink"],
+      "meterDeltas": { "worry_brave": 1.0, "empathy": 0.25 }
+    },
+    {
+      "band": "partial",
+      "sceneId": "w2",
+      "fx": ["worry_cloud_darken"],
+      "repairAction": "offer-hand"
+    },
+    {
+      "band": "poor",
+      "sceneId": "w2",
+      "fx": ["worry_cloud_darken"],
+      "repairAction": "walk-back"
+    }
+  ],
+  "emotionalArc": {
+    "childStateEntering": "curious, slightly concerned",
+    "childStateExiting": {
+      "strong": "empowered, proud, connected",
+      "partial": "uncertain, nudged toward reflection",
+      "poor": "guilty-but-safe (shame interrupted immediately)"
+    },
+    "companionStance": {
+      "strong": "warm, upright, light glow",
+      "partial": "leaned-in, soft-voiced, waits for child",
+      "poor": "kneels-to-child-level, soft-eyes, no-glow; interposes"
+    },
+    "recoveryCadence": "poor → companion intervenes before dead air → touch + one line → repairAction opens"
+  }
+}

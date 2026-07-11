@@ -1,0 +1,18 @@
+{
+  "id": "c2",
+  "chapterId": "ch3",
+  "order": 2,
+  "movementTier": "A",
+  "background": "bg_forest",
+  "narration": "The water clears a little. Calm doesn't erase the feeling — it makes room to choose a kind repair.",
+  "characters": [
+    { "assetRef": "char_hothead", "id": "hothead", "position": [960, 760], "expression": "calm" },
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [700, 780], "expression": "glow" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [820, 800], "expression": "happy" }
+  ],
+  "triggers": [
+    { "id": "repair_trigger", "bounds": [860, 640, 200, 180], "action": "startDecision", "target": "dp_friendship_repair" }
+  ],
+  "collectibles": [],
+  "decisionPoints": ["dp_friendship_repair"]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "w3a",
+  "chapterId": "ch2",
+  "order": 3,
+  "movementTier": "B",
+  "background": "bg_cave",
+  "narration": "Your friend takes a deep breath. The worry cloud shrinks. You found a glowing crystal!",
+  "characters": [
+    { "assetRef": "char_robin", "id": "robin", "position": [960, 720], "expression": "relieved_grin" },
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [720, 780], "expression": "excited_glow" }
+  ],
+  "triggers": [],
+  "collectibles": [],
+  "decisionPoints": [],
+  "nextSceneId": "w4"
+}
