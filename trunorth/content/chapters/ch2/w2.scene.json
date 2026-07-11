@@ -3,11 +3,11 @@
   "chapterId": "ch2",
   "order": 2,
   "movementTier": "B",
-  "background": "bg_clearing_day",
-  "narration": "Robin keeps looking up at the ladder. A worry cloud floats above their head.",
+  "background": "bg_cave",
+  "narration": "Your fox friend keeps looking at the glowing path ahead. A worry cloud floats above.",
   "characters": [
     { "assetRef": "char_robin", "id": "robin", "position": [960, 720], "expression": "worried" },
-    { "assetRef": "char_companion_fox", "id": "companion", "position": [720, 780], "expression": "neutral" },
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [720, 780], "expression": "neutral" },
     { "assetRef": "char_avatar", "id": "avatar", "position": [560, 800], "expression": "neutral" },
     { "assetRef": "fx_worry_cloud", "id": "worry_cloud", "position": [960, 520], "expression": "big" }
   ],

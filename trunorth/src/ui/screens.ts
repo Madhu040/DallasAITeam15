@@ -1,5 +1,6 @@
 import { apiLogin, apiRegister, setSession, clearSession, getToken } from "./auth.js";
 import { SCENARIOS } from "../content/scenarios.js";
+import { zoneForChapter } from "../content/zones.js";
 import type { ScenarioMeta } from "../types/index.js";
 
 type Screen = "landing" | "login" | "register" | "dashboard";
@@ -17,7 +18,7 @@ export function renderLanding(
   const card = document.createElement("div");
   card.className = "onboarding-card";
   card.innerHTML = `
-    <h1>⭐ TruNorth</h1>
+    <h1>🧭 TruNorth</h1>
     <p>Kids learn empathy, courage, and calm through play. Parents get coaching insights to help at home.</p>
   `;
 
@@ -142,8 +143,8 @@ export function renderOnboarding(
   container.innerHTML = "";
   let step = 0;
   const data = {
-    companionName: "Pip",
-    companionArchetype: "companion_fox",
+    companionName: "Spark",
+    companionArchetype: "companion_dragon",
     avatar: { skinTone: "tone_3", hair: "hair_curly" },
     ageBand: "8-10",
     baselineStrength: "empathy",
@@ -158,8 +159,9 @@ export function renderOnboarding(
     card.innerHTML = "";
 
     if (step === 0) {
-      card.innerHTML = `<h1>Meet your companion!</h1><p>Choose a friend to adventure with.</p>`;
+      card.innerHTML = `<h1>Meet your dragon!</h1><p>Choose a companion for your True North journey.</p>`;
       const archetypes = [
+        { id: "companion_dragon", emoji: "🐉", name: "Dragon" },
         { id: "companion_fox", emoji: "🦊", name: "Fox" },
         { id: "companion_sprite", emoji: "✨", name: "Sprite" },
       ];
@@ -176,13 +178,13 @@ export function renderOnboarding(
       card.innerHTML = `<h1>Name your companion</h1>`;
       const input = document.createElement("input");
       input.className = "typed-input";
-      input.value = "Pip";
+      input.value = "Spark";
       input.maxLength = 20;
       card.appendChild(input);
       const btn = document.createElement("button");
       btn.className = "btn-primary";
       btn.textContent = "Next";
-      btn.onclick = () => { data.companionName = input.value.trim() || "Pip"; step++; renderStep(); };
+      btn.onclick = () => { data.companionName = input.value.trim() || "Spark"; step++; renderStep(); };
       card.appendChild(btn);
     } else if (step === 2) {
       card.innerHTML = `<h1>Pick your look</h1>`;
@@ -235,8 +237,8 @@ export function renderScenarioHub(
   const header = document.createElement("div");
   header.className = "hub-header";
   header.innerHTML = `
-    <h1>TruNorth Scenarios</h1>
-    <p>${playMode === "together" ? "Pick a story to play side by side with your child." : "Choose a story to play, or open the parent coach corner."}</p>
+    <h1>🧭 Your Journey</h1>
+    <p>${playMode === "together" ? "Pick a zone to explore side by side with your child." : "Choose a zone to explore, or open the parent coach corner."}</p>
   `;
   surface.appendChild(header);
 
@@ -251,10 +253,12 @@ export function renderScenarioHub(
   const onSelect = playMode === "together" ? onSelectTogether : onSelectSolo;
 
   for (const scenario of SCENARIOS.filter((s) => s.audience === "child")) {
+    const zone = zoneForChapter(scenario.id);
     const card = document.createElement("button");
     card.className = `scenario-card${playMode === "together" ? " together" : ""}`;
     const done = completedChapters.includes(scenario.id);
     card.innerHTML = `
+      <img class="zone-thumb" src="${zone.image}" alt="${zone.name}" />
       <div class="scenario-eyebrow">${scenario.subtitle}${done ? " · Done" : ""}${playMode === "together" ? " · Together" : ""}</div>
       <h3>${scenario.title}</h3>
       <p>${scenario.description}</p>

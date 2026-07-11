@@ -1,15 +1,18 @@
 :root {
-  --bg-dark: #1a1a2e;
-  --bg-parent: #2d3142;
-  --accent: #7ec8a3;
-  --accent-warm: #f4a261;
-  --accent-glow: #e9c46a;
+  --bg-dark: #1a0a2e;
+  --bg-parent: #2d1b4e;
+  --accent: #9d4edd;
+  --accent-warm: #ffd60a;
+  --accent-glow: #ffd60a;
+  --tru-purple: #7b2cbf;
+  --tru-purple-dark: #5a189a;
+  --tru-gold: #ffd60a;
   --text-light: #faf8f5;
   --text-dark: #3d3d3d;
   --bubble-bg: #faf8f5;
   --meter-empathy: #e76f51;
   --meter-calm: #2a9d8f;
-  --meter-courage: #e9c46a;
+  --meter-courage: #ffd60a;
   --font-child: "Nunito", system-ui, sans-serif;
   --font-parent: "Inter", system-ui, sans-serif;
   --hit-target: 64px;
@@ -48,21 +51,41 @@ body {
 .scene-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #87ceeb 0%, #98d8a0 40%, #7cb87c 100%);
+  background: center / cover no-repeat;
+  background-color: #1a0a2e;
 }
 
-.scene-bg.treehouse {
-  background: linear-gradient(180deg, #a8d8ea 0%, #7ec8a3 50%, #5a9e6f 100%);
+.scene-bg.zone-meadow,
+.scene-bg.zone-cave,
+.scene-bg.zone-forest,
+.scene-bg.zone-mountain {
+  background-size: cover;
+  background-position: center;
 }
 
-.scene-bg.playground {
-  background:
-    linear-gradient(180deg, #8ecae6 0%, #bde0fe 35%, #95d5b2 70%, #74c69d 100%);
+.scene-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(26,10,46,0.15) 0%, rgba(26,10,46,0.45) 100%);
+  pointer-events: none;
 }
 
-.scene-bg.classroom {
-  background:
-    linear-gradient(180deg, #e9ecef 0%, #dee2e6 40%, #ced4da 100%);
+.zone-sign {
+  position: absolute;
+  top: 48px;
+  left: 12px;
+  background: rgba(90, 24, 154, 0.88);
+  color: var(--tru-gold);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 214, 10, 0.5);
+  z-index: 12;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .character {
@@ -146,8 +169,8 @@ body {
 
 .counselor-badge {
   display: inline-block;
-  background: #2a9d8f;
-  color: white;
+  background: var(--tru-purple);
+  color: var(--tru-gold);
   font-size: 11px;
   font-weight: 700;
   padding: 3px 8px;
@@ -225,8 +248,8 @@ body {
 
 .scenario-card:hover, .scenario-card:focus-visible {
   transform: translateY(-2px);
-  border-color: var(--accent);
-  background: rgba(126,200,163,0.12);
+  border-color: var(--tru-purple);
+  background: rgba(157, 78, 221, 0.15);
   outline: none;
 }
 
@@ -236,7 +259,15 @@ body {
 }
 
 .scenario-card.together {
-  border-color: rgba(126, 200, 163, 0.35);
+  border-color: rgba(157, 78, 221, 0.35);
+}
+
+.scenario-card .zone-thumb {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 12px;
 }
 
 .scenario-eyebrow {
@@ -522,8 +553,81 @@ body {
   color: white;
 }
 
+.mountain-celebration {
+  position: relative;
+  background: center / cover no-repeat;
+  border-radius: 24px;
+  max-width: 560px;
+  width: 100%;
+  min-height: 480px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.mountain-celebration::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(26,10,46,0.5) 0%, rgba(26,10,46,0.85) 100%);
+}
+
+.celebration-content {
+  position: relative;
+  z-index: 1;
+  padding: 32px 28px;
+}
+
+.celebration-trophy {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--tru-gold), #ffb703);
+  color: var(--tru-purple-dark);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 8px 16px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.celebration-zone {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 16px;
+}
+
+.achievement-checklist {
+  list-style: none;
+  text-align: left;
+  max-width: 280px;
+  margin: 0 auto 16px;
+  background: rgba(90, 24, 154, 0.6);
+  border: 2px solid rgba(255, 214, 10, 0.4);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.achievement-checklist li {
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  color: var(--tru-gold);
+  font-weight: 600;
+}
+
+.celebration-quote {
+  font-size: 0.95rem !important;
+  font-style: italic;
+  opacity: 0.85;
+  margin-bottom: 20px !important;
+}
+
 .celebration h1 { font-size: 2.5rem; margin-bottom: 12px; }
 .celebration p { font-size: 1.2rem; margin-bottom: 24px; }
+
+.celebration-overlay .btn-primary,
+.celebration-overlay .btn-secondary {
+  position: relative;
+  z-index: 2;
+}
 
 /* Parent surfaces */
 .parent-surface {

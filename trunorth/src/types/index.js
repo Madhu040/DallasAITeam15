@@ -12,8 +12,8 @@ export function createInitialGameState(demoMode = false) {
             ageBand: "8-10",
             chapterId: "ch2",
             avatar: { skinTone: "tone_3", hair: "hair_curly" },
-            companionName: "Pip",
-            companionArchetype: "companion_fox",
+            companionName: "Spark",
+            companionArchetype: "companion_dragon",
             baselineStrength: "empathy",
         },
         progress: {

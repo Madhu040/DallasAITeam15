@@ -3,11 +3,11 @@
   "chapterId": "ch2",
   "order": 1,
   "movementTier": "B",
-  "background": "bg_clearing_day",
-  "narration": "You and Pip arrive at the sunny clearing. Robin is sitting alone near the treehouse ladder, looking worried.",
+  "background": "bg_cave",
+  "narration": "You and your dragon enter the Cave of Purpose. A fox friend sits near glowing crystals, looking worried.",
   "characters": [
     { "assetRef": "char_robin", "id": "robin", "position": [1200, 720], "expression": "worried" },
-    { "assetRef": "char_companion_fox", "id": "companion", "position": [480, 780], "expression": "neutral" },
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [480, 780], "expression": "neutral" },
     { "assetRef": "char_avatar", "id": "avatar", "position": [640, 800], "expression": "neutral" }
   ],
   "triggers": [

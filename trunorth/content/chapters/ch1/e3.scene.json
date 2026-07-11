@@ -3,12 +3,12 @@
   "chapterId": "ch1",
   "order": 3,
   "movementTier": "A",
-  "background": "bg_playground",
-  "narration": "A trusted grown-up walks by and asks how everyone is doing. Asking for help is brave too.",
+  "background": "bg_meadow",
+  "narration": "A trusted grown-up walks through the meadow. Asking for help is brave too.",
   "characters": [
     { "assetRef": "char_grownup", "id": "grownup", "position": [1180, 760], "expression": "calm" },
     { "assetRef": "char_leftout", "id": "leftout", "position": [820, 760], "expression": "happy" },
-    { "assetRef": "char_companion_fox", "id": "companion", "position": [600, 780], "expression": "neutral" },
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [600, 780], "expression": "neutral" },
     { "assetRef": "char_avatar", "id": "avatar", "position": [700, 800], "expression": "neutral" }
   ],
   "triggers": [

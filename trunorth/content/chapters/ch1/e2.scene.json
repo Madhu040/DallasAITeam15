@@ -3,11 +3,11 @@
   "chapterId": "ch1",
   "order": 2,
   "movementTier": "A",
-  "background": "bg_playground",
-  "narration": "Jamie smiles a little. Friendship starts with one kind invitation.",
+  "background": "bg_meadow",
+  "narration": "The rabbit friend smiles a little. Friendship in the meadow starts with one kind invitation.",
   "characters": [
     { "assetRef": "char_leftout", "id": "leftout", "position": [960, 740], "expression": "happy" },
-    { "assetRef": "char_companion_fox", "id": "companion", "position": [700, 780], "expression": "glow" },
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [700, 780], "expression": "glow" },
     { "assetRef": "char_avatar", "id": "avatar", "position": [820, 800], "expression": "happy" }
   ],
   "triggers": [],

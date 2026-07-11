@@ -3,6 +3,7 @@ import { getDecisionPoint } from "../content/index.js";
 import { renderFullBodyCharacter } from "../render/characters.js";
 import type { JourneyReflection } from "../counselor/insights.js";
 import { discussPrompt } from "../counselor/coPlay.js";
+import { zoneFromBackground, zoneForChapter, ACHIEVEMENT_CHECKLIST } from "../content/zones.js";
 
 export interface CounselorPanelData {
   title: string;
@@ -53,16 +54,15 @@ export function renderGameView(
   }
 
   const brownie = document.createElement("div");
-  brownie.className = "brownie-counter";
-  brownie.setAttribute("aria-label", `Brownie points: ${state.progress.browniePoints}`);
-  brownie.textContent = `✨ ${state.progress.browniePoints}`;
+  brownie.className = "brownie-counter crystal-counter";
+  brownie.setAttribute("aria-label", `Crystals collected: ${state.progress.browniePoints}`);
+  brownie.textContent = `💎 ${state.progress.browniePoints}`;
   viewport.appendChild(brownie);
 
   const stageTag = document.createElement("div");
   stageTag.className = "stage-tag";
-  stageTag.textContent = scene
-    ? `${scene.chapterId.toUpperCase()} · ${scene.id.toUpperCase()}`
-    : "SCENE";
+  const zone = scene ? (zoneFromBackground(scene.background) ?? zoneForChapter(scene.chapterId)) : null;
+  stageTag.textContent = zone ? zone.name : "SCENE";
   viewport.appendChild(stageTag);
 
   const hud = document.createElement("div");
@@ -81,15 +81,22 @@ export function renderGameView(
 
   if (scene) {
     const bg = document.createElement("div");
-    const bgClass = scene.background.includes("treehouse")
+    const zoneMeta = zoneFromBackground(scene.background) ?? zoneForChapter(scene.chapterId);
+    const legacyClass = scene.background.includes("treehouse")
       ? "treehouse"
       : scene.background.includes("classroom")
         ? "classroom"
         : scene.background.includes("playground")
           ? "playground"
           : "";
-    bg.className = `scene-bg${bgClass ? ` ${bgClass}` : ""}`;
+    bg.className = `scene-bg zone-${zoneMeta.id}${legacyClass ? ` ${legacyClass}` : ""}`;
+    bg.style.backgroundImage = `url(${zoneMeta.image})`;
     viewport.appendChild(bg);
+
+    const sign = document.createElement("div");
+    sign.className = "zone-sign";
+    sign.textContent = zoneMeta.name;
+    viewport.appendChild(sign);
 
     for (const ch of scene.characters) {
       const el = document.createElement("div");
@@ -120,14 +127,20 @@ export function renderGameView(
           : ch.id === "avatar"
             ? "You"
             : ch.id === "leftout"
-              ? "Jamie"
+              ? "Friend"
               : ch.id === "hothead"
-                ? "Alex"
+                ? "Friend"
                 : ch.id === "grownup"
                   ? "Grown-up"
-                  : ch.id === "worry_cloud"
-                    ? ""
-                    : ch.id.charAt(0).toUpperCase() + ch.id.slice(1);
+                  : ch.id === "helper_bear"
+                    ? "Bear"
+                    : ch.id === "helper_deer"
+                      ? "Deer"
+                      : ch.id === "worry_cloud"
+                        ? ""
+                        : ch.id === "robin"
+                          ? "Fox"
+                          : ch.id.charAt(0).toUpperCase() + ch.id.slice(1);
       if (label.textContent) el.appendChild(label);
 
       if (companionLine && ch.id === "companion" && (phase === "consequence" || phase === "awaitingCompanion")) {
@@ -316,10 +329,21 @@ export function renderCelebration(
 ): void {
   container.innerHTML = "";
   const overlay = document.createElement("div");
-  overlay.className = "overlay";
+  overlay.className = "overlay celebration-overlay";
   const celeb = document.createElement("div");
-  celeb.className = "celebration";
-  celeb.innerHTML = `<h1>You finished this stage!</h1><p>${escapeText(chapterTitle)}</p><p>Let's look at the feelings skills you practiced.</p>`;
+  celeb.className = "celebration mountain-celebration";
+  celeb.style.backgroundImage = "url(/assets/zones/mountain.png)";
+  celeb.innerHTML = `
+    <div class="celebration-content">
+      <div class="celebration-trophy">🏆 TRUE NORTH CHAMPION</div>
+      <h1>You did it!</h1>
+      <p class="celebration-zone">${escapeText(chapterTitle)}</p>
+      <ul class="achievement-checklist">
+        ${ACHIEVEMENT_CHECKLIST.map((item) => `<li>✓ ${item}</li>`).join("")}
+      </ul>
+      <p class="celebration-quote">You are stronger together. Keep following your True North.</p>
+    </div>
+  `;
 
   const reflectBtn = document.createElement("button");
   reflectBtn.className = "btn-primary";
