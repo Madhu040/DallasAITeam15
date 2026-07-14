@@ -10,18 +10,18 @@ export interface ZoneMeta {
 
 export const ZONES: ZoneMeta[] = [
   {
+    id: "bridge",
+    name: "The Singing Bridge",
+    tagline: "Feel nervous — and still take the next step.",
+    image: "/assets/zones/forest.png",
+    chapterIds: ["ch2"],
+  },
+  {
     id: "meadow",
     name: "Meadow of Curiosity",
     tagline: "Explore, wonder, and welcome others.",
     image: "/assets/zones/meadow.png",
     chapterIds: ["ch1"],
-  },
-  {
-    id: "cave",
-    name: "Cave of Purpose",
-    tagline: "Discover your gifts and take brave steps.",
-    image: "/assets/zones/cave.png",
-    chapterIds: ["ch2"],
   },
   {
     id: "forest",
@@ -40,12 +40,12 @@ export const ZONES: ZoneMeta[] = [
 ];
 
 export const ACHIEVEMENT_CHECKLIST = [
-  "Asked questions",
-  "Stayed curious",
-  "Welcomed yourself",
-  "Found your purpose",
-  "Used your tools",
-  "Never gave up!",
+  "Thanked Flicker for noticing",
+  "Checked the facts",
+  "Sorted stories from truths",
+  "Helped Flicker's body calm",
+  "Chose to keep going",
+  "Earned Courage Feather #1",
 ] as const;
 
 export function zoneForChapter(chapterId: string): ZoneMeta {

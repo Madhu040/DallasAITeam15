@@ -13,7 +13,8 @@ export type CharacterId =
   | "helper_bear"
   | "helper_fox"
   | "helper_rabbit"
-  | "helper_deer";
+  | "helper_deer"
+  | "wize";
 
 export type ExpressionKey = "neutral" | "worried" | "happy" | "glow" | "sad" | "calm";
 
@@ -28,6 +29,12 @@ const SKIN: Record<string, string> = {
 const PURPLE = "#7b2cbf";
 const PURPLE_DARK = "#5a189a";
 const GOLD = "#ffd60a";
+const FLICKER_RED = "#c1121f";
+const FLICKER_DARK = "#780000";
+const FLICKER_BELLY = "#ffba08";
+const WIZE_BROWN = "#6b4226";
+const WIZE_CREAM = "#f5e6d3";
+const WIZE_GOLD = "#d4a373";
 
 function expressionOffset(expr?: string): string {
   if (expr?.includes("worried") || expr?.includes("sad")) return "worried";
@@ -51,6 +58,8 @@ export function renderFullBodyCharacter(opts: {
   switch (key) {
     case "companion_dragon":
       return dragonSvg(expr, size);
+    case "wize":
+      return wizeSvg(expr, size);
     case "companion_fox":
       return foxSvg(expr, size);
     case "companion_sprite":
@@ -81,6 +90,7 @@ export function renderFullBodyCharacter(opts: {
 
 function resolveCharacterKey(id: string, assetRef?: string, archetype?: string): CharacterId {
   if (id === "worry_cloud" || assetRef?.includes("worry")) return "worry_cloud";
+  if (id === "wize" || assetRef?.includes("wize")) return "wize";
   if (id === "companion" || assetRef?.includes("companion")) {
     if (archetype === "companion_dragon") return "companion_dragon";
     return archetype === "companion_sprite" ? "companion_sprite" : "companion_fox";
@@ -138,23 +148,47 @@ function avatarSvg(expr: string, size: number, skin: string): string {
   </svg>`;
 }
 
-/** Purple dragon companion with gold wings */
+/** Flicker — little red Guardian Dragon with gold belly and sparks */
 function dragonSvg(expr: string, size: number): string {
   const glow = expr === "happy" ? `<circle cx="50" cy="70" r="46" fill="${GOLD}" opacity="0.35"/>` : "";
+  const sparks =
+    expr === "worried"
+      ? `<circle cx="18" cy="70" r="3" fill="${GOLD}"/><circle cx="82" cy="66" r="2.5" fill="${GOLD}"/><circle cx="22" cy="90" r="2" fill="#ff6b35"/>`
+      : "";
   return `<svg viewBox="0 0 100 160" width="${size}" height="${size * 1.6}" aria-hidden="true">
     ${glow}
     <path d="M8 95 Q4 70 20 60 Q30 80 18 105 Z" fill="#ff9e00" opacity="0.9"/>
     <path d="M92 95 Q96 70 80 60 Q70 80 82 105 Z" fill="#ff9e00" opacity="0.9"/>
-    <ellipse cx="50" cy="110" rx="22" ry="28" fill="${PURPLE}"/>
-    <ellipse cx="50" cy="118" rx="14" ry="16" fill="#ffd60a"/>
-    <circle cx="50" cy="48" r="24" fill="${PURPLE}"/>
-    <polygon points="34,32 30,8 44,24" fill="${PURPLE_DARK}"/>
-    <polygon points="66,32 70,8 56,24" fill="${PURPLE_DARK}"/>
-    <ellipse cx="50" cy="58" rx="10" ry="8" fill="#ffd60a"/>
+    <ellipse cx="50" cy="110" rx="22" ry="28" fill="${FLICKER_RED}"/>
+    <ellipse cx="50" cy="118" rx="14" ry="16" fill="${FLICKER_BELLY}"/>
+    <circle cx="50" cy="48" r="24" fill="${FLICKER_RED}"/>
+    <polygon points="34,32 30,8 44,24" fill="${FLICKER_DARK}"/>
+    <polygon points="66,32 70,8 56,24" fill="${FLICKER_DARK}"/>
+    <ellipse cx="50" cy="58" rx="10" ry="8" fill="${FLICKER_BELLY}"/>
     ${face(expr, 50, 46)}
-    <circle cx="42" cy="100" r="3" fill="#ffd60a"/>
-    <circle cx="50" cy="104" r="3" fill="#ffd60a"/>
-    <circle cx="58" cy="100" r="3" fill="#ffd60a"/>
+    <circle cx="42" cy="100" r="3" fill="${FLICKER_BELLY}"/>
+    <circle cx="50" cy="104" r="3" fill="${FLICKER_BELLY}"/>
+    <circle cx="58" cy="100" r="3" fill="${FLICKER_BELLY}"/>
+    ${sparks}
+  </svg>`;
+}
+
+/** Wize — gentle mentor owl who glides down from the oak */
+function wizeSvg(expr: string, size: number): string {
+  return `<svg viewBox="0 0 100 160" width="${size}" height="${size * 1.6}" aria-hidden="true">
+    <ellipse cx="50" cy="145" rx="22" ry="6" fill="#3d2914" opacity="0.25"/>
+    <path d="M18 70 Q8 50 22 42 Q32 62 24 78 Z" fill="${WIZE_GOLD}" opacity="0.85"/>
+    <path d="M82 70 Q92 50 78 42 Q68 62 76 78 Z" fill="${WIZE_GOLD}" opacity="0.85"/>
+    <ellipse cx="50" cy="105" rx="26" ry="32" fill="${WIZE_BROWN}"/>
+    <ellipse cx="50" cy="112" rx="16" ry="18" fill="${WIZE_CREAM}"/>
+    <circle cx="50" cy="48" r="26" fill="${WIZE_BROWN}"/>
+    <circle cx="38" cy="46" r="10" fill="${WIZE_CREAM}"/>
+    <circle cx="62" cy="46" r="10" fill="${WIZE_CREAM}"/>
+    <circle cx="38" cy="46" r="4" fill="#2d2d2d"/>
+    <circle cx="62" cy="46" r="4" fill="#2d2d2d"/>
+    <polygon points="50,54 44,62 56,62" fill="#e09f3e"/>
+    <path d="M28 28 Q38 12 50 22 Q62 12 72 28" fill="none" stroke="${WIZE_GOLD}" stroke-width="3"/>
+    ${expr === "happy" || expr === "calm" ? `<path d="M40 68 Q50 74 60 68" fill="none" stroke="#3d3d3d" stroke-width="2" stroke-linecap="round"/>` : ""}
   </svg>`;
 }
 

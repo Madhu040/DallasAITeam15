@@ -18,10 +18,12 @@ TruNorth helps children practice empathy, courage, and calm through interactive 
 
 Built per the [Consolidated TruNorth Technical Specification](../Consolidated%20TruNorth-Technical-Specification.md).
 
+**Repo ledger:** keep [`../product.md`](../product.md) current on every PR that changes files or behavior.
+
 ## Features
 
 - **Custom scene engine** — no game engine; DOM + CSS scene-graph state machine
-- **Showcase golden path** — W1 → W2 → W3a → W4 (Robin & the treehouse)
+- **Showcase golden path** — Level 1 The Singing Bridge (W1→W6 with Flicker & Wize)
 - **AI companion** — server-side Claude proxy with 5-layer safety pipeline
 - **Demo mode** — fully offline, zero network (`?demo=1`)
 - **Parent authentication** — JWT-based parent accounts (children never log in directly)
@@ -126,7 +128,7 @@ Browser Client          API Server (Hono)
 ## Golden Path
 
 ```
-W1 (meet Robin) → W2 (ladder decision) → W3a (consequence) → W4 (climb celebration)
+W1 (quest) → W2 (investigate) → W3 (fact/story) → W4 (breathe) → W5 (choose) → W6 (crossing + Courage Feather)
 ```
 
 ## License

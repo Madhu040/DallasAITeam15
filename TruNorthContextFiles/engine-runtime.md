@@ -1,0 +1,49 @@
+# Engine runtime
+
+**Sources:** `trunorth/src/main.ts`, `trunorth/src/engine/SceneEngine.ts`,
+`trunorth/src/engine/DecisionResolver.ts`, `trunorth/src/ui/GameView.ts`,
+`trunorth/src/content/index.ts`
+
+## Boot / screens
+
+1. Landing (guest play, together, demo, parent auth)
+2. Trust screen → onboarding (companion archetype + name, avatar)
+3. Scenario hub (`SCENARIOS`)
+4. `startScenario` builds store + companion client, constructs `SceneEngine`,
+   `loadScene(startSceneId)`
+5. On chapter-complete decision with strong band → celebration → parent gate →
+   journey reflection
+
+Demo mode: `?demo=1` or `VITE_DEMO_MODE=true` → `DemoProgressStore` +
+`DemoCompanionClient` (zero network).
+
+## Scene phases
+
+`loading` → `exploring` → (`encounter`) → `decision` → `awaitingCompanion` →
+`consequence` → (`transitioning` | celebration) | repair back to `decision`.
+
+- Exploring: narration + clickable `triggers` on the scene.
+- Decision: choice / typed overlay from `GameView`.
+- Narration-only scenes (no DPs, has `nextSceneId`) auto-advance after ~2.2s.
+
+## Multi-tap mini-games
+
+`MULTI_TAP_REQUIRED` in `content/index.ts`:
+
+| Decision | Taps | Progress lines |
+|---|---|---|
+| `dp_breathe` | 5 | Breath N… heart softens |
+| `dp_crossing` | 4 | Plank N… bridge holds |
+
+Intermediate taps emit partial insight and return early; final strong option
+(or tap count met) continues into companion resolve + scene advance.
+
+## Repair
+
+If consequence includes `repairAction`, engine stays on the decision and shows a
+contextual line (e.g. Singing Bridge “go back” keeps Wize’s agency invite).
+
+## Level 1 path (golden)
+
+`GOLDEN_PATH`: w1 → w2 → w3 → w4 → w5 → w6  
+Finale decision: `dp_crossing` → Courage Feather celebration.

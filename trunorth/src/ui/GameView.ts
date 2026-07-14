@@ -126,21 +126,23 @@ export function renderGameView(
           ? state.profile.companionName
           : ch.id === "avatar"
             ? "You"
-            : ch.id === "leftout"
-              ? "Friend"
-              : ch.id === "hothead"
+            : ch.id === "wize"
+              ? "Wize"
+              : ch.id === "leftout"
                 ? "Friend"
-                : ch.id === "grownup"
-                  ? "Grown-up"
-                  : ch.id === "helper_bear"
-                    ? "Bear"
-                    : ch.id === "helper_deer"
-                      ? "Deer"
-                      : ch.id === "worry_cloud"
-                        ? ""
-                        : ch.id === "robin"
-                          ? "Fox"
-                          : ch.id.charAt(0).toUpperCase() + ch.id.slice(1);
+                : ch.id === "hothead"
+                  ? "Friend"
+                  : ch.id === "grownup"
+                    ? "Grown-up"
+                    : ch.id === "helper_bear"
+                      ? "Bear"
+                      : ch.id === "helper_deer"
+                        ? "Deer"
+                        : ch.id === "worry_cloud"
+                          ? ""
+                          : ch.id === "robin"
+                            ? "Fox"
+                            : ch.id.charAt(0).toUpperCase() + ch.id.slice(1);
       if (label.textContent) el.appendChild(label);
 
       if (companionLine && ch.id === "companion" && (phase === "consequence" || phase === "awaitingCompanion")) {
@@ -332,16 +334,18 @@ export function renderCelebration(
   overlay.className = "overlay celebration-overlay";
   const celeb = document.createElement("div");
   celeb.className = "celebration mountain-celebration";
-  celeb.style.backgroundImage = "url(/assets/zones/mountain.png)";
+  celeb.style.backgroundImage = "url(/assets/zones/forest.png)";
   celeb.innerHTML = `
     <div class="celebration-content">
-      <div class="celebration-trophy">🏆 TRUE NORTH CHAMPION</div>
-      <h1>You did it!</h1>
+      <div class="celebration-trophy">🪶 Courage Feather #1</div>
+      <h1>Level Complete</h1>
       <p class="celebration-zone">${escapeText(chapterTitle)}</p>
+      <p class="celebration-lessons"><strong>Today Flicker learned:</strong> “I don’t have to stop my child every time I feel scared.”</p>
+      <p class="celebration-lessons"><strong>Today you learned:</strong> “I can feel nervous and still take the next step.”</p>
       <ul class="achievement-checklist">
         ${ACHIEVEMENT_CHECKLIST.map((item) => `<li>✓ ${item}</li>`).join("")}
       </ul>
-      <p class="celebration-quote">You are stronger together. Keep following your True North.</p>
+      <p class="celebration-quote">You can feel afraid… and still keep walking.</p>
     </div>
   `;
 

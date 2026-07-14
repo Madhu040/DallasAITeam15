@@ -3,16 +3,16 @@
   "chapterId": "ch2",
   "order": 4,
   "movementTier": "A",
-  "background": "bg_mountain",
-  "narration": "The path leads toward the Mountain of Helpers! Tap each glowing star together.",
+  "background": "bg_bridge",
+  "narration": "Flicker's heart still races — thinking alone doesn't erase worry. Help Flicker's body: match five slow breaths. In… 2… 3… Out… 2… 3…",
   "characters": [
-    { "assetRef": "char_robin", "id": "robin", "position": [960, 680], "expression": "relieved_grin" },
-    { "assetRef": "char_companion_dragon", "id": "companion", "position": [720, 780], "expression": "excited_glow" },
-    { "assetRef": "char_bear", "id": "helper_bear", "position": [1100, 760], "expression": "happy" }
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [640, 760], "expression": "worried" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [440, 800], "expression": "calm" },
+    { "assetRef": "char_wize", "id": "wize", "position": [920, 700], "expression": "calm" }
   ],
   "triggers": [
-    { "id": "climb_trigger", "bounds": [860, 400, 200, 300], "action": "startDecision", "target": "dp_climb_celebration" }
+    { "id": "breathe_trigger", "bounds": [520, 640, 280, 220], "action": "startDecision", "target": "dp_breathe" }
   ],
   "collectibles": [],
-  "decisionPoints": ["dp_climb_celebration"]
+  "decisionPoints": ["dp_breathe"]
 }

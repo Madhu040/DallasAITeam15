@@ -7,19 +7,28 @@ import { insightForStep, buildJourneyReflection } from "../../src/counselor/insi
 import { renderFullBodyCharacter } from "../../src/render/characters.js";
 
 describe("DecisionResolver", () => {
-  it("resolves strong choice for opt_a on robin ladder", () => {
+  it("resolves strong choice for story on fact sort", () => {
     const resolver = new DecisionResolver();
-    const dp = getDecisionPoint("dp_robin_ladder")!;
-    expect(resolver.resolveChoice(dp, "opt_a")).toBe("strong");
+    const dp = getDecisionPoint("dp_fact_sort")!;
+    expect(resolver.resolveChoice(dp, "opt_will_break")).toBe("strong");
   });
 
-  it("applies meter deltas on strong band", () => {
+  it("applies meter deltas on strong band for investigate", () => {
     const resolver = new DecisionResolver();
-    const dp = getDecisionPoint("dp_robin_ladder")!;
+    const dp = getDecisionPoint("dp_investigate")!;
     const state = createInitialGameState();
     const { nextSceneId } = resolver.applyConsequence(state, dp, "strong");
-    expect(nextSceneId).toBe("w3a");
-    expect(state.meters.worry_brave.level).toBeGreaterThan(1);
+    expect(nextSceneId).toBe("w3");
+    expect(state.meters.worry_brave.fill).toBeGreaterThan(0);
+  });
+
+  it("keeps agency on go-back with repair", () => {
+    const resolver = new DecisionResolver();
+    const dp = getDecisionPoint("dp_choose_path")!;
+    const state = createInitialGameState();
+    const { nextSceneId, repairAction } = resolver.applyConsequence(state, dp, "partial");
+    expect(nextSceneId).toBe("w5");
+    expect(repairAction).toBe("offer-hand");
   });
 });
 
@@ -43,10 +52,11 @@ describe("Safety filters", () => {
 });
 
 describe("Golden path", () => {
-  it("has all showcase scenes", () => {
+  it("has all Singing Bridge showcase scenes", () => {
     for (const id of GOLDEN_PATH) {
       expect(SCENES[id]).toBeDefined();
     }
+    expect(GOLDEN_PATH).toEqual(["w1", "w2", "w3", "w4", "w5", "w6"]);
   });
 
   it("has empathy and calm chapter scenes", () => {
@@ -56,8 +66,8 @@ describe("Golden path", () => {
 });
 
 describe("Counselor insights", () => {
-  it("returns child and parent coaching for a step", () => {
-    const insight = insightForStep("dp_robin_ladder", "strong");
+  it("returns child and parent coaching for a Singing Bridge step", () => {
+    const insight = insightForStep("dp_fact_sort", "strong");
     expect(insight.forChild.length).toBeGreaterThan(20);
     expect(insight.forParent.length).toBeGreaterThan(20);
     expect(insight.practiceTip.length).toBeGreaterThan(5);
@@ -68,8 +78,8 @@ describe("Counselor insights", () => {
     state.eventLog.push({
       id: "1",
       timestamp: new Date().toISOString(),
-      sceneId: "w2",
-      decisionPointId: "dp_robin_ladder",
+      sceneId: "w3",
+      decisionPointId: "dp_fact_sort",
       scoreBand: "strong",
       safetyFlag: "none",
     });
@@ -81,8 +91,8 @@ describe("Counselor insights", () => {
 
 describe("Full-body characters", () => {
   it("renders svg markup for key cast", () => {
-    for (const id of ["avatar", "companion", "robin", "leftout", "hothead", "grownup"]) {
-      const svg = renderFullBodyCharacter({ id, companionArchetype: "companion_fox" });
+    for (const id of ["avatar", "companion", "wize", "leftout", "hothead", "grownup"]) {
+      const svg = renderFullBodyCharacter({ id, companionArchetype: "companion_dragon" });
       expect(svg).toContain("<svg");
       expect(svg).toContain("</svg>");
     }

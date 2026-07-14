@@ -143,11 +143,11 @@ export function renderOnboarding(
   container.innerHTML = "";
   let step = 0;
   const data = {
-    companionName: "Spark",
+    companionName: "Flicker",
     companionArchetype: "companion_dragon",
     avatar: { skinTone: "tone_3", hair: "hair_curly" },
     ageBand: "8-10",
-    baselineStrength: "empathy",
+    baselineStrength: "worry_brave",
   };
 
   const surface = document.createElement("div");
@@ -159,9 +159,9 @@ export function renderOnboarding(
     card.innerHTML = "";
 
     if (step === 0) {
-      card.innerHTML = `<h1>Meet your dragon!</h1><p>Choose a companion for your True North journey.</p>`;
+      card.innerHTML = `<h1>Meet Flicker!</h1><p>Every child in Everbright has a Guardian Dragon. Choose yours for The Singing Bridge.</p>`;
       const archetypes = [
-        { id: "companion_dragon", emoji: "🐉", name: "Dragon" },
+        { id: "companion_dragon", emoji: "🐉", name: "Dragon (Flicker)" },
         { id: "companion_fox", emoji: "🦊", name: "Fox" },
         { id: "companion_sprite", emoji: "✨", name: "Sprite" },
       ];
@@ -178,13 +178,13 @@ export function renderOnboarding(
       card.innerHTML = `<h1>Name your companion</h1>`;
       const input = document.createElement("input");
       input.className = "typed-input";
-      input.value = "Spark";
+      input.value = "Flicker";
       input.maxLength = 20;
       card.appendChild(input);
       const btn = document.createElement("button");
       btn.className = "btn-primary";
       btn.textContent = "Next";
-      btn.onclick = () => { data.companionName = input.value.trim() || "Spark"; step++; renderStep(); };
+      btn.onclick = () => { data.companionName = input.value.trim() || "Flicker"; step++; renderStep(); };
       card.appendChild(btn);
     } else if (step === 2) {
       card.innerHTML = `<h1>Pick your look</h1>`;

@@ -58,6 +58,7 @@ body {
 .scene-bg.zone-meadow,
 .scene-bg.zone-cave,
 .scene-bg.zone-forest,
+.scene-bg.zone-bridge,
 .scene-bg.zone-mountain {
   background-size: cover;
   background-position: center;
@@ -618,6 +619,14 @@ body {
   font-style: italic;
   opacity: 0.85;
   margin-bottom: 20px !important;
+}
+
+.celebration-lessons {
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin: 8px auto 4px;
+  max-width: 420px;
+  text-align: left;
 }
 
 .celebration h1 { font-size: 2.5rem; margin-bottom: 12px; }

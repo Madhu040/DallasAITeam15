@@ -1,0 +1,18 @@
+{
+  "id": "w6",
+  "chapterId": "ch2",
+  "order": 6,
+  "movementTier": "A",
+  "background": "bg_bridge",
+  "narration": "One plank at a time. The bridge creaks… and holds. Take careful steps with Flicker until you cross — courage grows from action.",
+  "characters": [
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [700, 760], "expression": "worried" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [520, 800], "expression": "neutral" },
+    { "assetRef": "char_wize", "id": "wize", "position": [1040, 700], "expression": "happy" }
+  ],
+  "triggers": [
+    { "id": "crossing_trigger", "bounds": [480, 600, 480, 280], "action": "startDecision", "target": "dp_crossing" }
+  ],
+  "collectibles": [],
+  "decisionPoints": ["dp_crossing"]
+}
