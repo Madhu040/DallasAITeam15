@@ -15,6 +15,7 @@ import { DecisionResolver } from "./DecisionResolver.js";
 import type { CompanionClient } from "../companion/CompanionClient.js";
 import type { ProgressStore } from "../types/index.js";
 import { childFacingLine, insightForStep } from "../counselor/insights.js";
+import { appConfig } from "../config/app.js";
 
 export interface EngineCallbacks {
   onPhaseChange: (phase: ScenePhase) => void;
@@ -63,7 +64,7 @@ export class SceneEngine {
     if (!scene.decisionPoints.length && scene.nextSceneId) {
       this.setPhase("exploring");
       this.callbacks.onSceneChange(sceneId);
-      setTimeout(() => { void this.loadScene(scene.nextSceneId!); }, 2200);
+      setTimeout(() => { void this.loadScene(scene.nextSceneId!); }, appConfig.timing.narrationAutoAdvanceMs);
       return scene;
     }
 

@@ -1,6 +1,7 @@
 import { apiLogin, apiRegister, setSession, clearSession, getToken } from "./auth.js";
 import { SCENARIOS } from "../content/scenarios.js";
 import { zoneForChapter } from "../content/zones.js";
+import { appConfig } from "../config/app.js";
 import type { ScenarioMeta } from "../types/index.js";
 
 type Screen = "landing" | "login" | "register" | "dashboard";
@@ -142,12 +143,13 @@ export function renderOnboarding(
 ): void {
   container.innerHTML = "";
   let step = 0;
+  const { defaults } = appConfig;
   const data = {
-    companionName: "Flicker",
-    companionArchetype: "companion_dragon",
+    companionName: defaults.companionName,
+    companionArchetype: defaults.companionArchetype,
     avatar: { skinTone: "tone_3", hair: "hair_curly" },
-    ageBand: "8-10",
-    baselineStrength: "worry_brave",
+    ageBand: defaults.ageBand,
+    baselineStrength: defaults.baselineStrength,
   };
 
   const surface = document.createElement("div");
@@ -159,9 +161,9 @@ export function renderOnboarding(
     card.innerHTML = "";
 
     if (step === 0) {
-      card.innerHTML = `<h1>Meet Flicker!</h1><p>Every child in Everbright has a Guardian Dragon. Choose yours for The Singing Bridge.</p>`;
+      card.innerHTML = `<h1>Meet ${defaults.companionName}!</h1><p>Every child in Everbright has a Guardian Dragon. Choose yours for The Singing Bridge.</p>`;
       const archetypes = [
-        { id: "companion_dragon", emoji: "🐉", name: "Dragon (Flicker)" },
+        { id: "companion_dragon", emoji: "🐉", name: `Dragon (${defaults.companionName})` },
         { id: "companion_fox", emoji: "🦊", name: "Fox" },
         { id: "companion_sprite", emoji: "✨", name: "Sprite" },
       ];
@@ -178,13 +180,13 @@ export function renderOnboarding(
       card.innerHTML = `<h1>Name your companion</h1>`;
       const input = document.createElement("input");
       input.className = "typed-input";
-      input.value = "Flicker";
+      input.value = defaults.companionName;
       input.maxLength = 20;
       card.appendChild(input);
       const btn = document.createElement("button");
       btn.className = "btn-primary";
       btn.textContent = "Next";
-      btn.onclick = () => { data.companionName = input.value.trim() || "Flicker"; step++; renderStep(); };
+      btn.onclick = () => { data.companionName = input.value.trim() || defaults.companionName; step++; renderStep(); };
       card.appendChild(btn);
     } else if (step === 2) {
       card.innerHTML = `<h1>Pick your look</h1>`;

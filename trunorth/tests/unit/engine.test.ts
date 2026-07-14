@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { DecisionResolver } from "../../src/engine/DecisionResolver.js";
 import { filterInput } from "../../src/safety/filters.js";
-import { createInitialGameState } from "../../src/types/index.js";
+import { createInitialGameState } from "../../src/config/gameState.js";
 import { getDecisionPoint, GOLDEN_PATH, SCENES } from "../../src/content/index.js";
 import { insightForStep, buildJourneyReflection } from "../../src/counselor/insights.js";
 import { renderFullBodyCharacter } from "../../src/render/characters.js";
@@ -96,5 +96,36 @@ describe("Full-body characters", () => {
       expect(svg).toContain("<svg");
       expect(svg).toContain("</svg>");
     }
+  });
+});
+
+describe("World collision", () => {
+  it("slides along a solid wall with axis separation", async () => {
+    const { moveWithCollision } = await import("../../src/engine/Collision.js");
+    // Tall thin wall to the right of the avatar
+    const wall = { x: 380, y: 600, w: 40, h: 300 };
+    const start = { x: 340, y: 800 };
+    const next = moveWithCollision(
+      start,
+      { x: 80, y: 20 },
+      { w: 56, h: 36 },
+      [wall],
+      { x: 0, y: 0, w: 1920, h: 1080 },
+    );
+    expect(next.x).toBe(start.x); // blocked horizontally
+    expect(next.y).toBeGreaterThan(start.y); // still slides vertically
+  });
+
+  it("keeps the avatar inside walk bounds", async () => {
+    const { moveWithCollision } = await import("../../src/engine/Collision.js");
+    const bounds = { x: 100, y: 500, w: 400, h: 200 };
+    const next = moveWithCollision(
+      { x: 120, y: 520 },
+      { x: -80, y: 0 },
+      { w: 56, h: 36 },
+      [],
+      bounds,
+    );
+    expect(next.x).toBe(120);
   });
 });

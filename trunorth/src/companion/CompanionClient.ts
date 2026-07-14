@@ -1,6 +1,7 @@
 import type { CompanionRequest, CompanionResponse, ScoreBand } from "../types/index.js";
 import showcaseBundle from "../../content/demo/showcase.bundle.json";
 import { insightForStep } from "../counselor/insights.js";
+import { appConfig } from "../config/app.js";
 
 export interface CompanionClient {
   request(req: CompanionRequest): Promise<CompanionResponse>;
@@ -26,7 +27,7 @@ export class LiveCompanionClient implements CompanionClient {
 
 export class DemoCompanionClient implements CompanionClient {
   async request(req: CompanionRequest): Promise<CompanionResponse> {
-    await new Promise((r) => setTimeout(r, 350));
+    await new Promise((r) => setTimeout(r, appConfig.timing.demoCompanionDelayMs));
 
     const band = inferBandFromInput(req);
     const key = `${req.sceneId}:${req.decisionPointId}:${band}`;

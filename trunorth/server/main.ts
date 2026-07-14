@@ -1,9 +1,8 @@
 import "./db/migrate.js";
 import { serve } from "@hono/node-server";
 import { app } from "./index.js";
+import { serverConfig } from "./config.js";
 
-const port = Number(process.env.PORT ?? 3001);
-
-serve({ fetch: app.fetch, port }, () => {
-  console.log(`TruNorth API running on http://localhost:${port}`);
+serve({ fetch: app.fetch, port: serverConfig.port }, () => {
+  console.log(`TruNorth API running on http://localhost:${serverConfig.port}`);
 });

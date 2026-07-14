@@ -1,8 +1,9 @@
 import Database from "better-sqlite3";
 import { mkdirSync } from "fs";
 import { dirname } from "path";
+import { serverConfig } from "../config.js";
 
-const DB_PATH = process.env.DATABASE_PATH ?? "./data/trunorth.db";
+const DB_PATH = serverConfig.databasePath;
 
 mkdirSync(dirname(DB_PATH), { recursive: true });
 

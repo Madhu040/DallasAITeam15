@@ -3,8 +3,8 @@
 > **Living implementation ledger.** This file is the single high-level, always-current
 > picture of **what actually exists in `trunorth/` right now** — files, methods,
 > and functionality. It is the practical counterpart to the design intent in
-> [`TruNorth Technical Specification.md`](./TruNorth%20Technical%20Specification.md)
-> and [`Consolidated TruNorth-Technical-Specification.md`](./Consolidated%20TruNorth-Technical-Specification.md).
+> [`docs/specs/TruNorth Technical Specification.md`](./docs/specs/TruNorth%20Technical%20Specification.md)
+> and [`Consolidated TruNorth-Technical-Specification.md`](./docs/specs/Consolidated%20TruNorth-Technical-Specification.md).
 
 ---
 
@@ -24,7 +24,7 @@ entry is updated in the same change.
   Level 1 The Singing Bridge / Everbright), so the app can pull the right images per
   level when needed — **without breaking** the fully-offline demo path (`?demo=1` +
   `public/assets/zones/`). Design the visuals together with Gabby, based on
-  [`Scene, script, players.docx`](./Scene,%20script,%20players.docx) (Vandy).
+  [`docs/scripts/Scene, script, players.docx`](./docs/scripts/Scene,%20script,%20players.docx) (Vandy).
 
 ### Gabby — Backend (Supabase level images, with Ermoni) 🔧
 
@@ -37,14 +37,13 @@ entry is updated in the same change.
 - [x] ~~Ship Level 1 **The Singing Bridge** from Vandy’s script into playable content~~
   (W1→W6 scenes, DPs, Flicker/Wize cast, multi-tap breathe/crossing, celebration,
   insights/fallbacks/demo bundle) — done 2026-07-13.
-- [ ] Next: tighten Level 1 play feel in the **current DOM scene model** — clearer
-  trigger hotspots, expression changes as Flicker’s arc progresses, and optional
-  progressive investigation steps (look / listen / check) before fact-sort. Do **not**
-  invent a TileMap/WASD stack in this repo until the team explicitly adopts that
-  architecture (it is **not** present today).
-- **Files owned:** `trunorth/content/chapters/ch2/*`, `trunorth/src/engine/SceneEngine.ts`,
-  `trunorth/src/ui/GameView.ts`, `trunorth/src/render/characters.ts`,
-  `trunorth/src/content/{index,scenarios,zones}.ts`.
+- [x] ~~Ship world movement + environment interact~~ (WASD/arrows, collision, E/Space,
+  companion follow, sparks) — done 2026-07-14.
+- [ ] Next: polish Level 1 play feel — expression changes along Flicker’s arc, richer
+  investigation hotspots, and optional TileMap rooms if the team adopts grid levels.
+- **Files owned:** `trunorth/content/chapters/ch2/*`, `trunorth/src/engine/*`,
+  `trunorth/src/input/InputController.ts`, `trunorth/src/ui/GameView.ts`,
+  `trunorth/src/render/characters.ts`, `trunorth/src/content/{index,scenarios,zones}.ts`.
 
 ### Jose — Frontend (deployment) 🔧
 
@@ -55,7 +54,7 @@ entry is updated in the same change.
 
 ### Vandy — Product management (research & game vision)
 
-- [x] ~~Deliver Level 1 script~~ — [`Scene, script, players.docx`](./Scene,%20script,%20players.docx)
+- [x] ~~Deliver Level 1 script~~ — [`docs/scripts/Scene, script, players.docx`](./docs/scripts/Scene,%20script,%20players.docx)
   (The Singing Bridge: Flicker, Wize, Courage Feather) — done; content integrated.
 - [ ] Research how existing SEL products — especially **GoZen!** — teach hard emotional
   skills to kids, and turn findings into vision for Levels 2+ (still feed Ermoni/Gabby
@@ -72,7 +71,7 @@ entry is updated in the same change.
 
 - [ ] Provide continuous support across the team: help review and shepherd pull
   requests, and make sure work stays aligned with
-  `TruNorth Technical Specification.md` (intent) and **this `product.md`** (what’s built).
+  `docs/specs/TruNorth Technical Specification.md` (intent) and **this `product.md`** (what’s built).
   Prefer PRs that update `product.md` in the same change when files/behavior move.
 
 ---
@@ -104,9 +103,9 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
    its method list, or a subsystem's explanation becomes too large or complex to sit
    inline here (rule of thumb: more than ~15 lines, or needs diagrams/tables/deep
    walkthroughs), move that detail into a dedicated file under
-   [`TruNorthContextFiles/`](./TruNorthContextFiles/) and **link to it** from the inline
+   [`docs/context/`](./docs/context/) and **link to it** from the inline
    entry. Keep only a one-line summary + the link in `product.md`.
-   - Naming: `TruNorthContextFiles/<area>-<subject>.md`
+   - Naming: `docs/context/<area>-<subject>.md`
      (e.g. `engine-scene-lifecycle.md`, `safety-companion-pipeline.md`).
    - The context file should state which source file(s) it documents at the top.
 
@@ -134,16 +133,34 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 |---|---|
 | Product | TruNorth — choice-driven social-emotional learning (SEL) narrative for ages 5–15 |
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
-| Spec source of truth | `TruNorth Technical Specification.md` / Consolidated spec (intent) |
-| Level 1 script | `Scene, script, players.docx` → **The Singing Bridge** (integrated) |
+| Spec source of truth | `docs/specs/TruNorth Technical Specification.md` / Consolidated spec (intent) |
+| Level 1 script | `docs/scripts/Scene, script, players.docx` → **The Singing Bridge** (integrated) |
 | Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Three child scenarios (ch1 meadow, **ch2 Singing Bridge golden path W1→W6**, ch3 forest) + parent coach entry; scene engine; companion safety filters + demo/live clients; counselor insights + together-mode; local/demo persistence; onboarding, parent gate, trust screen; Hono API + SQLite auth stubs; Docker; unit tests (11) + content validate. **Not built:** TileMap/WASD movement, Supabase assets, hosted deploy, e2e/red-team suites, JSON Schema CI, remote progress sync. Art is zone PNGs + inline SVG cast (placeholder style). |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, tsx |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 |
-| Last updated | 2026-07-13 |
+| Last updated | 2026-07-13 (folder organize + config) |
 
 ---
 
-## 2. Folder structure (actual `trunorth/` tree)
+## 2. Folder structure
+
+### Repo root
+
+```
+DallasAITeam15/
+├── product.md                 # Living ledger + task board
+├── README.md
+├── docs/
+│   ├── README.md
+│   ├── specs/                 # Technical specifications
+│   ├── scripts/               # Narrative scripts (Singing Bridge, …)
+│   ├── kickoff/               # Team slides
+│   └── context/               # Deep-dives (was TruNorthContextFiles)
+└── trunorth/                  # Application (configurable via .env)
+```
+
+### Application (`trunorth/` tree)
+
 
 ```
 trunorth/
@@ -167,6 +184,7 @@ trunorth/
 │   └── main.ts                # listen entry
 ├── src/
 │   ├── main.ts                # ✅ Boot, screens, startScenario, engine wiring
+│   ├── config/                # ✅ app.ts, content.ts, gameState.ts (env-driven)
 │   ├── companion/CompanionClient.ts   # ✅ Live + Demo clients
 │   ├── content/               # ✅ SCENES/DPs registry, scenarios, zones
 │   ├── counselor/             # ✅ insights + coPlay discuss prompts
@@ -175,8 +193,9 @@ trunorth/
 │   ├── safety/filters.ts      # ✅ input/output filters
 │   ├── store/ProgressStore.ts # ✅ Local + Demo stores
 │   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones
-│   ├── types/index.ts         # ✅ Shared contracts + initial state
+│   ├── types/index.ts         # ✅ Shared contracts
 │   └── ui/                    # ✅ GameView, screens, auth helpers
+├── server/config.ts           # ✅ Env loader + serverConfig
 ├── tests/unit/engine.test.ts  # ✅ 11 tests (resolver, safety, golden path, cast)
 ├── Dockerfile · docker-compose.yml
 ├── index.html · vite.config.ts · vitest.config.ts
@@ -184,8 +203,7 @@ trunorth/
 └── .github/workflows/ci.yml   # typecheck, validate:content, test:unit, build
 ```
 
-Repo root (outside `trunorth/`) also holds specs, `product.md`, kickoff slides, and
-`Scene, script, players.docx`.
+Repo root holds `product.md`, `docs/` (specs, scripts, kickoff, context), and `trunorth/`.
 
 > Update this tree whenever directories or top-level files change.
 
@@ -197,7 +215,11 @@ trees, JSON Schema pack under `content/schema/`.
 
 ## 3. Implemented components
 
-> Inline entries stay short; deep walkthroughs live in `TruNorthContextFiles/` (Section 4).
+> Inline entries stay short; deep walkthroughs live in `docs/context/` (Section 4).
+
+### 3.0 Configuration (`src/config/`, `server/config.ts`, `.env.example`)
+✅ Implemented. Runtime tunables via `.env` / `VITE_*` — ports, CORS, companion model,
+demo defaults (Flicker, ch2), feature flags, zone/celebration copy in `content.ts`.
 
 ### 3.1 Application entry (`src/main.ts`)
 ✅ Implemented. Detects demo mode (`?demo` / `VITE_DEMO_MODE`), wires
@@ -207,7 +229,7 @@ gate → journey reflection. Together-mode co-play step machine.
 
 ### 3.2 Scene engine (`src/engine/`)
 ✅ Implemented — **click/trigger DOM scenes** (not tile-walking). Lifecycle detail:
-[engine-runtime.md](./TruNorthContextFiles/engine-runtime.md).
+[engine-runtime.md](./docs/context/engine-runtime.md).
 
 - `SceneEngine` — loadScene, startDecision, submitChoice/submitTyped, multi-tap
   progress (`MULTI_TAP_REQUIRED` for `dp_breathe` / `dp_crossing`), repair loops,
@@ -215,8 +237,8 @@ gate → journey reflection. Together-mode co-play step machine.
 - `DecisionResolver` — `resolveChoice`, `applyConsequence` (meter deltas, brownie,
   event log, repairAction).
 
-⬜ Not in repo: `TileMap`, `CollisionSystem`, `MovementController`, `SceneGraph`,
-`EmotionalResidue` modules.
+✅ Partial world movement (DOM stage, not full TileMap): `InputController`, `Collision`, `WorldRuntime` — WASD/arrows, NPC solids, trigger interact, collectibles.
+⬜ Not in repo: full `TileMap` grid parser, `SceneGraph`, `EmotionalResidue` modules.
 
 ### 3.3 Rendering (`src/render/`)
 🟨 Partial — inline SVG cast, no separate sprite/manifest pipeline.
@@ -226,9 +248,9 @@ gate → journey reflection. Together-mode co-play step machine.
 ⬜ Not in repo: Viewport layers, SceneRenderer, BubbleManager, ParticleSystem, AvatarSprite
 as separate modules (bubbles/HUD live in `GameView` + CSS).
 
-### 3.4 Input
-🟨 Partial — choice UI + trigger hotspots in `GameView`; no dedicated
-`InputController` / WASD loop.
+### 3.4 Input (`src/input/InputController.ts`)
+✅ Implemented for exploration — WASD/arrows hold-polling, E/Space/Enter interact;
+choice UI + clickable trigger hotspots remain as fallback.
 
 ### 3.5 UI & parent surfaces (`src/ui/`)
 ✅ Implemented.
@@ -239,7 +261,7 @@ as separate modules (bubbles/HUD live in `GameView` + CSS).
 - Together Mode discuss prompts: `counselor/coPlay.ts`.
 
 ### 3.6 AI companion client (`src/companion/`)
-✅ Implemented — see [safety-companion-pipeline.md](./TruNorthContextFiles/safety-companion-pipeline.md).
+✅ Implemented — see [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md).
 - `LiveCompanionClient` — POST `{API}/api/companion` with optional bearer token.
 - `DemoCompanionClient` — offline bundle lookup `{scene}:{dp}:{band}` + rubric-ish band
   inference for typed lines; attaches counselor insight tips.
@@ -266,7 +288,7 @@ PlayMode, factories `createDefaultMeters` / `createInitialGameState` (default co
 **Flicker**, chapter `ch2`, scene `w1`).
 
 ### 3.11 Server API (`server/`)
-✅ Implemented locally — [safety-companion-pipeline.md](./TruNorthContextFiles/safety-companion-pipeline.md).
+✅ Implemented locally — [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md).
 
 > 🔧 **Jose** — production hosting for this Hono server + static client.
 - `routes/companion.ts` — input filter → Anthropic (if key) or local score → confidence
@@ -306,12 +328,12 @@ Singing Bridge golden path presence, insights, SVG cast.
 
 ---
 
-## 4. Context files index (`TruNorthContextFiles/`)
+## 4. Context files index (`docs/context/`)
 
 | Context file | Documents | Summary |
 |---|---|---|
-| [engine-runtime.md](./TruNorthContextFiles/engine-runtime.md) | `src/engine/*`, `src/main.ts`, `src/ui/GameView.ts` | Boot screens, scene phases, multi-tap + repair + celebration |
-| [safety-companion-pipeline.md](./TruNorthContextFiles/safety-companion-pipeline.md) | `server/routes/companion.ts`, `src/companion/*`, `src/safety/*`, fallbacks | Live vs demo companion paths, filters, fallback coverage |
+| [engine-runtime.md](./docs/context/engine-runtime.md) | `src/engine/*`, `src/main.ts`, `src/ui/GameView.ts` | Boot screens, scene phases, multi-tap + repair + celebration |
+| [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md) | `server/routes/companion.ts`, `src/companion/*`, `src/safety/*`, fallbacks | Live vs demo companion paths, filters, fallback coverage |
 
 ---
 
@@ -338,3 +360,5 @@ Singing Bridge golden path presence, insights, SVG cast.
 | 2026-07-13 | Rebased this ledger onto real `trunorth/` tree (removed phantom `TruNorthProject/` claims). |
 | 2026-07-13 | Integrated Level 1 **The Singing Bridge** (W1–W6, Flicker, Wize, Courage Feather). |
 | 2026-07-13 | Updated team board: Daniel L1 done; Ermoni/Gabby/Jose/Vandy/Ranya tasks retargeted. |
+| 2026-07-13 | Organized repo into `docs/{specs,scripts,kickoff,context}`; added configurable `server/config.ts`, `src/config/*`, expanded `.env.example`. |
+| 2026-07-14 | Added world movement: WASD/arrows, collision, proximity interact (E/Space), companion follow, collectible pickup (`WorldRuntime`). |

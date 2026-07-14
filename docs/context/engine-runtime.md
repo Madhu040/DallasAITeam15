@@ -26,7 +26,16 @@ Demo mode: `?demo=1` or `VITE_DEMO_MODE=true` → `DemoProgressStore` +
 - Decision: choice / typed overlay from `GameView`.
 - Narration-only scenes (no DPs, has `nextSceneId`) auto-advance after ~2.2s.
 
-## Multi-tap mini-games
+## Exploration movement
+
+When `VITE_FEATURE_WORLD_MOVEMENT=true` (default):
+
+- `InputController` — WASD/arrows hold-polling; E / Space / Enter interact
+- `WorldRuntime` — rAF avatar motion in 1920×1080 scene space, companion follow,
+  axis-separated collision vs NPC feet boxes + walk band, proximity to triggers,
+  collectible pickup
+- Decision UI freezes movement; clicking a dashed hotspot still works as fallback
+
 
 `MULTI_TAP_REQUIRED` in `content/index.ts`:
 

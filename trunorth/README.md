@@ -16,9 +16,24 @@ TruNorth helps children practice empathy, courage, and calm through interactive 
 - PIN-protected reflections and progress tracking
 - Parent accounts to manage child profiles and sync progress (optional)
 
-Built per the [Consolidated TruNorth Technical Specification](../Consolidated%20TruNorth-Technical-Specification.md).
+Built per the [Consolidated TruNorth Technical Specification](../docs/specs/Consolidated%20TruNorth-Technical-Specification.md).
 
 **Repo ledger:** keep [`../product.md`](../product.md) current on every PR that changes files or behavior.
+
+## Configuration
+
+Copy [`.env.example`](./.env.example) → `.env`. Highlights:
+
+| Area | Module | Env keys |
+|---|---|---|
+| API port, CORS, JWT, DB | `server/config.ts` | `PORT`, `CORS_ORIGINS`, `JWT_SECRET`, `DATABASE_PATH` |
+| Companion AI | `server/config.ts` | `ANTHROPIC_API_KEY`, `COMPANION_MODEL`, `CONFIDENCE_FLOOR` |
+| Client API + demo | `src/config/app.ts` | `VITE_API_URL`, `VITE_DEMO_MODE` |
+| Gameplay defaults | `src/config/app.ts` | `VITE_DEFAULT_COMPANION_NAME`, `VITE_DEFAULT_CHAPTER_ID`, … |
+| Zones / celebration art | `src/config/content.ts` | (edit file — image paths & copy) |
+| Vite ports / proxy | `vite.config.ts` | `VITE_DEV_PORT`, `VITE_API_PROXY_TARGET` |
+
+Client-facing variables **must** start with `VITE_` so Vite exposes them to the browser.
 
 ## Features
 
