@@ -1,9 +1,11 @@
 import "./styles/global.css";
 import { SceneEngine } from "./engine/SceneEngine.js";
+import { worldRuntime } from "./engine/WorldRuntime.js";
 import { LocalProgressStore, DemoProgressStore } from "./store/ProgressStore.js";
 import { LiveCompanionClient, DemoCompanionClient } from "./companion/CompanionClient.js";
-import { createInitialGameState } from "./types/index.js";
-import type { GameState, ScenePhase, ScenarioMeta } from "./types/index.js";
+import { createInitialGameState } from "./config/gameState.js";
+import { appConfig, isDemoMode } from "./config/app.js";
+import type { GameState, ScenePhase, ScenarioMeta, Scene } from "./types/index.js";
 import {
   renderGameView,
   renderCelebration,
@@ -35,11 +37,8 @@ type AppScreen =
   | "login"
   | "register";
 
-const demoMode =
-  import.meta.env.VITE_DEMO_MODE === "true" ||
-  new URLSearchParams(location.search).has("demo");
-
-const API_URL = import.meta.env.VITE_API_URL ?? "";
+const demoMode = isDemoMode();
+const API_URL = appConfig.apiUrl;
 
 let currentScreen: AppScreen = "landing";
 let gameState: GameState = createInitialGameState(demoMode);
@@ -55,8 +54,44 @@ let coPlayStep: CoPlayStep = "discuss";
 const app = document.getElementById("app")!;
 
 function navigate(screen: AppScreen): void {
+  if (screen !== "game") {
+    worldRuntime.detach();
+  }
   currentScreen = screen;
   render();
+}
+
+function beginEncounter(target: string): void {
+  activeDecisionId = target;
+  engine?.triggerEncounter(target);
+  currentPhase = "decision";
+  worldRuntime.freeze(true);
+  if (gameState.flags.playMode === "together") {
+    coPlayStep = "discuss";
+  }
+  renderGame();
+}
+
+function onWorldCollect(collectibleId: string): void {
+  gameState.progress.browniePoints += 1;
+  const sceneId = gameState.progress.currentSceneId;
+  const found = gameState.progress.kindnessSparksFound[sceneId] ?? [];
+  if (!found.includes(collectibleId)) {
+    gameState.progress.kindnessSparksFound[sceneId] = [...found, collectibleId];
+  }
+  void new LocalProgressStore().save(gameState);
+  const counter = document.querySelector(".brownie-counter");
+  if (counter) {
+    counter.textContent = `💎 ${gameState.progress.browniePoints}`;
+    counter.setAttribute("aria-label", `Crystals collected: ${gameState.progress.browniePoints}`);
+  }
+}
+
+function bindWorld(viewport: HTMLElement, scene: Scene, exploring: boolean): void {
+  worldRuntime.attach(viewport, scene, exploring, {
+    onInteract: (target) => beginEncounter(target),
+    onCollect: onWorldCollect,
+  });
 }
 
 async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "together" = "solo"): Promise<void> {
@@ -140,21 +175,14 @@ function renderGame(): void {
       coPlayStep = "discuss";
       void engine?.submitTyped(dpId, text, parentReflection);
     },
-    (target) => {
-      activeDecisionId = target;
-      engine?.triggerEncounter(target);
-      currentPhase = "decision";
-      if (gameState.flags.playMode === "together") {
-        coPlayStep = "discuss";
-      }
-      renderGame();
-    },
+    (target) => beginEncounter(target),
     gameState.flags.playMode === "together",
     coPlayStep,
     () => {
       coPlayStep = "choose";
       renderGame();
     },
+    (viewport, sceneEl, exploring) => bindWorld(viewport, sceneEl, exploring),
   );
 }
 

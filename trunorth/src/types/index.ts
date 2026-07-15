@@ -224,29 +224,3 @@ export function createDefaultMeters(): GameState["meters"] {
   return Object.fromEntries(skills.map((s) => [s, { fill: 0, level: 1 }])) as GameState["meters"];
 }
 
-export function createInitialGameState(demoMode = false): GameState {
-  return {
-    version: 1,
-    profile: {
-      ageBand: "8-10",
-      chapterId: "ch2",
-      avatar: { skinTone: "tone_3", hair: "hair_curly" },
-    companionName: "Spark",
-    companionArchetype: "companion_dragon",
-      baselineStrength: "empathy",
-    },
-    progress: {
-      currentSceneId: "w1",
-      chaptersUnlocked: ["ch1", "ch2", "ch3"],
-      chaptersCompleted: [],
-      browniePoints: 0,
-      kindnessSparksFound: {},
-    },
-    meters: createDefaultMeters(),
-    companion: { level: 1, appearanceRef: "companion_dragon_base" },
-    emotionalResidue: {},
-    parentGate: { lastPassedChapter: null },
-    flags: { demoMode, lastSafetyFlag: null, onboardingComplete: false, playMode: "solo" },
-    eventLog: [],
-  };
-}

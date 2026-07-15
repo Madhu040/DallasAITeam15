@@ -2,6 +2,18 @@ import type { ScenarioMeta } from "../types/index.js";
 
 export const SCENARIOS: ScenarioMeta[] = [
   {
+    id: "ch2",
+    audience: "child",
+    title: "The Singing Bridge",
+    subtitle: "Worry & Courage",
+    description:
+      "In Everbright, Flicker the Guardian Dragon panics at a creaky bridge. Investigate, sort facts from stories, breathe, and choose to keep walking.",
+    startSceneId: "w1",
+    ageBand: "8-10",
+    skills: ["worry_brave", "calm", "courage"],
+    estimatedMinutes: 12,
+  },
+  {
     id: "ch1",
     audience: "child",
     title: "Meadow of Curiosity",
@@ -11,17 +23,6 @@ export const SCENARIOS: ScenarioMeta[] = [
     ageBand: "5-7",
     skills: ["empathy", "friendship_repair", "courage"],
     estimatedMinutes: 4,
-  },
-  {
-    id: "ch2",
-    audience: "child",
-    title: "Cave of Purpose",
-    subtitle: "Worry & Brave",
-    description: "Deep in the cave, fear hides brave gifts. Practice naming worry and taking one brave step.",
-    startSceneId: "w1",
-    ageBand: "8-10",
-    skills: ["worry_brave", "empathy", "courage"],
-    estimatedMinutes: 5,
   },
   {
     id: "ch3",

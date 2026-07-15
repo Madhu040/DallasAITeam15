@@ -1,0 +1,18 @@
+{
+  "id": "w3",
+  "chapterId": "ch2",
+  "order": 3,
+  "movementTier": "B",
+  "background": "bg_bridge",
+  "narration": "The ropes look strong. A duck waddles across while birds hop and sing. Wize smiles: \"Let's think together.\" Which thought is a story — not a fact?",
+  "characters": [
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [560, 780], "expression": "worried" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [400, 800], "expression": "neutral" },
+    { "assetRef": "char_wize", "id": "wize", "position": [900, 700], "expression": "calm" }
+  ],
+  "triggers": [
+    { "id": "fact_sort_trigger", "bounds": [360, 620, 640, 240], "action": "startDecision", "target": "dp_fact_sort" }
+  ],
+  "collectibles": [],
+  "decisionPoints": ["dp_fact_sort"]
+}

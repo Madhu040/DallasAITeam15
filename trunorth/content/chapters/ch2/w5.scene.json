@@ -1,0 +1,18 @@
+{
+  "id": "w5",
+  "chapterId": "ch2",
+  "order": 5,
+  "movementTier": "B",
+  "background": "bg_bridge",
+  "narration": "Flicker still feels nervous. Wize softly says: \"Feeling nervous isn't a stop sign — it's your dragon asking you to pay attention. We've looked carefully. We've helped your body. Now… we choose.\"",
+  "characters": [
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [600, 760], "expression": "worried" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [420, 800], "expression": "neutral" },
+    { "assetRef": "char_wize", "id": "wize", "position": [900, 690], "expression": "calm" }
+  ],
+  "triggers": [
+    { "id": "choose_trigger", "bounds": [400, 620, 600, 260], "action": "startDecision", "target": "dp_choose_path" }
+  ],
+  "collectibles": [],
+  "decisionPoints": ["dp_choose_path"]
+}

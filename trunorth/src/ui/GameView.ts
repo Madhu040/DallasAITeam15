@@ -3,7 +3,8 @@ import { getDecisionPoint } from "../content/index.js";
 import { renderFullBodyCharacter } from "../render/characters.js";
 import type { JourneyReflection } from "../counselor/insights.js";
 import { discussPrompt } from "../counselor/coPlay.js";
-import { zoneFromBackground, zoneForChapter, ACHIEVEMENT_CHECKLIST } from "../content/zones.js";
+import { zoneFromBackground, zoneForChapter } from "../content/zones.js";
+import { contentConfig } from "../config/content.js";
 
 export interface CounselorPanelData {
   title: string;
@@ -28,6 +29,7 @@ export function renderGameView(
   togetherMode = false,
   coPlayStep: CoPlayStep = "discuss",
   onCoPlayReady?: () => void,
+  onWorldReady?: (viewport: HTMLElement, scene: Scene, exploring: boolean) => void,
 ): void {
   container.innerHTML = "";
 
@@ -101,9 +103,11 @@ export function renderGameView(
     for (const ch of scene.characters) {
       const el = document.createElement("div");
       el.className = "character full-body";
+      el.dataset.charId = ch.id;
       const [x, y] = ch.position;
       el.style.left = `${(x / 1920) * 100}%`;
       el.style.top = `${(y / 1080) * 100}%`;
+      el.style.zIndex = String(10 + Math.floor(y / 20));
 
       const sprite = document.createElement("div");
       sprite.className = `char-fullbody ${ch.id}${
@@ -126,21 +130,23 @@ export function renderGameView(
           ? state.profile.companionName
           : ch.id === "avatar"
             ? "You"
-            : ch.id === "leftout"
-              ? "Friend"
-              : ch.id === "hothead"
+            : ch.id === "wize"
+              ? "Wize"
+              : ch.id === "leftout"
                 ? "Friend"
-                : ch.id === "grownup"
-                  ? "Grown-up"
-                  : ch.id === "helper_bear"
-                    ? "Bear"
-                    : ch.id === "helper_deer"
-                      ? "Deer"
-                      : ch.id === "worry_cloud"
-                        ? ""
-                        : ch.id === "robin"
-                          ? "Fox"
-                          : ch.id.charAt(0).toUpperCase() + ch.id.slice(1);
+                : ch.id === "hothead"
+                  ? "Friend"
+                  : ch.id === "grownup"
+                    ? "Grown-up"
+                    : ch.id === "helper_bear"
+                      ? "Bear"
+                      : ch.id === "helper_deer"
+                        ? "Deer"
+                        : ch.id === "worry_cloud"
+                          ? ""
+                          : ch.id === "robin"
+                            ? "Fox"
+                            : ch.id.charAt(0).toUpperCase() + ch.id.slice(1);
       if (label.textContent) el.appendChild(label);
 
       if (companionLine && ch.id === "companion" && (phase === "consequence" || phase === "awaitingCompanion")) {
@@ -153,11 +159,23 @@ export function renderGameView(
       viewport.appendChild(el);
     }
 
+    for (const item of scene.collectibles) {
+      const spark = document.createElement("div");
+      spark.className = "world-collectible";
+      spark.dataset.collectibleId = item.id;
+      spark.style.left = `${(item.position[0] / 1920) * 100}%`;
+      spark.style.top = `${(item.position[1] / 1080) * 100}%`;
+      spark.setAttribute("aria-label", "Kindness spark");
+      spark.textContent = "✨";
+      viewport.appendChild(spark);
+    }
+
     if (phase === "exploring") {
       for (const trigger of scene.triggers) {
         const zone = document.createElement("button");
         zone.className = "trigger-zone";
-        zone.setAttribute("aria-label", "Interact with character");
+        zone.dataset.target = trigger.target;
+        zone.setAttribute("aria-label", "Interact with hot spot");
         const [x, y, w, h] = trigger.bounds;
         zone.style.left = `${(x / 1920) * 100}%`;
         zone.style.top = `${(y / 1080) * 100}%`;
@@ -174,6 +192,8 @@ export function renderGameView(
       narr.textContent = scene.narration;
       viewport.appendChild(narr);
     }
+
+    onWorldReady?.(viewport, scene, phase === "exploring");
   }
 
   if (phase === "awaitingCompanion") {
@@ -332,16 +352,19 @@ export function renderCelebration(
   overlay.className = "overlay celebration-overlay";
   const celeb = document.createElement("div");
   celeb.className = "celebration mountain-celebration";
-  celeb.style.backgroundImage = "url(/assets/zones/mountain.png)";
+  const celebCfg = contentConfig.celebration;
+  celeb.style.backgroundImage = `url(${celebCfg.backgroundImage})`;
   celeb.innerHTML = `
     <div class="celebration-content">
-      <div class="celebration-trophy">🏆 TRUE NORTH CHAMPION</div>
-      <h1>You did it!</h1>
+      <div class="celebration-trophy">${escapeText(celebCfg.trophyLabel)}</div>
+      <h1>${escapeText(celebCfg.title)}</h1>
       <p class="celebration-zone">${escapeText(chapterTitle)}</p>
+      <p class="celebration-lessons"><strong>Today Flicker learned:</strong> “${escapeText(celebCfg.flickerLesson)}”</p>
+      <p class="celebration-lessons"><strong>Today you learned:</strong> “${escapeText(celebCfg.playerLesson)}”</p>
       <ul class="achievement-checklist">
-        ${ACHIEVEMENT_CHECKLIST.map((item) => `<li>✓ ${item}</li>`).join("")}
+        ${contentConfig.achievementChecklist.map((item) => `<li>✓ ${item}</li>`).join("")}
       </ul>
-      <p class="celebration-quote">You are stronger together. Keep following your True North.</p>
+      <p class="celebration-quote">${escapeText(celebCfg.quote)}</p>
     </div>
   `;
 

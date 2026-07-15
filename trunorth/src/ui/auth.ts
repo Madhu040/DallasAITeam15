@@ -1,9 +1,11 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "";
+import { appConfig } from "../config/app.js";
 
 export interface AuthSession {
   token: string;
   user: { id: string; email: string; role: string };
 }
+
+const API_URL = appConfig.apiUrl;
 
 export function getToken(): string | null {
   return localStorage.getItem("trunorth_token");

@@ -9,11 +9,13 @@ import {
   CHAPTER_COMPLETE_DECISION,
   getDecisionPoint,
   getScene,
+  MULTI_TAP_REQUIRED,
 } from "../content/index.js";
 import { DecisionResolver } from "./DecisionResolver.js";
 import type { CompanionClient } from "../companion/CompanionClient.js";
 import type { ProgressStore } from "../types/index.js";
 import { childFacingLine, insightForStep } from "../counselor/insights.js";
+import { appConfig } from "../config/app.js";
 
 export interface EngineCallbacks {
   onPhaseChange: (phase: ScenePhase) => void;
@@ -34,7 +36,7 @@ export class SceneEngine {
   private phase: ScenePhase = "loading";
   private inputFrozen = false;
   private resolver = new DecisionResolver();
-  private climbTaps = 0;
+  private multiTapCounts: Record<string, number> = {};
 
   constructor(
     private state: GameState,
@@ -62,7 +64,7 @@ export class SceneEngine {
     if (!scene.decisionPoints.length && scene.nextSceneId) {
       this.setPhase("exploring");
       this.callbacks.onSceneChange(sceneId);
-      setTimeout(() => { void this.loadScene(scene.nextSceneId!); }, 2200);
+      setTimeout(() => { void this.loadScene(scene.nextSceneId!); }, appConfig.timing.narrationAutoAdvanceMs);
       return scene;
     }
 
@@ -93,10 +95,19 @@ export class SceneEngine {
     const band = this.resolver.resolveChoice(dp, optionId);
     const option = dp.options?.find((o) => o.id === optionId);
 
-    if (decisionPointId === "dp_climb_celebration") {
-      this.climbTaps++;
-      if (this.climbTaps < 3 && optionId !== "tap_3") {
-        this.callbacks.onCompanionLine(`Rung ${this.climbTaps} — keep going!`);
+    const requiredTaps = MULTI_TAP_REQUIRED[decisionPointId];
+    if (requiredTaps) {
+      this.multiTapCounts[decisionPointId] = (this.multiTapCounts[decisionPointId] ?? 0) + 1;
+      const taps = this.multiTapCounts[decisionPointId];
+      const isFinalOption = band === "strong";
+      if (taps < requiredTaps && !isFinalOption) {
+        const progressLine =
+          decisionPointId === "dp_breathe"
+            ? `Breath ${taps}… Flicker's heart softens.`
+            : decisionPointId === "dp_crossing"
+              ? `Plank ${taps}… the bridge holds.`
+              : `Step ${taps} — keep going!`;
+        this.callbacks.onCompanionLine(progressLine);
         this.emitInsight(dp, "partial");
         return;
       }
@@ -228,7 +239,13 @@ export class SceneEngine {
     }
 
     if (repairAction) {
-      this.callbacks.onCompanionLine("Let's try a kinder way together.");
+      const repairLine =
+        dp.id === "dp_choose_path"
+          ? "We can always go back. But if we never cross, we'll never discover whether Flicker's worry was right this time. Want one careful step together?"
+          : dp.id === "dp_fact_sort"
+            ? "Stories aren't bad — which thought says the bridge WILL break?"
+            : "Let's try a kinder way together.";
+      this.callbacks.onCompanionLine(repairLine);
       this.setPhase("decision");
       return;
     }
@@ -236,9 +253,14 @@ export class SceneEngine {
     await this.store.save(this.state);
 
     const chapterId = this.state.profile.chapterId;
-    const isFinaleDecision = CHAPTER_COMPLETE_DECISION[chapterId] === dp.id && band === "strong";
+    const requiredTaps = MULTI_TAP_REQUIRED[dp.id] ?? 0;
+    const tapsDone = this.multiTapCounts[dp.id] ?? 0;
+    const isFinaleDecision =
+      CHAPTER_COMPLETE_DECISION[chapterId] === dp.id &&
+      band === "strong" &&
+      (requiredTaps === 0 || tapsDone >= requiredTaps);
 
-    if (isFinaleDecision || (dp.id === "dp_climb_celebration" && this.climbTaps >= 3)) {
+    if (isFinaleDecision) {
       if (!this.state.progress.chaptersCompleted.includes(chapterId)) {
         this.state.progress.chaptersCompleted.push(chapterId);
       }
@@ -249,7 +271,7 @@ export class SceneEngine {
 
     if (nextSceneId !== this.state.progress.currentSceneId) {
       this.setPhase("transitioning");
-      if (nextSceneId === "w4") this.climbTaps = 0;
+      if (MULTI_TAP_REQUIRED[dp.id]) this.multiTapCounts[dp.id] = 0;
       await this.loadScene(nextSceneId);
     } else {
       this.setPhase("exploring");

@@ -1,9 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import type { AuthUser, UserRole } from "../../src/types/index.js";
+import { serverConfig } from "../config.js";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? "dev-secret-change-in-production-min-32-chars",
-);
+const JWT_SECRET = new TextEncoder().encode(serverConfig.jwtSecret);
 
 export async function signToken(user: AuthUser): Promise<string> {
   return new SignJWT({ sub: user.id, email: user.email, role: user.role })

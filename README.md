@@ -2,25 +2,36 @@
 
 Github channel for the TruNorth gaming platform.
 
-## Project
+## Layout
 
-The full application lives in [`trunorth/`](trunorth/README.md).
+```
+DallasAITeam15/
+├── product.md              # Living ledger — what's built + team tasks
+├── docs/
+│   ├── specs/              # Technical specifications (intent)
+│   ├── scripts/            # Narrative scripts (Level 1 Singing Bridge, …)
+│   ├── kickoff/            # Team kickoff materials
+│   └── context/            # Deep-dives linked from product.md
+└── trunorth/               # Playable app (Vite client + Hono API)
+```
 
-**TruNorth** is an SEL adventure for kids and a coaching companion for parents — helping children ages 5–15 practice emotional skills through play while giving caregivers counselor-style insights to support growth at home.
+**Living implementation ledger:** [`product.md`](product.md)  
+**Documentation index:** [`docs/README.md`](docs/README.md)  
+**App:** [`trunorth/README.md`](trunorth/README.md)
 
 ## Quick Start
 
 ```bash
 cd trunorth
 npm install
-cp .env.example .env   # if .env doesn't exist
+cp .env.example .env   # configure ports, AI key, defaults
 npm run dev
 ```
 
-| Service | URL |
+| Service | URL (defaults) |
 |---------|-----|
 | Game | http://localhost:5173 |
 | API | http://localhost:3001 |
 | Demo (offline) | http://localhost:5173?demo=1 |
 
-See [trunorth/README.md](trunorth/README.md) for full documentation.
+Configure everything via `trunorth/.env` (see `.env.example`). Client vars must be prefixed with `VITE_`.

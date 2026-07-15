@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import fallbacks from "../../content/fallbacks/companion-fallbacks.json";
 import { filterInput, filterOutput } from "../../src/safety/filters.js";
 import { insightForStep } from "../../src/counselor/insights.js";
+import { serverConfig } from "../config.js";
 import type {
   CompanionRequest,
   CompanionResponse,
@@ -10,8 +11,8 @@ import type {
   SkillId,
 } from "../../src/types/index.js";
 
-const CONFIDENCE_FLOOR = Number(process.env.CONFIDENCE_FLOOR ?? 0.55);
-const TIMEOUT_MS = 8000;
+const { confidenceFloor: CONFIDENCE_FLOOR, timeoutMs: TIMEOUT_MS, model: COMPANION_MODEL, apiKey } =
+  serverConfig.companion;
 
 const companion = new Hono();
 
@@ -39,7 +40,6 @@ companion.post("/companion", async (c) => {
     return c.json(response);
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return c.json(scoreLocally(req));
   }
@@ -50,7 +50,7 @@ companion.post("/companion", async (c) => {
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     const message = await client.messages.create({
-      model: process.env.COMPANION_MODEL ?? "claude-3-5-haiku-latest",
+      model: COMPANION_MODEL,
       max_tokens: 420,
       system: buildSystemPrompt(req),
       messages: [{

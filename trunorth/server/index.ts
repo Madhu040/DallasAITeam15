@@ -5,6 +5,7 @@ import { randomUUID } from "crypto";
 import { db } from "./db/migrate.js";
 import { signToken, verifyToken } from "./auth/jwt.js";
 import { companionRoutes } from "./routes/companion.js";
+import { serverConfig } from "./config.js";
 import type { AuthUser } from "../src/types/index.js";
 
 type Variables = { user: AuthUser };
@@ -12,13 +13,21 @@ type Variables = { user: AuthUser };
 const app = new Hono<{ Variables: Variables }>();
 
 app.use("*", cors({
-  origin: ["http://localhost:5173", "http://localhost:4173", "http://127.0.0.1:5173"],
+  origin: [...serverConfig.corsOrigins],
   allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.get("/api/health", (c) =>
-  c.json({ status: "ok", service: "trunorth", timestamp: new Date().toISOString() }),
+  c.json({
+    status: "ok",
+    service: "trunorth",
+    timestamp: new Date().toISOString(),
+    config: {
+      companionModel: serverConfig.companion.model,
+      hasApiKey: Boolean(serverConfig.companion.apiKey),
+    },
+  }),
 );
 
 // --- Parent Auth (parent-only; children never authenticate directly) ---
