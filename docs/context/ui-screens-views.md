@@ -46,8 +46,10 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
   (dragon/fox/sprite), companion name (default from `appConfig.defaults`), avatar skin tone;
   returns collected profile data.
 - `renderScenarioHub(container, completedChapters, playMode, onSelectSolo, onSelectTogether, onParentCoach, onBack)` —
-  child scenario cards (zone thumb, done/together badges, age + minutes) from `SCENARIOS`,
-  parent-audience card wired to the PIN-gated coach corner.
+  child scenario cards (done/together badges, age + minutes) from `SCENARIOS` (now 2:
+  ch2 Singing Bridge, ch1 Everbright Meadow); thumbnails are grid canvases
+  (`createGridThumbnail`) when the start scene binds a `gridMapId`, PNG zone thumbs
+  otherwise; parent-audience card wired to the PIN-gated coach corner.
 - `isAuthenticated()` / `logout()` — thin wrappers over `auth.ts` (currently unused by callers).
 - Local `type Screen = landing|login|register|dashboard` — **"dashboard" is not an `AppScreen`
   in `main.ts`, which is one of the open typecheck errors.**

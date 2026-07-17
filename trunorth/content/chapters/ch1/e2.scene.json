@@ -4,6 +4,7 @@
   "order": 2,
   "movementTier": "A",
   "background": "bg_meadow",
+  "gridMapId": "everbright-meadow",
   "narration": "The rabbit friend smiles a little. Friendship in the meadow starts with one kind invitation.",
   "characters": [
     { "assetRef": "char_leftout", "id": "leftout", "position": [960, 740], "expression": "happy" },

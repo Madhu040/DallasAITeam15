@@ -302,6 +302,10 @@ body {
   margin-bottom: 12px;
 }
 
+.scenario-card .zone-thumb-grid {
+  image-rendering: pixelated;
+}
+
 .scenario-eyebrow {
   font-size: 12px;
   color: var(--accent);

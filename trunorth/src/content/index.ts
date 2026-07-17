@@ -19,11 +19,6 @@ import e3 from "../../content/chapters/ch1/e3.scene.json";
 import dpLeftout from "../../content/chapters/ch1/dp_leftout_bench.json";
 import dpAskGrownup from "../../content/chapters/ch1/dp_ask_grownup.json";
 
-import c1 from "../../content/chapters/ch3/c1.scene.json";
-import c2 from "../../content/chapters/ch3/c2.scene.json";
-import dpHothead from "../../content/chapters/ch3/dp_hothead_calm.json";
-import dpRepair from "../../content/chapters/ch3/dp_friendship_repair.json";
-
 export const SCENES: Record<string, Scene> = {
   w1: w1 as Scene,
   w2: w2 as Scene,
@@ -34,8 +29,6 @@ export const SCENES: Record<string, Scene> = {
   e1: e1 as Scene,
   e2: e2 as Scene,
   e3: e3 as Scene,
-  c1: c1 as Scene,
-  c2: c2 as Scene,
 };
 
 export const DECISION_POINTS: Record<string, DecisionPoint> = {
@@ -47,8 +40,6 @@ export const DECISION_POINTS: Record<string, DecisionPoint> = {
   dp_crossing: dpCrossing as DecisionPoint,
   dp_leftout_bench: dpLeftout as DecisionPoint,
   dp_ask_grownup: dpAskGrownup as DecisionPoint,
-  dp_hothead_calm: dpHothead as DecisionPoint,
-  dp_friendship_repair: dpRepair as DecisionPoint,
 };
 
 export function getScene(id: string): Scene | undefined {
@@ -65,13 +56,11 @@ export const GOLDEN_PATH = ["w1", "w2", "w3", "w4", "w5", "w6"];
 export const CHAPTER_FINALE: Record<string, string> = {
   ch1: "e3",
   ch2: "w6",
-  ch3: "c2",
 };
 
 export const CHAPTER_COMPLETE_DECISION: Record<string, string> = {
   ch1: "dp_ask_grownup",
   ch2: "dp_crossing",
-  ch3: "dp_friendship_repair",
 };
 
 /** Multi-step mini-games: required taps before a strong resolve */

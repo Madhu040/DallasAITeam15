@@ -4,6 +4,7 @@
   "order": 2,
   "movementTier": "B",
   "background": "bg_bridge",
+  "gridMapId": "singing-bridge",
   "narration": "CREEEAK! The bridge sways. Flicker panics — \"What if it breaks?!\" Wize thanks Flicker for noticing: Guardian Dragons are supposed to warn. Now let's look carefully together.",
   "characters": [
     { "assetRef": "char_companion_dragon", "id": "companion", "position": [640, 760], "expression": "worried" },

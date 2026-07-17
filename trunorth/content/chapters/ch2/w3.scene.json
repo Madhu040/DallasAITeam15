@@ -4,6 +4,7 @@
   "order": 3,
   "movementTier": "B",
   "background": "bg_bridge",
+  "gridMapId": "singing-bridge",
   "narration": "The ropes look strong. A duck waddles across while birds hop and sing. Wize smiles: \"Let's think together.\" Which thought is a story — not a fact?",
   "characters": [
     { "assetRef": "char_companion_dragon", "id": "companion", "position": [560, 780], "expression": "worried" },

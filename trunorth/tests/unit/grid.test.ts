@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { GRID_COLS, GRID_ROWS, GridMap, moveWithGridCollision } from "../../src/engine/GridMap.js";
 import { WORLD_H, WORLD_W } from "../../src/engine/Collision.js";
 import { getGridLevel, listGridLevelIds, resolveGridLevel } from "../../src/content/gridLevels.js";
+import { SCENARIOS } from "../../src/content/scenarios.js";
+import { SCENES, getScene } from "../../src/content/index.js";
 
 describe("GridMap", () => {
   it("stores a full 100×100 cell vector with coordinates", () => {
@@ -57,6 +59,20 @@ describe("grid levels", () => {
     expect(resolveGridLevel({ gridMapId: "everbright-meadow" }, "")?.id).toBe("everbright-meadow");
     expect(resolveGridLevel(null, "")).toBeNull();
     expect(resolveGridLevel(null, "?grid=nope")).toBeNull();
+  });
+
+  it("routes every child scenario and scene to a registered grid level", () => {
+    const childScenarios = SCENARIOS.filter((s) => s.audience === "child");
+    expect(childScenarios.map((s) => s.id).sort()).toEqual(["ch1", "ch2"]);
+    for (const scenario of childScenarios) {
+      const gridId = getScene(scenario.startSceneId)?.gridMapId;
+      expect(gridId, `${scenario.id} start scene has a gridMapId`).toBeTruthy();
+      expect(getGridLevel(gridId!)).not.toBeNull();
+    }
+    for (const scene of Object.values(SCENES)) {
+      expect(scene.gridMapId, `scene ${scene.id} bound to a grid level`).toBeTruthy();
+      expect(getGridLevel(scene.gridMapId!)).not.toBeNull();
+    }
   });
 
   it("keeps the singing-bridge crossing walkable only over the bridge", () => {

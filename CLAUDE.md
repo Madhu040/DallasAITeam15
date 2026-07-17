@@ -48,7 +48,7 @@ Any change that adds, removes, or alters a file, export, endpoint, or behavior i
 - Run locally: `cd trunorth && npm install && npm run dev` (client 5173 + API 3001).
   Offline demo: `npm run demo` → http://localhost:4173/?demo=1
 - Before committing: `npm run test:unit` and `npm run validate:content` must pass.
-  `npm run typecheck` is currently failing (11 known errors — see `product.md` §3.14);
+  `npm run typecheck` is currently failing (9 known errors — see `product.md` §3.14);
   don't add new type errors, and update the ledger if you fix them.
 - Known-broken tooling (see ledger §3.14): `npm run lint` (phantom `api/` dir),
   `test:e2e` (no tests/e2e), `/sw.js` registration (file absent).

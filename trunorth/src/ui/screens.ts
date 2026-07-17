@@ -1,5 +1,8 @@
 import { apiLogin, apiRegister, setSession, clearSession, getToken } from "./auth.js";
 import { SCENARIOS } from "../content/scenarios.js";
+import { getScene } from "../content/index.js";
+import { getGridLevel } from "../content/gridLevels.js";
+import { createGridThumbnail } from "../render/gridBackground.js";
 import { zoneForChapter } from "../content/zones.js";
 import { appConfig } from "../config/app.js";
 import type { ScenarioMeta } from "../types/index.js";
@@ -255,17 +258,27 @@ export function renderScenarioHub(
   const onSelect = playMode === "together" ? onSelectTogether : onSelectSolo;
 
   for (const scenario of SCENARIOS.filter((s) => s.audience === "child")) {
-    const zone = zoneForChapter(scenario.id);
     const card = document.createElement("button");
     card.className = `scenario-card${playMode === "together" ? " together" : ""}`;
     const done = completedChapters.includes(scenario.id);
     card.innerHTML = `
-      <img class="zone-thumb" src="${zone.image}" alt="${zone.name}" />
       <div class="scenario-eyebrow">${scenario.subtitle}${done ? " · Done" : ""}${playMode === "together" ? " · Together" : ""}</div>
       <h3>${scenario.title}</h3>
       <p>${scenario.description}</p>
       <div class="scenario-meta">Ages ${scenario.ageBand} · ~${scenario.estimatedMinutes} min</div>
     `;
+    const gridId = getScene(scenario.startSceneId)?.gridMapId;
+    const gridLevel = gridId ? getGridLevel(gridId) : null;
+    if (gridLevel) {
+      card.prepend(createGridThumbnail(gridLevel));
+    } else {
+      const zone = zoneForChapter(scenario.id);
+      const thumb = document.createElement("img");
+      thumb.className = "zone-thumb";
+      thumb.src = zone.image;
+      thumb.alt = zone.name;
+      card.prepend(thumb);
+    }
     card.onclick = () => onSelect(scenario);
     kidGrid.appendChild(card);
   }

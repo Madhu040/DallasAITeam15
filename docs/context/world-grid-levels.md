@@ -36,15 +36,20 @@ only uses a grid when one resolves for it.
     plank bridge (cols 46–53) is the only crossing; rails, top cliff wall, side
     walls, crystal outcrops. Spawn [50, 85].
 - `listGridLevelIds()`, `resolveGridLevel(scene, search?)` — **URL `?grid=<id>`
-  wins** (testing), else `scene.gridMapId` (new optional `Scene` field; no scene
-  JSON sets it yet). `isGridDebug()` — `?gridDebug=1`.
-- Adding a level = write a builder + register it in `LEVEL_BUILDERS`.
+  wins** (testing), else `scene.gridMapId`. **Every scene JSON now sets `gridMapId`**
+  (ch1 e1–e3 → `everbright-meadow`, ch2 w1–w6 → `singing-bridge`), so grids are the
+  levels; ch3 Forest was removed 2026-07-17. `isGridDebug()` — `?gridDebug=1`.
+- Adding a level = write a builder + register it in `LEVEL_BUILDERS`, then point the
+  scene JSONs' `gridMapId` (or a new scenario's scenes) at it.
 
 ## `src/render/gridBackground.ts` — canvas renderer
 
 `renderGridBackground(viewport, level, debug)` draws the cell vector to a
 `canvas.grid-bg` (one canvas pixel per cell), scaled to the viewport by CSS with
 `image-rendering: pixelated`. Debug mode tints non-walkable cells red.
+`createGridThumbnail(level)` returns a `.zone-thumb.zone-thumb-grid` canvas used by
+the scenario hub cards (`screens.ts`); PNG zone thumbs remain the fallback for
+scenarios without a grid.
 
 ## Integration
 

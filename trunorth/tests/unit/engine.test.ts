@@ -59,9 +59,9 @@ describe("Golden path", () => {
     expect(GOLDEN_PATH).toEqual(["w1", "w2", "w3", "w4", "w5", "w6"]);
   });
 
-  it("has empathy and calm chapter scenes", () => {
+  it("has meadow chapter scenes and no removed forest chapter", () => {
     expect(SCENES.e1).toBeDefined();
-    expect(SCENES.c1).toBeDefined();
+    expect(SCENES.c1).toBeUndefined();
   });
 });
 

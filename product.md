@@ -127,7 +127,7 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
 | Level 1 script | `docs/scripts/Scene, script, players.docx` → **The Singing Bridge** (integrated) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Three child scenarios (ch1 meadow, **ch2 Singing Bridge golden path W1→W6**, ch3 forest) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision; 2 demo levels via `?grid=<id>`)**; companion safety filters + demo/live clients; counselor insights + Together Mode; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 19 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (11 errors — see §3.14), so CI is red. Art is zone PNGs + inline SVG cast (placeholder style). |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Singing Bridge golden path W1→W6**; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId`, hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 20 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (9 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (placeholder style); zone PNGs remain for celebration + fallback. |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
 | Last updated | 2026-07-17 (full reality audit of the ledger) |
@@ -156,9 +156,8 @@ DallasAITeam15/
 ```
 trunorth/
 ├── content/
-│   ├── chapters/ch1/          # ✅ Meadow — e1–e3 scenes + leftout/ask-grownup DPs
-│   ├── chapters/ch2/          # ✅ Singing Bridge — w1–w6 + 6 DPs (golden path)
-│   ├── chapters/ch3/          # ✅ Forest — c1–c2 + hothead/repair DPs
+│   ├── chapters/ch1/          # ✅ Everbright Meadow — e1–e3 + 2 DPs (gridMapId: everbright-meadow)
+│   ├── chapters/ch2/          # ✅ Singing Bridge — w1–w6 + 6 DPs (gridMapId: singing-bridge)
 │   ├── demo/showcase.bundle.json     # ✅ 10 canned companion lines (demo mode)
 │   └── fallbacks/companion-fallbacks.json  # ✅ band/timeout/safety lines, all 10 DPs
 ├── data/                      # SQLite runtime files (git-ignored)
@@ -250,10 +249,11 @@ registration silently no-ops.
   hotspots remain as fallback.
 - **Grid levels** (`GridMap.ts`, `src/content/gridLevels.ts`,
   `src/render/gridBackground.ts`) — parameterized 100×100 cell grid (flat vector:
-  coordinate + color + walkable per cell), painted-level builders (2 demo levels:
-  `everbright-meadow`, `singing-bridge`), canvas background, center-point collision
-  in `WorldRuntime`; test via `?grid=<id>` (+`&gridDebug=1`). Optional
-  `Scene.gridMapId` field exists; no scene JSON sets it yet. See
+  coordinate + color + walkable per cell), painted-level builders (2 levels:
+  `everbright-meadow` ← ch1, `singing-bridge` ← ch2), canvas background + hub
+  thumbnails (`createGridThumbnail`), center-point collision in `WorldRuntime`.
+  **Every scene JSON sets `gridMapId`** — grids are the levels now; URL `?grid=<id>`
+  (+`&gridDebug=1`) still overrides for testing. See
   [world-grid-levels.md](./docs/context/world-grid-levels.md).
 ⬜ Not in repo: `SceneGraph`, `EmotionalResidue` modules.
 
@@ -272,7 +272,8 @@ modules (bubbles/HUD live in `GameView` + CSS).
   `renderCelebration` (Courage Feather), `renderJourneyReflection`, `renderParentGate`
   (4-digit PIN, SHA-256 hash in localStorage, 3-fail lockout), `renderTrustScreen`.
 - `screens.ts` — `renderLanding`, `renderAuthForm` (parent login/register),
-  `renderOnboarding` (archetype/name/avatar; default **Flicker**), `renderScenarioHub`.
+  `renderOnboarding` (archetype/name/avatar; default **Flicker**), `renderScenarioHub`
+  (child cards use grid canvas thumbnails when the start scene binds a grid; PNG fallback).
   Known issue: its local `Screen` type includes `"dashboard"`, which `main.ts` rejects
   (typecheck error).
 - `auth.ts` — session token helpers (`getToken`/`setSession`/`clearSession`),
@@ -300,8 +301,9 @@ Used by unit tests and the server companion route.
 ### 3.9 Counselor layer (`src/counselor/`)
 ✅ Implemented.
 - `insights.ts` — `insightForStep(dpId, band)` (hand-written coaching for **all 10 DPs**
-  × 3 bands + generic fallback), `buildJourneyReflection(state)` (summary, strengths,
-  growth edges, per-step insights, parent coaching), `childFacingLine`.
+  × 3 bands + generic fallback; 2 are legacy ch3 DPs kept as library data),
+  `buildJourneyReflection(state)` (summary, strengths, growth edges, per-step insights,
+  parent coaching), `childFacingLine`.
 - `coPlay.ts` — `discussPrompt(dpId)` Together-Mode conversation starters (all 10 DPs).
 
 ### 3.10 Shared types (`src/types/index.ts`)
@@ -327,16 +329,20 @@ PlayMode, ProgressStore interface, AuthUser/ChildProfile, factories
 - ⬜ No Vercel `api/` tree in this repo.
 
 ### 3.12 Content (`content/`)
-✅ Implemented (draft; SME review still pending).
-- **Ch.2 The Singing Bridge (golden path):**
+✅ Implemented (draft; SME review still pending). Every scene sets `gridMapId`, so both
+levels play on grid backgrounds (§3.3); hub shows only these two + parent coach.
+- **Ch.2 The Singing Bridge (golden path, grid `singing-bridge`):**
   w1 quest → w2 investigate → w3 fact/story → w4 breathe (5 taps) → w5 choose →
   w6 crossing (4 taps) + Courage Feather finale. DPs: `dp_quest_start`,
   `dp_investigate`, `dp_fact_sort`, `dp_breathe`, `dp_choose_path`, `dp_crossing`.
-- Ch.1 Meadow (e1–e3, 2 DPs) + Ch.3 Forest (c1–c2, 2 DPs) playable via hub.
-- `fallbacks/companion-fallbacks.json` — all 10 DPs × strong/partial/poor/timeout/safety.
+- **Ch.1 Everbright Meadow (grid `everbright-meadow`):** e1–e3, 2 DPs.
+- **Ch.3 Forest removed 2026-07-17** (files deleted, registry/scenario/hub entries
+  dropped). Its 2 DPs remain only as library data in insights/coPlay/fallbacks.
+- `fallbacks/companion-fallbacks.json` — 10 DPs × strong/partial/poor/timeout/safety
+  (8 registered + 2 legacy ch3).
 - `demo/showcase.bundle.json` — 10 canned responses keyed `{scene}:{dp}:{band}`.
 - ⬜ `content/schema/` Ajv pack, `content/rubrics/` — not present.
-- ⬜ Per-scene `tileMap` rooms — not used (scenes use `background` + `triggers`).
+- ⬜ Per-scene `tileMap` rooms — not used (scenes use `gridMapId` + `triggers`).
 
 ### 3.13 Assets (`public/assets/`)
 🟨 Partial. Zone PNGs (meadow/forest/cave/mountain) under `public/assets/zones/`;
@@ -351,10 +357,10 @@ characters are code-drawn SVG. The Singing Bridge zone + celebration reuse `fore
   consequences (no Ajv schemas yet). **Passing** as of 2026-07-17.
 - `npm run test:unit` — **13/13 passing**. `npm run build` — **passing** (vite build;
   server tsc errors are swallowed by `|| true`).
-- **`npm run typecheck` — FAILING (11 errors), which makes CI red:**
-  10 × TS2352 in `src/content/index.ts` (scene JSON `position: number[]` doesn't satisfy
-  `[number, number]` for the `as Scene` casts) and 1 × TS2345 in `src/main.ts:218`
-  (`screens.ts` `Screen` includes `"dashboard"`, not in `AppScreen`).
+- **`npm run typecheck` — FAILING (9 errors), which makes CI red:**
+  8 × TS2352 in `src/content/index.ts` (scene JSON `position: number[]` doesn't satisfy
+  `[number, number]` for the `as Scene` casts; was 10 before ch3 removal) and 1 × TS2345
+  in `src/main.ts` (`screens.ts` `Screen` includes `"dashboard"`, not in `AppScreen`).
 - `npm run lint` — broken: targets a nonexistent `api/` directory.
 - CI (`.github/workflows/ci.yml`): typecheck → validate:content → test:unit → build.
 - ⬜ `build-asset-manifest`, `red-team-suite`, `audit-bundle-size` — not in tree.
@@ -362,11 +368,12 @@ characters are code-drawn SVG. The Singing Bridge zone + celebration reuse `fore
   playwright config**.
 
 ### 3.15 Tests (`tests/`)
-🟨 Partial — **19 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
-bands/meters/repair, safety filters, Singing Bridge golden-path presence, counselor
-insights + journey reflection, SVG cast rendering, world collision wall slide + bounds)
-+ `tests/unit/grid.test.ts` (6 — grid cell vector, painting/world lookup, center-point
-slide, level registry, `?grid=` resolution, bridge-only river crossing).
+🟨 Partial — **20 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
+bands/meters/repair, safety filters, Singing Bridge golden-path presence, ch3 absence,
+counselor insights + journey reflection, SVG cast rendering, world collision wall slide +
+bounds) + `tests/unit/grid.test.ts` (7 — grid cell vector, painting/world lookup,
+center-point slide, level registry, `?grid=` resolution, scenario/scene→grid routing,
+bridge-only river crossing).
 ⬜ integration / e2e / red-team folders.
 
 ---
@@ -398,7 +405,7 @@ slide, level registry, `?grid=` resolution, bridge-only river crossing).
 | E2E golden path W1→W6 | (unassigned) | ⬜ |
 | JSON Schema validate-content | (unassigned) | ⬜ |
 | `npm run lint` fix (drops phantom `api/` dir) | (unassigned) | ⬜ |
-| TileMap / WASD architecture | — | 🟨 free-roam WASD + 100×100 grid levels shipped; no scene JSON uses `gridMapId` yet |
+| TileMap / WASD architecture | — | ✅ free-roam WASD + 100×100 grid levels; all scenes bind `gridMapId` |
 
 ---
 
@@ -413,3 +420,4 @@ slide, level registry, `?grid=` resolution, bridge-only river crossing).
 | 2026-07-14 | Added world movement: WASD/arrows, collision, proximity interact (E/Space), companion follow, collectible pickup (`WorldRuntime`). |
 | 2026-07-17 | Full reality audit: documented server auth/children/progress/reflect endpoints, world movement promoted to ✅, test count 11→13, recorded failing typecheck (CI red), broken lint script, missing `sw.js`; added context files `world-movement.md`, `ui-screens-views.md`, `server-api.md`. |
 | 2026-07-17 | Added parameterized 100×100 grid levels: `GridMap` (cell vector: coordinate/color/walkable, painting API), `gridLevels.ts` (2 demo levels, `?grid=<id>` testing), canvas `gridBackground.ts`, center-point grid collision in `WorldRuntime`, optional `Scene.gridMapId`; tests 13→19; context file `world-grid-levels.md`. |
+| 2026-07-17 | Made grid levels the only levels: all ch1/ch2 scenes bind `gridMapId` (everbright-meadow / singing-bridge), hub cards render grid canvas thumbnails, ch1 scenario retitled "Everbright Meadow"; **removed ch3 Forest** (content files + registry + hub card + default unlock); tests 19→20; typecheck errors 11→9. |
