@@ -1,0 +1,70 @@
+import { describe, it, expect } from "vitest";
+import { GRID_COLS, GRID_ROWS, GridMap, moveWithGridCollision } from "../../src/engine/GridMap.js";
+import { WORLD_H, WORLD_W } from "../../src/engine/Collision.js";
+import { getGridLevel, listGridLevelIds, resolveGridLevel } from "../../src/content/gridLevels.js";
+
+describe("GridMap", () => {
+  it("stores a full 100×100 cell vector with coordinates", () => {
+    const map = new GridMap({ color: "#5aa85e", walkable: true });
+    expect(map.cells).toHaveLength(GRID_COLS * GRID_ROWS);
+    expect(map.cellAt(99, 99)).toMatchObject({ col: 99, row: 99, walkable: true });
+    expect(map.cellAt(100, 0)).toBeNull();
+    expect(map.cellAt(-1, 5)).toBeNull();
+  });
+
+  it("paints color and walkability, and maps world points to cells", () => {
+    const map = new GridMap({ color: "#5aa85e", walkable: true });
+    map.paintRect(10, 10, 5, 5, { color: "#3d7dc4", walkable: false });
+
+    const inside = map.cellAtWorld(12 * map.cellW + 1, 12 * map.cellH + 1);
+    expect(inside).toMatchObject({ col: 12, row: 12, color: "#3d7dc4", walkable: false });
+    expect(map.isWalkableWorld(12 * map.cellW + 1, 12 * map.cellH + 1)).toBe(false);
+    expect(map.isWalkableWorld(50 * map.cellW, 50 * map.cellH)).toBe(true);
+    // Outside the world is never walkable
+    expect(map.isWalkableWorld(-10, 100)).toBe(false);
+    expect(map.isWalkableWorld(WORLD_W + 10, WORLD_H + 10)).toBe(false);
+  });
+
+  it("slides along blocked cells with axis-separated center-point collision", () => {
+    const map = new GridMap({ color: "#5aa85e", walkable: true });
+    // Vertical wall at column 30
+    map.paintRect(30, 0, 1, GRID_ROWS, { walkable: false });
+
+    const start = { x: 29.4 * map.cellW, y: 50 * map.cellH };
+    const moved = moveWithGridCollision(start, { x: map.cellW, y: map.cellH }, map);
+    expect(moved.x).toBe(start.x); // blocked by the wall
+    expect(moved.y).toBe(start.y + map.cellH); // still slides down
+  });
+});
+
+describe("grid levels", () => {
+  it("registers full-size levels with a walkable spawn cell", () => {
+    const ids = listGridLevelIds();
+    expect(ids.length).toBeGreaterThanOrEqual(2);
+    for (const id of ids) {
+      const level = getGridLevel(id)!;
+      expect(level.name).toBeTruthy();
+      expect(level.map.cells).toHaveLength(GRID_COLS * GRID_ROWS);
+      const [col, row] = level.spawnCell;
+      expect(level.map.cellAt(col, row)?.walkable).toBe(true);
+    }
+  });
+
+  it("resolves levels from the ?grid= query first, then the scene", () => {
+    expect(resolveGridLevel({ gridMapId: "everbright-meadow" }, "?grid=singing-bridge")?.id).toBe(
+      "singing-bridge",
+    );
+    expect(resolveGridLevel({ gridMapId: "everbright-meadow" }, "")?.id).toBe("everbright-meadow");
+    expect(resolveGridLevel(null, "")).toBeNull();
+    expect(resolveGridLevel(null, "?grid=nope")).toBeNull();
+  });
+
+  it("keeps the singing-bridge crossing walkable only over the bridge", () => {
+    const level = getGridLevel("singing-bridge")!;
+    // Mid-river, mid-bridge cell is walkable planks
+    expect(level.map.cellAt(50, 48)?.walkable).toBe(true);
+    // Mid-river away from the bridge is water
+    expect(level.map.cellAt(20, 48)?.walkable).toBe(false);
+    expect(level.map.cellAt(80, 48)?.walkable).toBe(false);
+  });
+});

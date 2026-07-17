@@ -127,7 +127,7 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
 | Level 1 script | `docs/scripts/Scene, script, players.docx` → **The Singing Bridge** (integrated) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Three child scenarios (ch1 meadow, **ch2 Singing Bridge golden path W1→W6**, ch3 forest) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; companion safety filters + demo/live clients; counselor insights + Together Mode; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 13 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (11 errors — see §3.14), so CI is red. Art is zone PNGs + inline SVG cast (placeholder style). |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Three child scenarios (ch1 meadow, **ch2 Singing Bridge golden path W1→W6**, ch3 forest) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision; 2 demo levels via `?grid=<id>`)**; companion safety filters + demo/live clients; counselor insights + Together Mode; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 19 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (11 errors — see §3.14), so CI is red. Art is zone PNGs + inline SVG cast (placeholder style). |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
 | Last updated | 2026-07-17 (full reality audit of the ledger) |
@@ -179,17 +179,17 @@ trunorth/
 │   ├── main.ts                # ✅ Boot, screens, startScenario, engine + world wiring
 │   ├── companion/CompanionClient.ts   # ✅ Live + Demo clients
 │   ├── config/                # ✅ app.ts, content.ts, gameState.ts (env-driven)
-│   ├── content/               # ✅ SCENES/DPs registry, scenarios, zones
+│   ├── content/               # ✅ SCENES/DPs registry, scenarios, zones, gridLevels
 │   ├── counselor/             # ✅ insights + coPlay discuss prompts
-│   ├── engine/                # ✅ SceneEngine, DecisionResolver, WorldRuntime, Collision
+│   ├── engine/                # ✅ SceneEngine, DecisionResolver, WorldRuntime, Collision, GridMap
 │   ├── input/InputController.ts # ✅ WASD/arrows + interact keys
-│   ├── render/characters.ts   # ✅ Full-body SVG cast (Flicker, Wize, …)
+│   ├── render/                # ✅ characters.ts (SVG cast), gridBackground.ts (grid canvas)
 │   ├── safety/filters.ts      # ✅ input/output filters
 │   ├── store/ProgressStore.ts # ✅ Local + Demo stores
 │   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones
 │   ├── types/index.ts         # ✅ Shared contracts
 │   └── ui/                    # ✅ GameView, screens, auth helpers
-├── tests/unit/engine.test.ts  # ✅ 13 tests (resolver, safety, golden path, cast, collision)
+├── tests/unit/                # ✅ 19 tests — engine.test.ts (13) + grid.test.ts (6)
 ├── Dockerfile · docker-compose.yml
 ├── index.html · vite.config.ts · vitest.config.ts
 ├── package.json · .nvmrc · .env.example · .gitignore
@@ -248,7 +248,14 @@ registration silently no-ops.
 - `Collision.ts` — pure AABB helpers, `moveWithCollision` (wall sliding), walk bands.
 - `InputController` — WASD/arrows hold-polling, one-shot interact; clickable trigger
   hotspots remain as fallback.
-⬜ Not in repo: `TileMap` grid parser, `SceneGraph`, `EmotionalResidue` modules.
+- **Grid levels** (`GridMap.ts`, `src/content/gridLevels.ts`,
+  `src/render/gridBackground.ts`) — parameterized 100×100 cell grid (flat vector:
+  coordinate + color + walkable per cell), painted-level builders (2 demo levels:
+  `everbright-meadow`, `singing-bridge`), canvas background, center-point collision
+  in `WorldRuntime`; test via `?grid=<id>` (+`&gridDebug=1`). Optional
+  `Scene.gridMapId` field exists; no scene JSON sets it yet. See
+  [world-grid-levels.md](./docs/context/world-grid-levels.md).
+⬜ Not in repo: `SceneGraph`, `EmotionalResidue` modules.
 
 ### 3.4 Rendering (`src/render/characters.ts`)
 🟨 Partial — inline SVG cast, no separate sprite/manifest pipeline.
@@ -355,9 +362,11 @@ characters are code-drawn SVG. The Singing Bridge zone + celebration reuse `fore
   playwright config**.
 
 ### 3.15 Tests (`tests/`)
-🟨 Partial — `tests/unit/engine.test.ts` (**13 tests, all passing**): DecisionResolver
-(bands, meters, repair), safety filters, Singing Bridge golden-path presence, counselor
-insights + journey reflection, SVG cast rendering, world collision (wall slide + bounds).
+🟨 Partial — **19 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
+bands/meters/repair, safety filters, Singing Bridge golden-path presence, counselor
+insights + journey reflection, SVG cast rendering, world collision wall slide + bounds)
++ `tests/unit/grid.test.ts` (6 — grid cell vector, painting/world lookup, center-point
+slide, level registry, `?grid=` resolution, bridge-only river crossing).
 ⬜ integration / e2e / red-team folders.
 
 ---
@@ -368,6 +377,7 @@ insights + journey reflection, SVG cast rendering, world collision (wall slide +
 |---|---|---|
 | [engine-runtime.md](./docs/context/engine-runtime.md) | `src/engine/SceneEngine.ts`, `DecisionResolver.ts`, `src/main.ts`, `src/ui/GameView.ts`, `src/content/index.ts` | Boot screens, scene phases, multi-tap + repair + celebration flow |
 | [world-movement.md](./docs/context/world-movement.md) | `src/engine/WorldRuntime.ts`, `src/engine/Collision.ts`, `src/input/InputController.ts` | Free-roam runtime: rAF loop, AABB collision, follow, collectibles, interact |
+| [world-grid-levels.md](./docs/context/world-grid-levels.md) | `src/engine/GridMap.ts`, `src/content/gridLevels.ts`, `src/render/gridBackground.ts` | 100×100 grid levels: cell vector, painting API, canvas bg, center-point collision, `?grid=` testing |
 | [ui-screens-views.md](./docs/context/ui-screens-views.md) | `src/ui/GameView.ts`, `src/ui/screens.ts`, `src/ui/auth.ts` | Every render function: game view, overlays, onboarding, hub, parent gate, auth |
 | [server-api.md](./docs/context/server-api.md) | `server/*` (index, main, config, auth, db, routes) | All HTTP endpoints, SQLite schema, JWT, companion pipeline steps |
 | [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md) | `server/routes/companion.ts`, `src/companion/*`, `src/safety/*`, fallbacks | Live vs demo companion paths, filters, fallback coverage |
@@ -388,7 +398,7 @@ insights + journey reflection, SVG cast rendering, world collision (wall slide +
 | E2E golden path W1→W6 | (unassigned) | ⬜ |
 | JSON Schema validate-content | (unassigned) | ⬜ |
 | `npm run lint` fix (drops phantom `api/` dir) | (unassigned) | ⬜ |
-| TileMap / WASD architecture | — | 🟨 free-roam WASD shipped; no tile grid |
+| TileMap / WASD architecture | — | 🟨 free-roam WASD + 100×100 grid levels shipped; no scene JSON uses `gridMapId` yet |
 
 ---
 
@@ -402,3 +412,4 @@ insights + journey reflection, SVG cast rendering, world collision (wall slide +
 | 2026-07-13 | Organized repo into `docs/{specs,scripts,kickoff,context}`; added configurable `server/config.ts`, `src/config/*`, expanded `.env.example`. |
 | 2026-07-14 | Added world movement: WASD/arrows, collision, proximity interact (E/Space), companion follow, collectible pickup (`WorldRuntime`). |
 | 2026-07-17 | Full reality audit: documented server auth/children/progress/reflect endpoints, world movement promoted to ✅, test count 11→13, recorded failing typecheck (CI red), broken lint script, missing `sw.js`; added context files `world-movement.md`, `ui-screens-views.md`, `server-api.md`. |
+| 2026-07-17 | Added parameterized 100×100 grid levels: `GridMap` (cell vector: coordinate/color/walkable, painting API), `gridLevels.ts` (2 demo levels, `?grid=<id>` testing), canvas `gridBackground.ts`, center-point grid collision in `WorldRuntime`, optional `Scene.gridMapId`; tests 13→19; context file `world-grid-levels.md`. |

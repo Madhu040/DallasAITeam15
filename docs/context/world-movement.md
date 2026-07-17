@@ -3,9 +3,14 @@
 **Sources:** `trunorth/src/engine/WorldRuntime.ts`, `trunorth/src/engine/Collision.ts`,
 `trunorth/src/input/InputController.ts`
 
-Free-roam movement layered on the DOM scene stage (no tile map). Feature-flagged by
+Free-roam movement layered on the DOM scene stage. Feature-flagged by
 `VITE_FEATURE_WORLD_MOVEMENT` (default on); tunables in `appConfig.world`
 (`moveSpeedPx` 420, `interactRadiusPx` 140, `companionFollowLag` 0.88).
+
+Scenes can alternatively use a **100×100 grid background with per-cell walkability**
+— when a grid level resolves for the scene, `WorldRuntime` spawns the avatar at the
+level's spawn cell and switches `stepMovement` to center-point grid collision. See
+[world-grid-levels.md](./world-grid-levels.md).
 
 ## `InputController.ts`
 
