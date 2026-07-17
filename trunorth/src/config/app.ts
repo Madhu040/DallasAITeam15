@@ -35,6 +35,16 @@ export const appConfig = {
     scenarioHub: viteBool("VITE_FEATURE_SCENARIO_HUB", true),
     /** WASD/arrow exploration with proximity interact + collectibles */
     worldMovement: viteBool("VITE_FEATURE_WORLD_MOVEMENT", true),
+    /** Speak companion lines aloud via on-device SpeechSynthesis */
+    voiceOutput: viteBool("VITE_FEATURE_VOICE_OUTPUT", true),
+  },
+  voice: {
+    /** Speech rate (1 = normal). Slightly slower reads better for kids. */
+    rate: viteNumber("VITE_VOICE_RATE", 0.95),
+    /** Speech pitch (1 = normal). Slightly higher suits the companion. */
+    pitch: viteNumber("VITE_VOICE_PITCH", 1.1),
+    /** Exact system voice name to use, if available (empty = auto-pick). */
+    preferredVoice: viteString("VITE_VOICE_NAME", ""),
   },
   defaults: {
     companionName: viteString("VITE_DEFAULT_COMPANION_NAME", "Flicker"),

@@ -444,6 +444,21 @@ body {
   z-index: 20;
 }
 
+.voice-toggle {
+  position: absolute;
+  top: 52px;
+  right: 12px;
+  background: rgba(0,0,0,0.4);
+  border: none;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.voice-toggle:hover { background: rgba(0,0,0,0.6); }
+
 .coplay-badge {
   display: inline-block;
   background: #2a9d8f;

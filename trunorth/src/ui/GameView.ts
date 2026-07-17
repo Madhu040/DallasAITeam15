@@ -1,10 +1,11 @@
-import type { GameState, Scene, ScenePhase } from "../types/index.js";
+import type { DecisionPoint, GameState, Scene, ScenePhase } from "../types/index.js";
 import { getDecisionPoint } from "../content/index.js";
 import { renderFullBodyCharacter } from "../render/characters.js";
 import type { JourneyReflection } from "../counselor/insights.js";
 import { discussPrompt } from "../counselor/coPlay.js";
 import { zoneFromBackground, zoneForChapter } from "../content/zones.js";
 import { contentConfig } from "../config/content.js";
+import { isSpeechSupported, isVoiceEnabled, setVoiceEnabled, speakLine, stopSpeaking } from "../audio/speech.js";
 
 export interface CounselorPanelData {
   title: string;
@@ -80,6 +81,23 @@ export function renderGameView(
     hud.appendChild(meter);
   }
   viewport.appendChild(hud);
+
+  if (isSpeechSupported()) {
+    const voiceToggle = document.createElement("button");
+    voiceToggle.className = "voice-toggle";
+    const syncVoiceToggle = () => {
+      const on = isVoiceEnabled();
+      voiceToggle.textContent = on ? "🔊" : "🔇";
+      voiceToggle.setAttribute("aria-label", on ? "Turn companion voice off" : "Turn companion voice on");
+      voiceToggle.setAttribute("aria-pressed", String(on));
+    };
+    syncVoiceToggle();
+    voiceToggle.onclick = () => {
+      setVoiceEnabled(!isVoiceEnabled());
+      syncVoiceToggle();
+    };
+    viewport.appendChild(voiceToggle);
+  }
 
   if (scene) {
     const bg = document.createElement("div");
@@ -221,7 +239,18 @@ export function renderGameView(
       coPlayStep,
       onCoPlayReady,
     );
+  } else {
+    lastSpokenOverlayKey = null;
   }
+}
+
+/** Re-renders happen on every phase/meter update; only read each pop-up aloud once. */
+let lastSpokenOverlayKey: string | null = null;
+
+function speakOverlayOnce(key: string, text: string): void {
+  if (lastSpokenOverlayKey === key) return;
+  lastSpokenOverlayKey = key;
+  speakLine(text);
 }
 
 function buildCounselorPanel(counselor: CounselorPanelData): HTMLElement {
@@ -280,11 +309,15 @@ function renderDecisionOverlay(
     const ready = document.createElement("button");
     ready.className = "btn-primary coplay-ready";
     ready.textContent = "We're ready to choose";
-    ready.onclick = () => onCoPlayReady?.();
+    ready.onclick = () => {
+      stopSpeaking();
+      onCoPlayReady?.();
+    };
     panel.appendChild(ready);
 
     overlay.appendChild(panel);
     container.appendChild(overlay);
+    speakOverlayOnce(`${decisionId}:discuss`, discussPrompt(decisionId));
     return;
   }
 
@@ -314,7 +347,10 @@ function renderDecisionOverlay(
       const btn = document.createElement("button");
       btn.className = "choice-btn";
       btn.textContent = opt.label;
-      btn.onclick = () => onChoice(decisionId, opt.id, parentNote?.value.trim() || undefined);
+      btn.onclick = () => {
+        stopSpeaking();
+        onChoice(decisionId, opt.id, parentNote?.value.trim() || undefined);
+      };
       panel.appendChild(btn);
     }
   }
@@ -332,13 +368,33 @@ function renderDecisionOverlay(
     submit.textContent = "Say it";
     submit.onclick = () => {
       const text = input.value.trim();
-      if (text) onTyped(decisionId, text, parentNote?.value.trim() || undefined);
+      if (text) {
+        stopSpeaking();
+        onTyped(decisionId, text, parentNote?.value.trim() || undefined);
+      }
     };
     panel.appendChild(submit);
   }
 
   overlay.appendChild(panel);
   container.appendChild(overlay);
+  speakOverlayOnce(`${decisionId}:choose`, buildOverlayScript(dp));
+}
+
+/** Spoken version of a decision pop-up: the prompt, then each option in order. */
+function buildOverlayScript(dp: DecisionPoint): string {
+  const parts: string[] = [dp.prompt];
+  if (dp.options && dp.options.length > 0) {
+    const ordinals = ["First choice", "Second choice", "Third choice", "Fourth choice"];
+    parts.push("Your choices are:");
+    dp.options.forEach((opt, i) => {
+      parts.push(`${ordinals[i] ?? `Choice ${i + 1}`}: ${opt.label}.`);
+    });
+  }
+  if (dp.inputMode === "typed" || dp.inputMode === "both") {
+    parts.push(dp.options?.length ? "Or type your own answer." : "Type what you would say.");
+  }
+  return parts.join(" ");
 }
 
 export function renderCelebration(

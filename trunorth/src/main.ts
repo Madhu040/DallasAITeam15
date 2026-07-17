@@ -22,6 +22,7 @@ import {
   renderScenarioHub,
 } from "./ui/screens.js";
 import { getToken } from "./ui/auth.js";
+import { speakLine, stopSpeaking } from "./audio/speech.js";
 import { buildJourneyReflection } from "./counselor/insights.js";
 import { SCENARIOS } from "./content/scenarios.js";
 
@@ -56,6 +57,7 @@ const app = document.getElementById("app")!;
 function navigate(screen: AppScreen): void {
   if (screen !== "game") {
     worldRuntime.detach();
+    stopSpeaking();
   }
   currentScreen = screen;
   render();
@@ -135,6 +137,7 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
     },
     onCompanionLine: (line) => {
       companionLine = line;
+      speakLine(line);
       renderGame();
     },
     onCounselorInsight: (insight) => {
