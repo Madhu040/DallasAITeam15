@@ -26,9 +26,11 @@ Demo mode: `?demo=1` or `VITE_DEMO_MODE=true` → `DemoProgressStore` +
 `loading` → `exploring` → (`encounter`) → `decision` → `awaitingCompanion` →
 `consequence` → (`transitioning` | celebration) | repair back to `decision`.
 
-- Exploring: narration + clickable `triggers` on the scene.
+- Exploring: clickable `triggers` on the scene. (`scene.narration` is no longer
+  displayed — the bottom narration bar was removed 2026-07-18; story text is carried
+  by stage-object dialogs.)
 - Decision: choice / typed overlay from `GameView`.
-- Narration-only scenes (no DPs, has `nextSceneId`) auto-advance after ~2.2s.
+- Narration-only scenes (no DPs, has `nextSceneId`) still auto-advance after ~2.2s.
 
 ## Exploration movement
 

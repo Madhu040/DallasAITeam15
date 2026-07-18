@@ -17,7 +17,17 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
     child's chosen name), depth z-index from y-position; companion speech `bubble` shown during
     `consequence`/`awaitingCompanion`.
   - Collectible ✨ sparks (`data-collectible-id`), clickable dashed `trigger-zone` buttons while
-    `exploring`, narration bar, "…is reflecting with you" indicator during `awaitingCompanion`.
+    `exploring`, "…is reflecting with you" indicator during `awaitingCompanion`.
+    (The bottom narration bar was removed 2026-07-18 — `scene.narration` is no longer
+    displayed; story text is carried by stage-object dialogs. Engine narration
+    auto-advance timing is unchanged.)
+  - **Stage z-layering (2026-07-18)** — guarantees no dialogue is blocked by a
+    character: characters get `10 + floor(y/20)` (max ~64) < counselor panel 70 <
+    speaking character (bubble host, inline z 75) = interact hint 75 < thinking pill 80
+    < modal `.overlay` (decision + stage-object dialogs) 100. The companion bubble is
+    wider (`360 * --px` max), bordered, with a ::after tail. In demo mode the stage tag
+    drops below the demo pill (`.demo-pill ~ .stage-tag`); the together-pill sits below
+    the crystal counter; the move hint lives bottom-left (clear of the counselor panel).
   - Calls `onWorldReady(viewport, scene, exploring)` so `worldRuntime.attach` can take over movement.
   - **Responsive stage scaling:** `.game-viewport` (global.css) is a CSS size container
     (`container-type: size`) defining `--px: 0.0520833cqw` = 1 design px of the 1920×1080
@@ -25,7 +35,7 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
     `.character` width is `calc(var(--char-size) * var(--px))` with the SVG at
     `width:100%; height:auto` (the SVG's own width/height attrs remain as fallback).
     Labels, bubbles, collectibles, move/interact hints, HUD meters, pills, zone sign,
-    stage tag, and narration bar are sized in `calc(n * var(--px))`; text uses
+    and stage tag are sized in `calc(n * var(--px))`; text uses
     `clamp(min, calc(n * var(--px)), n px)` so it shrinks with the stage but never below
     a legibility floor. Positions were already %-based (world coords / 1920 or 1080).
   - Counselor side panel (`buildCounselorPanel`) during exploring/decision/consequence.

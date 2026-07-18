@@ -192,6 +192,9 @@ export function renderGameView(
         bubble.className = "bubble";
         bubble.textContent = companionLine;
         el.appendChild(bubble);
+        // A speaking character (and its bubble) must never be hidden behind
+        // other characters (z up to ~64) or the counselor panel (z 70).
+        el.style.zIndex = "75";
       }
 
       viewport.appendChild(el);
@@ -251,13 +254,6 @@ export function renderGameView(
         zone.onclick = () => onTrigger(trigger.target);
         viewport.appendChild(zone);
       }
-    }
-
-    if (scene.narration) {
-      const narr = document.createElement("div");
-      narr.className = "narration-bar";
-      narr.textContent = scene.narration;
-      viewport.appendChild(narr);
     }
 
     onWorldReady?.(viewport, scene, phase === "exploring");

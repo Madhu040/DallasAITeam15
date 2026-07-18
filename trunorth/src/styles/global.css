@@ -198,6 +198,11 @@ body {
   z-index: 10;
 }
 
+/* In demo mode the demo pill owns the top-center spot — drop the tag below it. */
+.demo-pill ~ .stage-tag {
+  top: max(32px, calc(44 * var(--px)));
+}
+
 .counselor-panel {
   position: absolute;
   right: max(12px, calc(50vw - 48vh));
@@ -208,7 +213,9 @@ body {
   border-radius: 16px;
   padding: 14px 16px;
   box-shadow: 0 8px 28px rgba(0,0,0,0.28);
-  z-index: 25;
+  /* Above characters (z ≤ ~64) so its text can't be blocked by them;
+     below the speaking character + bubble (75) and modal overlays (100). */
+  z-index: 70;
   max-height: 42vh;
   overflow: auto;
 }
@@ -394,14 +401,28 @@ body {
   transform: translateX(-50%);
   background: var(--bubble-bg);
   color: var(--text-dark);
-  padding: calc(10 * var(--px)) calc(16 * var(--px));
+  padding: calc(12 * var(--px)) calc(18 * var(--px));
   border-radius: calc(16 * var(--px));
-  font-size: clamp(10px, calc(14 * var(--px)), 14px);
+  border: 2px solid rgba(123, 44, 191, 0.35);
+  font-size: clamp(11px, calc(15 * var(--px)), 15px);
+  line-height: 1.45;
   width: max-content;
-  max-width: clamp(140px, calc(200 * var(--px)), 200px);
-  margin-bottom: calc(8 * var(--px));
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  max-width: clamp(220px, calc(360 * var(--px)), 380px);
+  margin-bottom: calc(12 * var(--px));
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
   white-space: pre-wrap;
+}
+
+/* Speech tail pointing down at the speaking character. */
+.bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: calc(9 * var(--px)) solid transparent;
+  border-top-color: var(--bubble-bg);
+  border-bottom: none;
 }
 
 .hud {
@@ -461,7 +482,8 @@ body {
 
 .together-pill {
   position: absolute;
-  top: max(8px, calc(12 * var(--px)));
+  /* Sits below the crystal counter, which owns the top-left corner. */
+  top: max(36px, calc(50 * var(--px)));
   left: max(8px, calc(12 * var(--px)));
   background: rgba(126, 200, 163, 0.95);
   color: var(--text-dark);
@@ -512,29 +534,15 @@ body {
   margin-bottom: 12px;
 }
 
-.narration-bar {
-  position: absolute;
-  left: 50%;
-  bottom: max(8px, calc(12 * var(--px)));
-  transform: translateX(-50%);
-  width: min(92%, 860px);
-  background: rgba(26, 10, 46, 0.82);
-  color: #fff;
-  padding: calc(10 * var(--px)) calc(14 * var(--px));
-  border-radius: calc(12 * var(--px));
-  font-size: clamp(11px, calc(14 * var(--px)), 14px);
-  line-height: 1.4;
-  z-index: 18;
-  pointer-events: none;
-}
-
 .overlay {
   position: absolute;
   inset: 0;
   background: rgba(0,0,0,0.7);
   display: grid;
   place-items: center;
-  z-index: 30;
+  /* Above every stage element — characters go up to z ~64 (10 + y/20),
+     counselor panel 70, speaking character 75. */
+  z-index: 100;
   padding: 20px;
 }
 
@@ -612,7 +620,7 @@ body {
   padding: calc(10 * var(--px)) calc(20 * var(--px));
   border-radius: 999px;
   font-size: clamp(11px, calc(16 * var(--px)), 16px);
-  z-index: 15;
+  z-index: 80;
   animation: pulse 1.5s infinite;
 }
 
@@ -966,9 +974,9 @@ body {
 
 .move-hint {
   position: absolute;
-  left: 50%;
-  bottom: max(30px, calc(58 * var(--px)));
-  transform: translateX(-50%);
+  /* Bottom-left corner — clear of the counselor panel (bottom right). */
+  left: max(8px, calc(12 * var(--px)));
+  bottom: max(8px, calc(12 * var(--px)));
   z-index: 14;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
@@ -983,7 +991,8 @@ body {
 .interact-hint {
   position: absolute;
   transform: translate(-50%, -100%);
-  z-index: 16;
+  /* Follows the avatar — keep it above other characters and the counselor panel. */
+  z-index: 75;
   background: var(--tru-purple);
   color: var(--tru-gold);
   border: 2px solid rgba(255, 214, 10, 0.55);
