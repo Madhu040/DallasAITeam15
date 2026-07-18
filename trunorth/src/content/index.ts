@@ -6,6 +6,7 @@ import w3 from "../../content/chapters/ch2/w3.scene.json";
 import w4 from "../../content/chapters/ch2/w4.scene.json";
 import w5 from "../../content/chapters/ch2/w5.scene.json";
 import w6 from "../../content/chapters/ch2/w6.scene.json";
+import w7 from "../../content/chapters/ch2/w7.scene.json";
 import dpQuestStart from "../../content/chapters/ch2/dp_quest_start.json";
 import dpInvestigate from "../../content/chapters/ch2/dp_investigate.json";
 import dpFactSort from "../../content/chapters/ch2/dp_fact_sort.json";
@@ -29,6 +30,7 @@ export const SCENES: Record<string, Scene> = {
   w4: w4 as Scene,
   w5: w5 as Scene,
   w6: w6 as Scene,
+  w7: w7 as unknown as Scene,
   e1: e1 as Scene,
   e2: e2 as Scene,
   e3: e3 as Scene,
@@ -64,16 +66,20 @@ export function getDialog(id: string): DialogRecord | undefined {
 }
 
 /** Level 1 — The Singing Bridge (conference demo path) */
-export const GOLDEN_PATH = ["w1", "w2", "w3", "w4", "w5", "w6"];
+export const GOLDEN_PATH = ["w1", "w2", "w3", "w4", "w5", "w6", "w7"];
 
 export const CHAPTER_FINALE: Record<string, string> = {
   ch1: "e3",
-  ch2: "w6",
+  ch2: "w7",
 };
 
+/**
+ * Decisions that complete their chapter on a strong resolve. ch2 has none:
+ * after dp_crossing the player physically walks the bridge to the w7
+ * finish-object checkmark.
+ */
 export const CHAPTER_COMPLETE_DECISION: Record<string, string> = {
   ch1: "dp_ask_grownup",
-  ch2: "dp_crossing",
 };
 
 /** Multi-step mini-games: required taps before a strong resolve */

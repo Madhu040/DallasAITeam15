@@ -7,10 +7,10 @@
   "gridMapId": "singing-bridge",
   "narration": "CREEEAK! The bridge sways. Flicker panics — \"What if it breaks?!\" Wize thanks Flicker for noticing: Guardian Dragons are supposed to warn. Now let's look carefully together.",
   "characters": [
-    { "assetRef": "char_companion_dragon", "id": "companion", "position": [640, 760], "expression": "worried" },
+    { "assetRef": "char_wize", "id": "companion", "position": [640, 760], "expression": "calm" },
     { "assetRef": "char_avatar", "id": "avatar", "position": [480, 800], "expression": "worried" },
-    { "assetRef": "char_wize", "id": "wize", "position": [960, 700], "expression": "calm" },
-    { "assetRef": "fx_worry_cloud", "id": "worry_cloud", "position": [640, 500], "expression": "big" }
+    { "assetRef": "char_flicker_dragon", "id": "flicker", "position": [960, 700], "expression": "worried", "solidSize": [190, 80] },
+    { "assetRef": "fx_worry_cloud", "id": "worry_cloud", "position": [960, 480], "expression": "big" }
   ],
   "triggers": [
     { "id": "bridge_investigate", "bounds": [520, 620, 560, 240], "action": "startDecision", "target": "dp_investigate" }

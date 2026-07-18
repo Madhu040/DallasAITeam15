@@ -16,6 +16,7 @@ export const OBJECT_SPRITES: Record<string, string> = {
   sign_post: "🪧",
   notice_scroll: "📜",
   finish_flag: "🏁",
+  finish_check: "✅",
   arch: "🌈",
 };
 

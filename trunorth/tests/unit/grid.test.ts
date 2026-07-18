@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { GRID_COLS, GRID_ROWS, GridMap, moveWithGridCollision } from "../../src/engine/GridMap.js";
-import { WORLD_H, WORLD_W } from "../../src/engine/Collision.js";
+import { WORLD_H, WORLD_W, characterFeetBox } from "../../src/engine/Collision.js";
 import { getGridLevel, listGridLevelIds, resolveGridLevel } from "../../src/content/gridLevels.js";
 import { SCENARIOS } from "../../src/content/scenarios.js";
 import { SCENES, getScene } from "../../src/content/index.js";
@@ -82,5 +82,27 @@ describe("grid levels", () => {
     // Mid-river away from the bridge is water
     expect(level.map.cellAt(20, 48)?.walkable).toBe(false);
     expect(level.map.cellAt(80, 48)?.walkable).toBe(false);
+  });
+
+  it("lets Flicker's widened solid seal the bridge entrance until w7", () => {
+    const level = getGridLevel("singing-bridge")!;
+    const flicker = getScene("w6")!.characters.find((c) => c.id === "flicker")!;
+    const [w, h] = flicker.solidSize!;
+    const box = characterFeetBox(flicker.position[0], flicker.position[1], w, h);
+
+    // Every approach across the plank corridor is blocked by the solid…
+    for (const x of [890, 960, 1030]) {
+      const start = { x, y: box.y + box.h + 6 };
+      const moved = moveWithGridCollision(start, { x: 0, y: -12 }, level.map, [box]);
+      expect(moved.y, `blocked at x=${x}`).toBe(start.y);
+    }
+
+    // …and in w7 Flicker stands aside, so the same walk crosses freely.
+    const w7Flicker = getScene("w7")!.characters.find((c) => c.id === "flicker")!;
+    expect(w7Flicker.solidSize).toBeUndefined();
+    const clearBox = characterFeetBox(w7Flicker.position[0], w7Flicker.position[1]);
+    const start = { x: 960, y: box.y + box.h + 6 };
+    const moved = moveWithGridCollision(start, { x: 0, y: -12 }, level.map, [clearBox]);
+    expect(moved.y).toBe(start.y - 12);
   });
 });

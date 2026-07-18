@@ -77,6 +77,14 @@ export function renderGameView(
 
   const gridLevel = scene ? resolveGridLevel(scene) : null;
 
+  // A scene can recast the follower companion (ch2: Wize guides while Flicker
+  // blocks the bridge) — show that cast's name, not the profile's.
+  const companionName = scene?.characters
+    .find((c) => c.id === "companion")
+    ?.assetRef.includes("wize")
+    ? "Wize"
+    : state.profile.companionName;
+
   const stageTag = document.createElement("div");
   stageTag.className = "stage-tag";
   const zone = scene ? (zoneFromBackground(scene.background) ?? zoneForChapter(scene.chapterId)) : null;
@@ -165,7 +173,7 @@ export function renderGameView(
       label.className = "char-label";
       label.textContent =
         ch.id === "companion"
-          ? state.profile.companionName
+          ? companionName
           : ch.id === "avatar"
             ? "You"
             : ch.id === "wize"
@@ -262,7 +270,7 @@ export function renderGameView(
   if (phase === "awaitingCompanion") {
     const thinking = document.createElement("div");
     thinking.className = "companion-thinking";
-    thinking.textContent = `${state.profile.companionName} is reflecting with you...`;
+    thinking.textContent = `${companionName} is reflecting with you...`;
     viewport.appendChild(thinking);
   }
 

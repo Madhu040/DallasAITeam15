@@ -127,10 +127,10 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
 | Level 1 script | `docs/scripts/Scene, script, players.docx` → **The Singing Bridge** (integrated) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Singing Bridge golden path W1→W6**; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId`, hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 36 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (9 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Singing Bridge golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the bridge until the final walk-across finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId`, hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 36 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (9 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
-| Last updated | 2026-07-18 (SEL Coach panel drag/close; removed Flicker's stray orange wing pixels) |
+| Last updated | 2026-07-18 (ch2 role fix: Wize = companion, Flicker blocks the bridge; new w7 walk-to-checkmark finish) |
 
 ---
 
@@ -157,7 +157,7 @@ DallasAITeam15/
 trunorth/
 ├── content/
 │   ├── chapters/ch1/          # ✅ Everbright Meadow — e1–e3 + 2 DPs + 1 dialog + 3 stage objects
-│   ├── chapters/ch2/          # ✅ Singing Bridge — w1–w6 + 6 DPs + 1 dialog + 1 stage object
+│   ├── chapters/ch2/          # ✅ Singing Bridge — w1–w7 + 6 DPs + 1 dialog + 2 stage objects
 │   ├── demo/showcase.bundle.json     # ✅ 10 canned companion lines (demo mode)
 │   └── fallbacks/companion-fallbacks.json  # ✅ band/timeout/safety lines, all 10 DPs
 ├── data/                      # SQLite runtime files (git-ignored)
@@ -251,8 +251,9 @@ registration silently no-ops.
 ✅ Implemented (DOM stage free-roam, not a tile grid) — see
 [world-movement.md](./docs/context/world-movement.md).
 - `worldRuntime` singleton — rAF loop, avatar movement with axis-separated AABB collision
-  vs NPC feet boxes + walk bounds, companion lag-follow, collectible pickup, proximity
-  interact (E/Space/Enter) with hints; feature-flagged `VITE_FEATURE_WORLD_MOVEMENT`.
+  vs NPC feet boxes (default 70×42, per-character `solidSize` override — ch2 Flicker uses
+  190×80 to seal the bridge) + walk bounds, companion lag-follow, collectible pickup,
+  proximity interact (E/Space/Enter) with hints; feature-flagged `VITE_FEATURE_WORLD_MOVEMENT`.
   Proximity targets are a union: trigger zones → **stage objects** → NPC fallback
   (`onObjectInteract` callback) — see
   [world-stage-objects.md](./docs/context/world-stage-objects.md).
@@ -273,8 +274,10 @@ registration silently no-ops.
 🟨 Partial — inline SVG cast in **8-bit pixel-art style** (ASCII pixel maps →
 `<rect>` grids with `shape-rendering="crispEdges"`), no separate sprite/manifest pipeline.
 - `renderFullBodyCharacter(opts)` — avatar (skin-tone aware), **Flicker** (red Guardian
-  Dragon), **Wize** owl mentor, fox/sprite companion archetypes, helper animals, worry
-  cloud, grown-up, NPCs; `ExpressionKey` mapping from scene `expression` strings.
+  Dragon; id/assetRef containing "flicker" resolves to the dragon, used for the ch2
+  bridge-blocker NPC), **Wize** owl mentor, fox/sprite companion archetypes, helper
+  animals, worry cloud, grown-up, NPCs; `ExpressionKey` mapping from scene `expression`
+  strings.
   Expressions rendered as pixel overlays (eyes/brows/mouth, worry sparks, happy sparkles).
 ⬜ Not in repo: Viewport layers, SceneRenderer, BubbleManager, ParticleSystem as separate
 modules (bubbles/HUD live in `GameView` + CSS).
@@ -342,7 +345,8 @@ Used by unit tests and the server companion route.
   lines. `buildJourneyReflection` appends the baseline to its summary + parent coaching.
 
 ### 3.10 Shared types (`src/types/index.ts`)
-✅ Implemented. GameState, Scene, DecisionPoint, companion request/response, ScenarioMeta,
+✅ Implemented. GameState, Scene (`SceneCharacter` has optional `solidSize` [w, h]
+collision-footprint override), DecisionPoint, companion request/response, ScenarioMeta,
 PlayMode, ProgressStore interface, AuthUser/ChildProfile, `CheckinRecord`/`CheckinPlacement`
 (+ optional `progress.checkins` map), **`StageObject`/`StageObjectInteraction`
 (discriminated union: openDialog | finish) + `DialogRecord`/`DialogPage` + optional
@@ -382,13 +386,17 @@ levels play on grid backgrounds (§3.3); hub shows only these two + parent coach
 Scenes may declare **stage objects** (`objects[]`: grid-cell interactables → dialog or
 finish line) and **dialogs** (`dlg_*.json`, registered in `DIALOGS`): ch1 has a welcome
 signpost (e1), a North Gate finish/advance (e2 — replaces its auto-advance timer), and a
-Celebration Arch finish/complete (e3, alternate to `dp_ask_grownup`); ch2 w1 has Wize's
-bridge-legend scroll. Authoring guide:
+Celebration Arch finish/complete (e3, alternate to `dp_ask_grownup`); ch2 has Wize's
+bridge-legend scroll (w1) and the ✅ Level Complete finish (w7). Authoring guide:
 [world-stage-objects.md](./docs/context/world-stage-objects.md).
-- **Ch.2 The Singing Bridge (golden path, grid `singing-bridge`):**
+- **Ch.2 The Singing Bridge (golden path, grid `singing-bridge`):** Wize the owl is the
+  follower companion; Flicker the dragon stands at the bridge with a widened `solidSize`
+  solid, physically blocking the only river crossing through w1–w6.
   w1 quest → w2 investigate → w3 fact/story → w4 breathe (5 taps) → w5 choose →
-  w6 crossing (4 taps) + Courage Feather finale. DPs: `dp_quest_start`,
-  `dp_investigate`, `dp_fact_sort`, `dp_breathe`, `dp_choose_path`, `dp_crossing`.
+  w6 crossing (4 taps) → w7 Flicker steps aside, player walks the bridge to the ✅
+  finish/complete checkmark → Courage Feather celebration. DPs: `dp_quest_start`,
+  `dp_investigate`, `dp_fact_sort`, `dp_breathe`, `dp_choose_path`, `dp_crossing`
+  (no longer a chapter-complete decision — `CHAPTER_COMPLETE_DECISION` is ch1-only).
 - **Ch.1 Everbright Meadow (grid `everbright-meadow`):** e1–e3, 2 DPs.
 - **Ch.3 Forest removed 2026-07-17** (files deleted, registry/scenario/hub entries
   dropped). Its 2 DPs remain only as library data in insights/coPlay/fallbacks.
@@ -412,7 +420,7 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   consequences, plus dialog files (`dlg_*`: id/chapterId/non-empty pages) and scene
   `objects[]` (unique ids, 0–99 cells, resolvable dialog/finish targets) — two-pass,
   still no Ajv schemas. **Passing** as of 2026-07-17.
-- `npm run test:unit` — **36/36 passing**. `npm run build` — **passing** (vite build;
+- `npm run test:unit` — **37/37 passing**. `npm run build` — **passing** (vite build;
   server tsc errors are swallowed by `|| true`).
 - **`npm run typecheck` — FAILING (9 errors), which makes CI red:**
   8 × TS2352 in `src/content/index.ts` (scene JSON `position: number[]` doesn't satisfy
@@ -443,16 +451,17 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   playwright config**.
 
 ### 3.15 Tests (`tests/`)
-🟨 Partial — **36 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
+🟨 Partial — **37 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
 bands/meters/repair, safety filters, Singing Bridge golden-path presence, ch3 absence,
 counselor insights + journey reflection, SVG cast rendering, world collision wall slide +
-bounds) + `tests/unit/grid.test.ts` (7 — grid cell vector, painting/world lookup,
+bounds) + `tests/unit/grid.test.ts` (8 — grid cell vector, painting/world lookup,
 center-point slide, level registry, `?grid=` resolution, scenario/scene→grid routing,
-bridge-only river crossing) + `tests/unit/checkin.test.ts` (6 — question rotation, typed
+bridge-only river crossing, Flicker-solid bridge block w6 vs clear w7) +
+`tests/unit/checkin.test.ts` (6 — question rotation, typed
 feeling-word scoring, distress flag, placement bands, labels/lines, reflection baseline)
 + `tests/unit/stageObjects.test.ts` (10 — cell→world parity, object placement/sprites,
-object/dialog content integrity incl. ch2 finale guard, advanceScene/completeChapter,
-auto-advance suppression).
+object/dialog content integrity incl. ch2 w7-checkmark completion,
+advanceScene/completeChapter, auto-advance suppression).
 ⬜ integration / e2e / red-team folders.
 
 ---
@@ -482,7 +491,7 @@ auto-advance suppression).
 | GoZen!-informed vision for Levels 2+ | Vandy | 🟨 script L1 done; research open |
 | Level 1 playtest criteria | Ranya | ⬜ |
 | PR/spec shepherding | Madhu | ongoing |
-| E2E golden path W1→W6 | (unassigned) | ⬜ |
+| E2E golden path W1→W7 | (unassigned) | ⬜ |
 | JSON Schema validate-content | (unassigned) | ⬜ |
 | `npm run lint` fix (drops phantom `api/` dir) | (unassigned) | ⬜ |
 | TileMap / WASD architecture | — | ✅ free-roam WASD + 100×100 grid levels; all scenes bind `gridMapId` |
@@ -509,3 +518,4 @@ auto-advance suppression).
 | 2026-07-18 | Fixed dialogs being blocked by characters + removed the bottom narration bar (`GameView.ts` + `global.css` only): characters (z up to ~64 from `10 + y/20`) were punching through the decision/dialog `.overlay` (was z 30) and standing on the counselor panel (was z 25). New stage z-layering: counselor panel 70, speaking character + bubble / interact hint 75, thinking pill 80, modal overlays 100. Companion speech bubble restyled (wider `360*--px` max, border, tail, 11px floor). Narration bar deleted — `scene.narration` no longer renders (stage-object dialogs carry story text; `SceneEngine` auto-advance untouched). Also de-overlapped top pills: stage tag drops below the demo pill, together-pill below the crystal counter; move hint moved to bottom-left. Verified in-browser (w1→w3 + scroll dialog); 36/36 tests, typecheck still 9 known errors. |
 | 2026-07-17 | Added **declarative stage objects** (groundwork for the anxiety level & infinite stage authoring): `Scene.objects[]` — grid-cell-placed interactables with a `StageObjectInteraction` union (`openDialog` → new multi-page `renderDialogOverlay` with speaker/portrait, fed by `dlg_*.json` + `DIALOGS` registry; `finish` → new public `SceneEngine.advanceScene`/`completeChapter`, with `advance`\|`complete` per object). WorldRuntime proximity now targets triggers → objects → NPC fallback (`onObjectInteract`); objects render as emoji sprites with click fallback; narration auto-advance is skipped when a finish/advance object exists. Demo content: ch1 signpost/North Gate/Celebration Arch, ch2 w1 Wize scroll (ch2 finale untouched). validate-content now checks dialogs + objects; tests 26→36. Verified in-browser (dialog paging/freeze, gate advance, arch celebration, no auto-advance). New context file `world-stage-objects.md`. |
 | 2026-07-18 | Removed Flicker's detached orange wing pixels (`O: #ff9e00`) from `dragonSvg` in `src/render/characters.ts` — the floating triangles read as a stray orange mouse cursor next to the companion in-game; body/belly widened one column to fill the gap. Art-only, no export changes. |
+| 2026-07-18 | **Fixed the Wize/Flicker role swap in Level 1 + walk-to-finish ending.** Ch2 scenes now cast **Wize the owl as the follower companion** (assetRef `char_wize` on the `companion` id; GameView labels/pill say "Wize" whenever the scene's companion assetRef is wize) and **Flicker the dragon as a stationary NPC blocking the Singing Bridge** (new `flicker` id → dragon sprite mapping in `characters.ts`; new optional `SceneCharacter.solidSize` [w,h] lets his solid span the whole 154px plank corridor, 190×80 at the south entrance in w1–w6). Chapter completion is no longer decision-driven: `dp_crossing` strong now advances to **new scene w7**, where Flicker stands aside and a ✅ "Level Complete" `finish/complete` stage object sits on the north bank — the player physically crosses the bridge and presses E to end the level (ch2 removed from `CHAPTER_COMPLETE_DECISION`; `GOLDEN_PATH`/`CHAPTER_FINALE` updated; new `finish_check` sprite). Script text unchanged. Tests 36→37 (bridge-block collision test; ch2 finale guard rewritten for w7); verified end-to-end in headless Chromium (blocked at bridge in w1, full W1→W7 play-through, checkmark → Courage Feather celebration). |

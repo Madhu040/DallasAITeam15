@@ -101,8 +101,12 @@ fields. `gridCellToWorld(col, row)` in `GridMap.ts` converts cell → world px
 | ch1 `e2` | `obj_meadow_gate` 🏁 "North Gate" | `finish/advance` → e3 (replaces e2's auto-advance timer) |
 | ch1 `e3` | `obj_meadow_arch` 🌈 "Celebration Arch" | `finish/complete` — alternate completion; `dp_ask_grownup` still works |
 | ch2 `w1` | `obj_bridge_notice` 📜 | `openDialog → dlg_bridge_legend` (Wize, 3 pages) |
+| ch2 `w7` | `obj_bridge_finish` ✅ "Level Complete" | `finish/complete` — north bank, past the bridge |
 
-Ch2 has **no finish objects** — its completion stays decision-driven (`dp_crossing`).
+Ch2 completes via the w7 checkmark: `dp_crossing` (strong) advances w6 → w7, Flicker
+stops blocking the bridge (his `solidSize` solid is only in w1–w6), and the player
+physically crosses to the finish object. `dp_crossing` is no longer in
+`CHAPTER_COMPLETE_DECISION`.
 
 ## Authoring guide
 

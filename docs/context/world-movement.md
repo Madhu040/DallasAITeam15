@@ -38,7 +38,9 @@ Pure AABB helpers in 1920×1080 scene space (`WORLD_W`/`WORLD_H`):
 - `attach(viewport, scene, exploring, callbacks)` — no-op detach if the feature flag is off.
   On scene change: seeds avatar/companion positions from scene `characters`
   (`seedFromScene`), rebuilds NPC solids (`rebuildSolids` — feet boxes for everything except
-  avatar/companion/worry_cloud; bridge scenes get a narrower river-bank walk band), clears
+  avatar/companion/worry_cloud, default 70×42 px or the character's `solidSize` [w, h]
+  override — e.g. ch2's Flicker uses 190×80 to seal the whole bridge walkway; bridge
+  scenes get a narrower river-bank walk band), clears
   collected set. Starts one `requestAnimationFrame` loop and re-syncs DOM on every re-render
   (GameView rebuilds the DOM, so positions/hints are re-applied).
 - `detach()` — cancels rAF, detaches input, removes hint elements. Called by `main.ts`

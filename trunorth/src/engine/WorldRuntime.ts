@@ -148,7 +148,12 @@ export class WorldRuntime {
       .filter((c) => !SOLID_SKIP.has(c.id))
       .map((c) => ({
         id: c.id,
-        box: characterFeetBox(c.position[0], c.position[1], 70, 42),
+        box: characterFeetBox(
+          c.position[0],
+          c.position[1],
+          c.solidSize?.[0] ?? 70,
+          c.solidSize?.[1] ?? 42,
+        ),
       }));
 
     // Soft river/ledge band for bridge scenes — keep feet on the walkable bank.
