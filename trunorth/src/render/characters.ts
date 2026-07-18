@@ -227,7 +227,7 @@ function avatarSvg(expr: string, size: number, skin: string): string {
 
 /** Flicker — little red Guardian Dragon with gold belly and sparks */
 function dragonSvg(expr: string, size: number): string {
-  const P: Record<string, string> = { R: FLICKER_RED, K: FLICKER_DARK, Y: FLICKER_BELLY, O: "#ff9e00" };
+  const P: Record<string, string> = { R: FLICKER_RED, K: FLICKER_DARK, Y: FLICKER_BELLY };
   const rows = [
     ...pad(8),
     "...KK..........KK...",
@@ -242,12 +242,12 @@ function dragonSvg(expr: string, size: number): string {
     "....RRRYYYYYYRRR....",
     ".....RRRRRRRRRR.....",
     "......RRRRRRRR......",
-    "O....RRRRRRRRRR....O",
-    "OO...RRYYYYYYRR...OO",
-    "OOO..RRYYYYYYRR..OOO",
-    "OOO..RRYYYYYYRR..OOO",
-    "OO...RRYYYYYYRR...OO",
-    "O....RRYYYYYYRR....O",
+    ".....RRRRRRRRRR.....",
+    ".....RRYYYYYYRR.....",
+    ".....RRYYYYYYRR.....",
+    ".....RRYYYYYYRR.....",
+    ".....RRYYYYYYRR.....",
+    ".....RRYYYYYYRR.....",
     ".....RRYYYYYYRR.....",
     ".....RRRYYYYRRR.....",
     ".....RRRRRRRRRR.....",
