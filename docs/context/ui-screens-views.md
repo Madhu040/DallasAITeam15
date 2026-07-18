@@ -50,6 +50,13 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
   ch2 Singing Bridge, ch1 Everbright Meadow); thumbnails are grid canvases
   (`createGridThumbnail`) when the start scene binds a `gridMapId`, PNG zone thumbs
   otherwise; parent-audience card wired to the PIN-gated coach corner.
+- `renderCheckin(container, scenario, companionName, onDone, onBack)` — pre-level
+  check-in between hub and `startScenario`. Renders 3 questions from
+  `questionsForChapter(scenario.id)` (`src/counselor/checkin.ts`), one card at a time:
+  tappable options (0–2 pts) or an "in your own words" input (sanitized +
+  `filterInput`-checked, keyword-scored; distress → supportive line + flag). Ends on a
+  compass result screen (bright/steady/gentle label, 10-dot 0–10 starting-point scale,
+  companion line) → `onDone(CheckinRecord)`; "Skip and start playing" → `onDone(null)`.
 - `isAuthenticated()` / `logout()` — thin wrappers over `auth.ts` (currently unused by callers).
 - Local `type Screen = landing|login|register|dashboard` — **"dashboard" is not an `AppScreen`
   in `main.ts`, which is one of the open typecheck errors.**
