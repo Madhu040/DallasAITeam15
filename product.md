@@ -167,6 +167,8 @@ trunorth/
 │   └── manifest.json          # PWA manifest (note: main.ts registers /sw.js, which doesn't exist)
 ├── scripts/
 │   └── validate-content.ts    # 🟨 structural checks (no Ajv schemas yet)
+├── api/
+│   └── [[...route]].ts        # ✅ Vercel Node Function — forwards /api/* to the Hono `app`
 ├── server/                    # ✅ Hono API (dev: tsx watch) 🔧 Jose (deploy)
 │   ├── auth/jwt.ts            # HS256 sign/verify (jose)
 │   ├── config.ts              # ✅ .env loader + serverConfig
@@ -191,15 +193,17 @@ trunorth/
 ├── tests/unit/                # ✅ 26 tests — engine (13) + grid (7) + checkin (6)
 ├── Dockerfile · docker-compose.yml
 ├── index.html · vite.config.ts · vitest.config.ts
+├── tsconfig.json · tsconfig.server.json · tsconfig.api.json  # api.json = typecheck-only, covers api/
 ├── package.json · .nvmrc · .env.example · .gitignore
 └── .github/workflows/ci.yml   # typecheck, validate:content, test:unit, build
 ```
 
 > Update this tree whenever directories or top-level files change.
 
-**Intentionally absent (do not list as implemented):** `api/` (Vercel), `assets-src/`,
+**Intentionally absent (do not list as implemented):** `assets-src/`,
 `TileMap` grid parser, `TruNorthProject/`, `tests/e2e`, red-team trees, JSON Schema pack
-under `content/schema/`, `public/sw.js`.
+under `content/schema/`, `public/sw.js`. (`api/` now exists — see above — as of the Vercel
+adapter added 2026-07-17.)
 
 ---
 
@@ -330,6 +334,16 @@ PlayMode, ProgressStore interface, AuthUser/ChildProfile, `CheckinRecord`/`Check
 [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md).
 
 > 🔧 **Jose** — production hosting for this Hono server + static client.
+- `api/[[...route]].ts` — Vercel Node.js Function (`export const runtime = "nodejs"`,
+  required so `better-sqlite3` works) using `hono/vercel`'s `handle(app)` to forward every
+  `/api/*` path to the unchanged Hono `app`; catch-all filename so one function serves all
+  routes. **Requires `DATABASE_PATH=/tmp/trunorth.db`** (or similar) as a Vercel env var —
+  the project filesystem is read-only outside `/tmp`, so the default `./data/trunorth.db`
+  would crash every cold start (`db/migrate.ts` opens the file at module load). This makes
+  parent-auth/children/progress non-persistent across cold starts on Vercel, which is
+  currently fine because the client doesn't call those endpoints yet (§3.8); wiring real
+  persistence needs a serverless-compatible DB swap (Vercel Postgres/Neon or Turso
+  libSQL), a separate task from this adapter.
 - `index.ts` — `GET /api/health`; **parent auth** `register`/`login`/`me` (bcrypt + JWT);
   **child profiles** `GET/POST /api/children`; **remote progress** `GET/PUT
   /api/progress/:childId` (parent-owned, upsert; no client caller yet); audit-log writes;
@@ -375,7 +389,16 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   8 × TS2352 in `src/content/index.ts` (scene JSON `position: number[]` doesn't satisfy
   `[number, number]` for the `as Scene` casts; was 10 before ch3 removal) and 1 × TS2345
   in `src/main.ts` (`screens.ts` `Screen` includes `"dashboard"`, not in `AppScreen`).
-- `npm run lint` — broken: targets a nonexistent `api/` directory.
+  Script is now `tsc --noEmit && tsc -p tsconfig.api.json` — the second pass covers both
+  `server/` and the new `api/` (see below) via **`tsconfig.api.json`** (`noEmit: true`,
+  extends `tsconfig.server.json`); a separate config was needed because adding `api/` to
+  `tsconfig.server.json` itself trips `TS6059` (`api/[[...route]].ts` sits outside its
+  `rootDir: "server"`) whenever something actually emits — `noEmit: true` sidesteps that,
+  and `tsconfig.server.json` (used by the Docker build's `--noEmit false` pass) is
+  untouched.
+- `npm run lint` — broken: no `eslint.config.js` (flat config) for ESLint v9; the
+  `api/` directory it targets now exists (2026-07-17) but the missing config file is the
+  actual blocker.
 - **Known quirk (left as-is on purpose):** the server pass of `npm run build`
   (`tsc -p tsconfig.server.json --noEmit false`) emits stray `.js` files **into `src/`**
   for client files the server imports (`src/types/index.js`, `src/safety/filters.js`,
@@ -421,7 +444,7 @@ feeling-word scoring, distress flag, placement bands, labels/lines, reflection b
 |---|---|---|
 | Fix `npm run typecheck` (11 errors) → CI green | Daniel | ⬜ **CI currently red** |
 | Level 1 / zone production art + Supabase | Ermoni + Gabby | ⬜ |
-| Hosted deploy (client + Hono API) | Jose | ⬜ |
+| Hosted deploy (client + Hono API) | Jose | 🟨 Vercel Node Function adapter (`api/[[...route]].ts`) added 2026-07-17; actual Vercel project/env vars/deploy still pending |
 | Wire client to server remote-progress endpoints | (unassigned) | ⬜ server side done |
 | GoZen!-informed vision for Levels 2+ | Vandy | 🟨 script L1 done; research open |
 | Level 1 playtest criteria | Ranya | ⬜ |
@@ -446,4 +469,5 @@ feeling-word scoring, distress flag, placement bands, labels/lines, reflection b
 | 2026-07-17 | Added parameterized 100×100 grid levels: `GridMap` (cell vector: coordinate/color/walkable, painting API), `gridLevels.ts` (2 demo levels, `?grid=<id>` testing), canvas `gridBackground.ts`, center-point grid collision in `WorldRuntime`, optional `Scene.gridMapId`; tests 13→19; context file `world-grid-levels.md`. |
 | 2026-07-17 | Made grid levels the only levels: all ch1/ch2 scenes bind `gridMapId` (everbright-meadow / singing-bridge), hub cards render grid canvas thumbnails, ch1 scenario retitled "Everbright Meadow"; **removed ch3 Forest** (content files + registry + hub card + default unlock); tests 19→20; typecheck errors 11→9. |
 | 2026-07-17 | Added **pre-level check-in**: hub → `checkin` screen before every level (3 open-ended questions from a 6-question bank, tap or own-words answers, safety-filtered) → 0–10 starting point + bright/steady/gentle placement stored in `progress.checkins`, shown on a compass scale, and surfaced in the parent journey reflection. New `src/counselor/checkin.ts`, `renderCheckin`; tests 20→26. **Deleted committed stale compiled JS (`src/counselor/insights.js`, `src/safety/filters.js`, `src/types/index.js`)** — they silently shadowed the `.ts` sources in vitest and vite builds. Root cause: the server build pass emits into `src/` (documented as a known quirk in §3.14; left as-is until the proper hosted API/backend build replaces it). |
+| 2026-07-17 | Added Vercel deploy scaffolding: `api/[[...route]].ts` (Node Function wrapping the existing Hono `app` via `hono/vercel`'s `handle()`, catch-all so one function serves every `/api/*` route) + `tsconfig.api.json` (typecheck-only config covering `server/`+`api/` without disturbing the Docker build's `tsconfig.server.json`); `npm run typecheck`'s second pass now uses it. Code-side only — the actual Vercel project (root dir, env vars incl. `DATABASE_PATH=/tmp/...`, deploy) is still a manual step for whoever holds the Vercel account. |
 | 2026-07-17 | Recreated the full character cast (`src/render/characters.ts`) + `public/favicon.svg` in 8-bit pixel-art style: ASCII pixel maps rendered as crisp SVG `<rect>` grids, pixel expression overlays (brows/mouth/sparks/sparkles). Same exports, sizes, and aspect ratios — no caller changes. |
