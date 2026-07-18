@@ -39,6 +39,12 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
     `clamp(min, calc(n * var(--px)), n px)` so it shrinks with the stage but never below
     a legibility floor. Positions were already %-based (world coords / 1920 or 1080).
   - Counselor side panel (`buildCounselorPanel`) during exploring/decision/consequence.
+    **Draggable + closable (2026-07-18):** the header row (badge + ✕ button,
+    `.counselor-panel-header`) is a pointer-capture drag handle — dragging sets inline
+    `left/top` clamped to the window; the ✕ dismisses the panel. Both survive re-renders
+    via module-scope state (`counselorPanelPos`, `dismissedCounselorKey` keyed on the
+    insight's text via `counselorKey`), so a dismissed insight stays closed until a
+    *different* insight arrives, and the dragged position persists for the session.
   - Decision overlay (`renderDecisionOverlay`) during `decision`/`encounter`.
 - `renderDecisionOverlay` (private) — modal dialog. Together Mode is a two-step machine:
   step 1 "Talk together" shows `discussPrompt(dpId)` + ready button; step 2 shows the prompt,

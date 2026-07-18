@@ -220,6 +220,40 @@ body {
   overflow: auto;
 }
 
+/* Drag handle for the whole panel (body keeps overflow:auto scrolling). */
+.counselor-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.counselor-panel-header:active {
+  cursor: grabbing;
+}
+
+.counselor-close {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-dark);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.counselor-close:hover {
+  background: rgba(0, 0, 0, 0.18);
+}
+
 .counselor-badge {
   display: inline-block;
   background: var(--tru-purple);
@@ -228,7 +262,6 @@ body {
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 999px;
-  margin-bottom: 8px;
 }
 
 .counselor-panel h3 {

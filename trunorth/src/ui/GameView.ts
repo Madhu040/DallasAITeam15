@@ -268,7 +268,11 @@ export function renderGameView(
 
   root.appendChild(viewport);
 
-  if (counselor && (phase === "consequence" || phase === "decision" || phase === "exploring")) {
+  if (
+    counselor &&
+    (phase === "consequence" || phase === "decision" || phase === "exploring") &&
+    counselorKey(counselor) !== dismissedCounselorKey
+  ) {
     root.appendChild(buildCounselorPanel(counselor));
   }
 
@@ -306,18 +310,75 @@ function speakOverlayOnce(key: string, text: string): void {
   speakLine(text);
 }
 
+/* Counselor panel drag position + dismissal live at module scope because
+   renderGameView rebuilds the whole DOM on every phase/meter update. */
+let counselorPanelPos: { left: number; top: number } | null = null;
+let dismissedCounselorKey: string | null = null;
+
+function counselorKey(counselor: CounselorPanelData): string {
+  return `${counselor.title}|${counselor.child}|${counselor.parent}|${counselor.together ?? ""}`;
+}
+
 function buildCounselorPanel(counselor: CounselorPanelData): HTMLElement {
   const panel = document.createElement("aside");
   panel.className = "counselor-panel";
   panel.setAttribute("aria-label", "Counselor insight");
   panel.innerHTML = `
-    <div class="counselor-badge">SEL Coach Insight</div>
+    <div class="counselor-panel-header">
+      <div class="counselor-badge">SEL Coach Insight</div>
+      <button class="counselor-close" type="button" aria-label="Close insight">✕</button>
+    </div>
     <h3>${escapeText(counselor.title)}</h3>
     <p class="counselor-child"><strong>For you:</strong> ${escapeText(counselor.child)}</p>
     ${counselor.parent ? `<p class="counselor-parent"><strong>For grown-ups:</strong> ${escapeText(counselor.parent)}</p>` : ""}
     ${counselor.together ? `<p class="counselor-together"><strong>Try together:</strong> ${escapeText(counselor.together)}</p>` : ""}
     <p class="counselor-note">Supportive guidance — not a clinical diagnosis.</p>
   `;
+
+  const applyPos = (left: number, top: number) => {
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
+    panel.style.right = "auto";
+    panel.style.bottom = "auto";
+  };
+  if (counselorPanelPos) {
+    // Clamp so a saved position never strands the panel fully off-screen.
+    applyPos(
+      Math.max(0, Math.min(counselorPanelPos.left, window.innerWidth - 80)),
+      Math.max(0, Math.min(counselorPanelPos.top, window.innerHeight - 60)),
+    );
+  }
+
+  const closeBtn = panel.querySelector(".counselor-close") as HTMLButtonElement;
+  closeBtn.onclick = () => {
+    dismissedCounselorKey = counselorKey(counselor);
+    panel.remove();
+  };
+
+  const header = panel.querySelector(".counselor-panel-header") as HTMLElement;
+  header.addEventListener("pointerdown", (e: PointerEvent) => {
+    if ((e.target as HTMLElement).closest(".counselor-close")) return;
+    e.preventDefault();
+    const rect = panel.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+    header.setPointerCapture(e.pointerId);
+    const onMove = (ev: PointerEvent) => {
+      const left = Math.max(0, Math.min(ev.clientX - offsetX, window.innerWidth - rect.width));
+      const top = Math.max(0, Math.min(ev.clientY - offsetY, window.innerHeight - rect.height));
+      counselorPanelPos = { left, top };
+      applyPos(left, top);
+    };
+    const onUp = () => {
+      header.removeEventListener("pointermove", onMove);
+      header.removeEventListener("pointerup", onUp);
+      header.removeEventListener("pointercancel", onUp);
+    };
+    header.addEventListener("pointermove", onMove);
+    header.addEventListener("pointerup", onUp);
+    header.addEventListener("pointercancel", onUp);
+  });
+
   return panel;
 }
 
