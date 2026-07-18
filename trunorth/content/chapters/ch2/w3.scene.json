@@ -3,16 +3,62 @@
   "chapterId": "ch2",
   "order": 3,
   "movementTier": "B",
-  "background": "bg_bridge",
-  "narration": "The ropes look strong. A duck waddles across while birds hop and sing. Wize smiles: \"Let's think together.\" Which thought is a story — not a fact?",
+  "background": "bg_meadow",
+  "narration": "Meadow of Curiosity. Giant worry-flowers fill the field \u2014 some tiny, some huge. Pulling them only makes more grow. The Meadow Keeper laughs: \"You can't get rid of worries by fighting them. Investigate instead.\"",
   "characters": [
-    { "assetRef": "char_companion_dragon", "id": "companion", "position": [560, 780], "expression": "worried" },
-    { "assetRef": "char_avatar", "id": "avatar", "position": [400, 800], "expression": "neutral" },
-    { "assetRef": "char_wize", "id": "wize", "position": [900, 700], "expression": "calm" }
+    {
+      "assetRef": "char_companion_dragon",
+      "id": "companion",
+      "position": [
+        560,
+        780
+      ],
+      "expression": "worried"
+    },
+    {
+      "assetRef": "char_avatar",
+      "id": "avatar",
+      "position": [
+        400,
+        800
+      ],
+      "expression": "neutral"
+    },
+    {
+      "assetRef": "char_wize",
+      "id": "wize",
+      "position": [
+        920,
+        700
+      ],
+      "expression": "happy"
+    }
   ],
   "triggers": [
-    { "id": "fact_sort_trigger", "bounds": [360, 620, 640, 240], "action": "startDecision", "target": "dp_fact_sort" }
+    {
+      "id": "meadow_inspect",
+      "bounds": [
+        360,
+        620,
+        640,
+        240
+      ],
+      "action": "startDecision",
+      "target": "dp_fact_sort"
+    }
   ],
-  "collectibles": [],
-  "decisionPoints": ["dp_fact_sort"]
+  "collectibles": [
+    {
+      "id": "spark_meadow",
+      "assetRef": "collectible_spark",
+      "position": [
+        1100,
+        800
+      ],
+      "kind": "kindness_spark"
+    }
+  ],
+  "decisionPoints": [
+    "dp_fact_sort"
+  ]
 }

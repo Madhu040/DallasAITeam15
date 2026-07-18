@@ -7,10 +7,10 @@ import { insightForStep, buildJourneyReflection } from "../../src/counselor/insi
 import { renderFullBodyCharacter } from "../../src/render/characters.js";
 
 describe("DecisionResolver", () => {
-  it("resolves strong choice for story on fact sort", () => {
+  it("resolves strong choice when inspecting a worry-flower", () => {
     const resolver = new DecisionResolver();
     const dp = getDecisionPoint("dp_fact_sort")!;
-    expect(resolver.resolveChoice(dp, "opt_will_break")).toBe("strong");
+    expect(resolver.resolveChoice(dp, "opt_tiny")).toBe("strong");
   });
 
   it("applies meter deltas on strong band for investigate", () => {
@@ -22,11 +22,11 @@ describe("DecisionResolver", () => {
     expect(state.meters.worry_brave.fill).toBeGreaterThan(0);
   });
 
-  it("keeps agency on go-back with repair", () => {
+  it("offers repair when rejecting Flicker's purpose", () => {
     const resolver = new DecisionResolver();
     const dp = getDecisionPoint("dp_choose_path")!;
     const state = createInitialGameState();
-    const { nextSceneId, repairAction } = resolver.applyConsequence(state, dp, "partial");
+    const { nextSceneId, repairAction } = resolver.applyConsequence(state, dp, "poor");
     expect(nextSceneId).toBe("w5");
     expect(repairAction).toBe("offer-hand");
   });
@@ -52,7 +52,7 @@ describe("Safety filters", () => {
 });
 
 describe("Golden path", () => {
-  it("has all Singing Bridge showcase scenes", () => {
+  it("has all Little Dragon showcase scenes", () => {
     for (const id of GOLDEN_PATH) {
       expect(SCENES[id]).toBeDefined();
     }
@@ -66,7 +66,7 @@ describe("Golden path", () => {
 });
 
 describe("Counselor insights", () => {
-  it("returns child and parent coaching for a Singing Bridge step", () => {
+  it("returns child and parent coaching for a Little Dragon step", () => {
     const insight = insightForStep("dp_fact_sort", "strong");
     expect(insight.forChild.length).toBeGreaterThan(20);
     expect(insight.forParent.length).toBeGreaterThan(20);

@@ -255,7 +255,8 @@ export class WorldRuntime {
     el.style.top = `${(pos.y / WORLD_H) * 100}%`;
     el.classList.toggle("is-moving", isAvatar && !this.frozen);
     el.dataset.facing = this.facing;
-    el.style.zIndex = String(10 + Math.floor(pos.y / 20));
+    // Keep depth sorting in the scene band (1–12) so choice overlays stay on top.
+    el.style.zIndex = String(1 + Math.min(11, Math.floor(pos.y / 100)));
   }
 
   private sortDepth(): void {

@@ -3,19 +3,71 @@
   "chapterId": "ch2",
   "order": 2,
   "movementTier": "B",
-  "background": "bg_bridge",
-  "narration": "CREEEAK! The bridge sways. Flicker panics — \"What if it breaks?!\" Wize thanks Flicker for noticing: Guardian Dragons are supposed to warn. Now let's look carefully together.",
+  "background": "bg_forest",
+  "narration": "Forest of Questions. Flicker blocks the path: \"What if we get lost?\" The Wise Owl whispers: protectors feel less scared when we ask curious questions. Dark clouds swirl around Flicker.",
   "characters": [
-    { "assetRef": "char_companion_dragon", "id": "companion", "position": [640, 760], "expression": "worried" },
-    { "assetRef": "char_avatar", "id": "avatar", "position": [480, 800], "expression": "worried" },
-    { "assetRef": "char_wize", "id": "wize", "position": [960, 700], "expression": "calm" },
-    { "assetRef": "fx_worry_cloud", "id": "worry_cloud", "position": [640, 500], "expression": "big" }
+    {
+      "assetRef": "char_companion_dragon",
+      "id": "companion",
+      "position": [
+        640,
+        760
+      ],
+      "expression": "worried"
+    },
+    {
+      "assetRef": "char_avatar",
+      "id": "avatar",
+      "position": [
+        420,
+        800
+      ],
+      "expression": "worried"
+    },
+    {
+      "assetRef": "char_wize",
+      "id": "wize",
+      "position": [
+        980,
+        700
+      ],
+      "expression": "calm"
+    },
+    {
+      "assetRef": "fx_worry_cloud",
+      "id": "worry_cloud",
+      "position": [
+        640,
+        500
+      ],
+      "expression": "big"
+    }
   ],
   "triggers": [
-    { "id": "bridge_investigate", "bounds": [520, 620, 560, 240], "action": "startDecision", "target": "dp_investigate" }
+    {
+      "id": "forest_questions",
+      "bounds": [
+        400,
+        600,
+        560,
+        260
+      ],
+      "action": "startDecision",
+      "target": "dp_investigate"
+    }
   ],
   "collectibles": [
-    { "id": "spark_bridge", "assetRef": "collectible_spark", "position": [300, 820], "kind": "kindness_spark" }
+    {
+      "id": "spark_forest",
+      "assetRef": "collectible_spark",
+      "position": [
+        300,
+        820
+      ],
+      "kind": "kindness_spark"
+    }
   ],
-  "decisionPoints": ["dp_investigate"]
+  "decisionPoints": [
+    "dp_investigate"
+  ]
 }

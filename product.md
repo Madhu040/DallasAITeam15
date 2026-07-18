@@ -134,11 +134,11 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Product | TruNorth — choice-driven social-emotional learning (SEL) narrative for ages 5–15 |
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/specs/TruNorth Technical Specification.md` / Consolidated spec (intent) |
-| Level 1 script | `docs/scripts/Scene, script, players.docx` → **The Singing Bridge** (integrated) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Three child scenarios (ch1 meadow, **ch2 Singing Bridge golden path W1→W6**, ch3 forest) + parent coach entry; scene engine; companion safety filters + demo/live clients; counselor insights + together-mode; local/demo persistence; onboarding, parent gate, trust screen; Hono API + SQLite auth stubs; Docker; unit tests (11) + content validate. **Not built:** TileMap/WASD movement, Supabase assets, hosted deploy, e2e/red-team suites, JSON Schema CI, remote progress sync. Art is zone PNGs + inline SVG cast (placeholder style). |
+| Level 1 script | `docs/scripts/Updated-Script-6-8anxiety .docx` → **The Little Dragon Who Wouldn't Stop Guarding** |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Three child scenarios (ch1 meadow, **ch2 Little Dragon golden path W1→W6** (Forest→Festival), ch3 calm trees) + parent coach; scene engine; WASD movement; companion safety; counselor insights + together-mode; cross-device Play Together; mobile-responsive viewport; Hono API + SQLite. **Not built:** TileMap, Supabase assets, hosted deploy, e2e/red-team, full remote sync. |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, tsx |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 |
-| Last updated | 2026-07-13 (folder organize + config) |
+| Last updated | 2026-07-18 (Little Dragon anxiety script + mobile layout) |
 
 ---
 
@@ -166,7 +166,7 @@ DallasAITeam15/
 trunorth/
 ├── content/
 │   ├── chapters/ch1/          # ✅ Meadow — e1–e3 scenes + leftout/ask-grownup DPs
-│   ├── chapters/ch2/          # ✅ Singing Bridge — w1–w6 + 6 DPs (golden path)
+│   ├── chapters/ch2/          # ✅ Little Dragon — w1–w6 + 6 DPs (golden path)
 │   ├── chapters/ch3/          # ✅ Forest — c1–c2 + hothead/repair DPs
 │   ├── demo/showcase.bundle.json     # ✅ Canned companion lines (demo mode)
 │   └── fallbacks/companion-fallbacks.json  # ✅ Per-dp band/timeout/safety lines
@@ -180,6 +180,7 @@ trunorth/
 │   ├── auth/jwt.ts
 │   ├── db/migrate.ts          # SQLite schema migrate
 │   ├── routes/companion.ts    # POST /api/companion
+│   ├── routes/together.ts     # ✅ Play Together rooms (create/join/stream)
 │   ├── index.ts               # app routes
 │   └── main.ts                # listen entry
 ├── src/
@@ -188,6 +189,7 @@ trunorth/
 │   ├── companion/CompanionClient.ts   # ✅ Live + Demo clients
 │   ├── content/               # ✅ SCENES/DPs registry, scenarios, zones
 │   ├── counselor/             # ✅ insights + coPlay discuss prompts
+│   ├── together/inviteStore.ts # ✅ Cross-device invite client (API + offline fallback)
 │   ├── engine/                # ✅ SceneEngine, DecisionResolver
 │   ├── render/characters.ts   # ✅ Full-body SVG cast (Flicker, Wize, …)
 │   ├── safety/filters.ts      # ✅ input/output filters
@@ -362,3 +364,5 @@ Singing Bridge golden path presence, insights, SVG cast.
 | 2026-07-13 | Updated team board: Daniel L1 done; Ermoni/Gabby/Jose/Vandy/Ranya tasks retargeted. |
 | 2026-07-13 | Organized repo into `docs/{specs,scripts,kickoff,context}`; added configurable `server/config.ts`, `src/config/*`, expanded `.env.example`. |
 | 2026-07-14 | Added world movement: WASD/arrows, collision, proximity interact (E/Space), companion follow, collectible pickup (`WorldRuntime`). |
+| 2026-07-15 | Cross-device **Play Together** invites: SQLite rooms + SSE/poll (`/api/together/rooms`), shareable `?invite=CODE`, name/color/character setup. |
+| 2026-07-18 | Rebased Level 1 on **Little Dragon Who Wouldn't Stop Guarding** (6–8 anxiety script); mobile-responsive game chrome. |

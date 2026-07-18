@@ -21,6 +21,21 @@ import {
   renderOnboarding,
   renderScenarioHub,
 } from "./ui/screens.js";
+import {
+  renderTogetherLobby,
+  renderTogetherPlayerSetup,
+  renderTogetherWaiting,
+  type PlayerSetupResult,
+} from "./ui/togetherScreens.js";
+import {
+  createRoom,
+  joinRoom,
+  loadRoom,
+  parseInviteFromUrl,
+  type TogetherPlayer,
+  type TogetherRole,
+  type TogetherRoom,
+} from "./together/inviteStore.js";
 import { getToken } from "./ui/auth.js";
 import { buildJourneyReflection } from "./counselor/insights.js";
 import { SCENARIOS } from "./content/scenarios.js";
@@ -35,7 +50,10 @@ type AppScreen =
   | "celebration"
   | "reflection"
   | "login"
-  | "register";
+  | "register"
+  | "togetherLobby"
+  | "togetherSetup"
+  | "togetherWaiting";
 
 const demoMode = isDemoMode();
 const API_URL = appConfig.apiUrl;
@@ -51,14 +69,87 @@ let activeScenarioTitle = "Adventure complete";
 let parentGateNext: AppScreen = "reflection";
 let coPlayStep: CoPlayStep = "discuss";
 
+/** Play Together invite session (same-origin tabs via localStorage). */
+let togetherRoom: TogetherRoom | null = null;
+let togetherPlayers: TogetherPlayer[] = [];
+let togetherSetupRole: TogetherRole = "parent";
+let togetherSetupMode: "host" | "join" = "host";
+let togetherJoinCode: string | null = null;
+let stopTogetherWatch: (() => void) | null = null;
+
 const app = document.getElementById("app")!;
 
 function navigate(screen: AppScreen): void {
   if (screen !== "game") {
     worldRuntime.detach();
   }
+  if (screen !== "togetherWaiting") {
+    stopTogetherWatch?.();
+    stopTogetherWatch = null;
+  }
   currentScreen = screen;
   render();
+}
+
+function applyTogetherToProfile(players: TogetherPlayer[]): void {
+  togetherPlayers = players;
+  const child = players.find((p) => p.role === "child") ?? players[0];
+  const parent = players.find((p) => p.role === "parent");
+  if (child) {
+    gameState.profile.childDisplayName = child.displayName;
+    const hair = gameState.profile.avatar?.hair ?? "hair_curly";
+    gameState.profile.avatar = {
+      skinTone: child.skinTone,
+      hair,
+    };
+    if (child.characterId.startsWith("companion_")) {
+      gameState.profile.companionArchetype = child.characterId;
+      gameState.profile.companionName = child.displayName;
+    }
+  }
+  void parent;
+}
+
+async function finishHostSetup(result: PlayerSetupResult): Promise<void> {
+  try {
+    const created = await createRoom(result);
+    if (!created.ok) {
+      throw new Error(created.error);
+    }
+    if (!created.room?.code) {
+      throw new Error("Invite was created but no code came back. Try again.");
+    }
+    togetherRoom = created.room;
+    applyTogetherToProfile(created.room.players);
+    navigate("togetherWaiting");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Could not create invite.";
+    console.error("finishHostSetup", err);
+    alert(message);
+    throw err instanceof Error ? err : new Error(message);
+  }
+}
+
+async function finishJoinSetup(result: PlayerSetupResult): Promise<void> {
+  try {
+    const code = togetherJoinCode;
+    if (!code) {
+      navigate("togetherLobby");
+      return;
+    }
+    const joined = await joinRoom(code, result);
+    if (!joined.ok) {
+      throw new Error(joined.error);
+    }
+    togetherRoom = joined.room;
+    applyTogetherToProfile(joined.room.players);
+    navigate("togetherWaiting");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Could not join invite.";
+    console.error("finishJoinSetup", err);
+    alert(message);
+    throw err instanceof Error ? err : new Error(message);
+  }
 }
 
 function beginEncounter(target: string): void {
@@ -183,10 +274,20 @@ function renderGame(): void {
       renderGame();
     },
     (viewport, sceneEl, exploring) => bindWorld(viewport, sceneEl, exploring),
+    togetherPlayers,
   );
 }
 
 function goToHub(): void {
+  navigate("hub");
+}
+
+function enterTogetherReady(room: TogetherRoom): void {
+  togetherRoom = room;
+  applyTogetherToProfile(room.players);
+  gameState.flags.playMode = "together";
+  gameState.flags.onboardingComplete = true;
+  void new LocalProgressStore().save(gameState);
   navigate("hub");
 }
 
@@ -207,15 +308,78 @@ function render(): void {
         },
         () => {
           gameState.flags.playMode = "together";
-          if (!localStorage.getItem("trunorth_trust_seen")) {
-            navigate("trust");
-          } else if (!gameState.flags.onboardingComplete) {
-            navigate("onboarding");
+          if (appConfig.features.togetherMode) {
+            navigate("togetherLobby");
           } else {
             navigate("hub");
           }
         },
-        (s) => navigate(s),
+        (s) => {
+          if (s === "login" || s === "register") navigate(s);
+        },
+      );
+      break;
+
+    case "togetherLobby":
+      renderTogetherLobby(
+        app,
+        (role) => {
+          togetherSetupRole = role;
+          togetherSetupMode = "host";
+          togetherJoinCode = null;
+          navigate("togetherSetup");
+        },
+        (code) => {
+          void (async () => {
+            const room = await loadRoom(code);
+            if (!room) {
+              alert("Invite not found or expired. Ask for a fresh code, and make sure the API is running.");
+              return;
+            }
+            const taken = new Set(room.players.map((p) => p.role));
+            const openRole: TogetherRole | null =
+              !taken.has("parent") ? "parent" : !taken.has("child") ? "child" : null;
+            if (!openRole) {
+              alert("This invite is already full.");
+              return;
+            }
+            togetherJoinCode = code;
+            togetherSetupRole = openRole;
+            togetherSetupMode = "join";
+            navigate("togetherSetup");
+          })();
+        },
+        () => navigate("landing"),
+      );
+      break;
+
+    case "togetherSetup":
+      renderTogetherPlayerSetup(
+        app,
+        togetherSetupRole,
+        togetherSetupMode,
+        (result) => {
+          if (togetherSetupMode === "host") return finishHostSetup(result);
+          return finishJoinSetup(result);
+        },
+        () => navigate("togetherLobby"),
+      );
+      break;
+
+    case "togetherWaiting":
+      if (!togetherRoom) {
+        navigate("togetherLobby");
+        break;
+      }
+      stopTogetherWatch = renderTogetherWaiting(
+        app,
+        togetherRoom,
+        (room) => enterTogetherReady(room),
+        () => {
+          togetherRoom = null;
+          togetherPlayers = [];
+          navigate("togetherLobby");
+        },
       );
       break;
 
@@ -304,6 +468,13 @@ void (async () => {
       gameState.flags.playMode = "solo";
     }
   }
+
+  const invite = parseInviteFromUrl();
+  if (invite && appConfig.features.togetherMode) {
+    gameState.flags.playMode = "together";
+    currentScreen = "togetherLobby";
+  }
+
   render();
 })();
 
@@ -311,5 +482,4 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
   navigator.serviceWorker.register("/sw.js").catch(() => {});
 }
 
-// Keep SCENARIOS referenced for tree-shaking clarity in hub
 void SCENARIOS;

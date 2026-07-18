@@ -59,7 +59,7 @@ export function getDecisionPoint(id: string): DecisionPoint | undefined {
   return DECISION_POINTS[id];
 }
 
-/** Level 1 — The Singing Bridge (conference demo path) */
+/** Level 1 — The Little Dragon Who Wouldn't Stop Guarding (ages 6–8) */
 export const GOLDEN_PATH = ["w1", "w2", "w3", "w4", "w5", "w6"];
 
 export const CHAPTER_FINALE: Record<string, string> = {
