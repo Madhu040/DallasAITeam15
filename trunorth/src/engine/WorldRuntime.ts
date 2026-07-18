@@ -6,6 +6,8 @@
 import type { Scene, SceneCharacter } from "../types/index.js";
 import { appConfig } from "../config/app.js";
 import { InputController, type Facing } from "../input/InputController.js";
+import { moveWithGridCollision } from "./GridMap.js";
+import { resolveGridLevel, type GridLevel } from "../content/gridLevels.js";
 import {
   WORLD_H,
   WORLD_W,
@@ -31,6 +33,13 @@ interface SolidBody {
 
 const SOLID_SKIP = new Set(["avatar", "companion", "worry_cloud"]);
 
+/**
+ * Character sprites anchor at the feet (translate(-50%, -100%), ~110px tall), so
+ * the visual center sits this far above the position point. Grid collision tests
+ * the avatar's center, per the level design convention.
+ */
+const AVATAR_CENTER_OFFSET_Y = 55;
+
 export class WorldRuntime {
   private input = new InputController();
   private raf = 0;
@@ -49,6 +58,7 @@ export class WorldRuntime {
   private nearTarget: string | null = null;
   private solids: SolidBody[] = [];
   private walkBounds = defaultWalkBounds();
+  private grid: GridLevel | null = null;
 
   attach(
     viewport: HTMLElement,
@@ -70,8 +80,14 @@ export class WorldRuntime {
     if (sceneChanged || !this.attached) {
       this.sceneId = scene.id;
       this.collected.clear();
+      this.grid = resolveGridLevel(scene);
       this.seedFromScene(scene);
       this.rebuildSolids(scene);
+      if (this.grid) {
+        const spawn = this.grid.map.cellCenterWorld(...this.grid.spawnCell);
+        this.avatar = { x: spawn.x, y: spawn.y + AVATAR_CENTER_OFFSET_Y };
+        this.companion = { x: this.avatar.x - 100, y: this.avatar.y };
+      }
     }
 
     this.applyDomPositions();
@@ -171,6 +187,13 @@ export class WorldRuntime {
     const delta = { x: move.x * speed * dt, y: move.y * speed * dt };
     const footprint = { w: 56, h: 36 };
     const solidBoxes = this.solids.map((s) => s.box);
+
+    if (this.grid) {
+      const center = { x: this.avatar.x, y: this.avatar.y - AVATAR_CENTER_OFFSET_Y };
+      const moved = moveWithGridCollision(center, delta, this.grid.map, solidBoxes);
+      this.avatar = { x: moved.x, y: moved.y + AVATAR_CENTER_OFFSET_Y };
+      return;
+    }
 
     this.avatar = moveWithCollision(
       this.avatar,

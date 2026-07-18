@@ -14,7 +14,7 @@
     "preview": "vite preview",
     "demo": "vite build && vite preview --port 4173",
     "lint": "eslint src server api --max-warnings 0",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.api.json",
     "validate:content": "tsx scripts/validate-content.ts",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",

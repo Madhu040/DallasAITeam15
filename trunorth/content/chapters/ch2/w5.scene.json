@@ -4,6 +4,7 @@
   "order": 5,
   "movementTier": "B",
   "background": "bg_bridge",
+  "gridMapId": "singing-bridge",
   "narration": "Flicker still feels nervous. Wize softly says: \"Feeling nervous isn't a stop sign — it's your dragon asking you to pay attention. We've looked carefully. We've helped your body. Now… we choose.\"",
   "characters": [
     { "assetRef": "char_companion_dragon", "id": "companion", "position": [600, 760], "expression": "worried" },

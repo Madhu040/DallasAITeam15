@@ -20,8 +20,10 @@ import {
   renderAuthForm,
   renderOnboarding,
   renderScenarioHub,
+  renderCheckin,
 } from "./ui/screens.js";
 import { getToken } from "./ui/auth.js";
+import { speakLine, stopSpeaking } from "./audio/speech.js";
 import { buildJourneyReflection } from "./counselor/insights.js";
 import { SCENARIOS } from "./content/scenarios.js";
 
@@ -30,6 +32,7 @@ type AppScreen =
   | "trust"
   | "onboarding"
   | "hub"
+  | "checkin"
   | "game"
   | "parentGate"
   | "celebration"
@@ -50,12 +53,15 @@ let currentPhase: ScenePhase = "loading";
 let activeScenarioTitle = "Adventure complete";
 let parentGateNext: AppScreen = "reflection";
 let coPlayStep: CoPlayStep = "discuss";
+let pendingScenario: ScenarioMeta | null = null;
+let pendingPlayMode: "solo" | "together" = "solo";
 
 const app = document.getElementById("app")!;
 
 function navigate(screen: AppScreen): void {
   if (screen !== "game") {
     worldRuntime.detach();
+    stopSpeaking();
   }
   currentScreen = screen;
   render();
@@ -135,6 +141,7 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
     },
     onCompanionLine: (line) => {
       companionLine = line;
+      speakLine(line);
       renderGame();
     },
     onCounselorInsight: (insight) => {
@@ -244,8 +251,16 @@ function render(): void {
         app,
         gameState.progress.chaptersCompleted,
         gameState.flags.playMode,
-        (scenario) => { void startScenario(scenario, "solo"); },
-        (scenario) => { void startScenario(scenario, "together"); },
+        (scenario) => {
+          pendingScenario = scenario;
+          pendingPlayMode = "solo";
+          navigate("checkin");
+        },
+        (scenario) => {
+          pendingScenario = scenario;
+          pendingPlayMode = "together";
+          navigate("checkin");
+        },
         () => {
           parentGateNext = "reflection";
           navigate("parentGate");
@@ -253,6 +268,33 @@ function render(): void {
         () => navigate("landing"),
       );
       break;
+
+    case "checkin": {
+      const scenario = pendingScenario;
+      if (!scenario) {
+        navigate("hub");
+        break;
+      }
+      renderCheckin(
+        app,
+        scenario,
+        gameState.profile.companionName,
+        (result) => {
+          if (result) {
+            gameState.progress.checkins = {
+              ...(gameState.progress.checkins ?? {}),
+              [scenario.id]: result,
+            };
+            if (result.safetyFlag !== "none") {
+              gameState.flags.lastSafetyFlag = result.safetyFlag;
+            }
+          }
+          void startScenario(scenario, pendingPlayMode);
+        },
+        goToHub,
+      );
+      break;
+    }
 
     case "game":
       renderGame();

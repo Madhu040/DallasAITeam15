@@ -9,10 +9,14 @@
 1. Landing (guest play, together, demo, parent auth)
 2. Trust screen → onboarding (companion archetype + name, avatar)
 3. Scenario hub (`SCENARIOS`)
-4. `startScenario` builds store + companion client, constructs `SceneEngine`,
+4. Pre-level check-in (`renderCheckin` + `src/counselor/checkin.ts`): 3 open-ended
+   questions (tap an option or type; typed answers safety-filtered + keyword-scored)
+   → 0–10 starting point + bright/steady/gentle placement stored in
+   `progress.checkins[chapterId]`; skippable
+5. `startScenario` builds store + companion client, constructs `SceneEngine`,
    `loadScene(startSceneId)`
-5. On chapter-complete decision with strong band → celebration → parent gate →
-   journey reflection
+6. On chapter-complete decision with strong band → celebration → parent gate →
+   journey reflection (mentions the check-in baseline when one was recorded)
 
 Demo mode: `?demo=1` or `VITE_DEMO_MODE=true` → `DemoProgressStore` +
 `DemoCompanionClient` (zero network).
