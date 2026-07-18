@@ -82,6 +82,8 @@ export interface SceneCharacter {
   id: string;
   position: [number, number];
   expression?: string;
+  /** Collision footprint [w, h] px override — e.g. an NPC wide enough to block the bridge. */
+  solidSize?: [number, number];
 }
 
 export interface SceneTrigger {

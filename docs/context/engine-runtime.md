@@ -60,5 +60,8 @@ contextual line (e.g. Singing Bridge “go back” keeps Wize’s agency invite)
 
 ## Level 1 path (golden)
 
-`GOLDEN_PATH`: w1 → w2 → w3 → w4 → w5 → w6  
-Finale decision: `dp_crossing` → Courage Feather celebration.
+`GOLDEN_PATH`: w1 → w2 → w3 → w4 → w5 → w6 → w7  
+No finale decision for ch2: `dp_crossing` (strong) advances to w7, where Flicker steps
+aside and the player physically walks the bridge to the ✅ finish/complete stage object
+→ Courage Feather celebration. (ch1 still completes via `dp_ask_grownup` —
+`CHAPTER_COMPLETE_DECISION`.)

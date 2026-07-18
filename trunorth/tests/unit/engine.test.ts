@@ -56,7 +56,7 @@ describe("Golden path", () => {
     for (const id of GOLDEN_PATH) {
       expect(SCENES[id]).toBeDefined();
     }
-    expect(GOLDEN_PATH).toEqual(["w1", "w2", "w3", "w4", "w5", "w6"]);
+    expect(GOLDEN_PATH).toEqual(["w1", "w2", "w3", "w4", "w5", "w6", "w7"]);
   });
 
   it("has meadow chapter scenes and no removed forest chapter", () => {

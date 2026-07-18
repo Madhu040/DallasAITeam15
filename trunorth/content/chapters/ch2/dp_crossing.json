@@ -18,7 +18,7 @@
   "consequences": [
     {
       "band": "strong",
-      "sceneId": "w6",
+      "sceneId": "w7",
       "fx": ["celebration", "courage_feather"],
       "meterDeltas": { "courage": 1.0, "worry_brave": 0.75, "self_worth": 0.35 }
     },

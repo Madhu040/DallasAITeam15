@@ -99,14 +99,28 @@ describe("stage object content integrity", () => {
     }
   });
 
-  it("keeps ch2 completion decision-driven (no finish/complete objects)", () => {
-    for (const scene of Object.values(SCENES)) {
-      if (scene.chapterId !== "ch2") continue;
-      const completes = sceneObjects(scene).filter(
-        (o) => o.interaction.kind === "finish" && o.interaction.mode === "complete",
+  it("completes ch2 by walking to the w7 checkmark after dp_crossing", () => {
+    // dp_crossing no longer ends the chapter — its strong band leads to w7…
+    const w6 = getScene("w6")!;
+    expect(w6.nextSceneId).toBe("w7");
+
+    // …where the only finish/complete object in ch2 waits across the bridge.
+    const completes = Object.values(SCENES)
+      .filter((s) => s.chapterId === "ch2")
+      .flatMap((s) =>
+        sceneObjects(s)
+          .filter((o) => o.interaction.kind === "finish" && o.interaction.mode === "complete")
+          .map((o) => ({ sceneId: s.id, obj: o })),
       );
-      expect(completes, `${scene.id} has no finish/complete object`).toEqual([]);
-    }
+    expect(completes).toHaveLength(1);
+    expect(completes[0].sceneId).toBe("w7");
+
+    // The checkmark sits on the north bank: crossing the river is required.
+    const level = getGridLevel("singing-bridge")!;
+    const [col, row] = completes[0].obj.cell;
+    expect(level.map.cellAt(col, row)?.walkable).toBe(true);
+    expect(row).toBeLessThan(38); // north of the river band (rows 38–59)
+    expect(level.spawnCell[1]).toBeGreaterThan(59); // spawn is south of it
   });
 });
 
