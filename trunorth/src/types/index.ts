@@ -115,6 +115,21 @@ export interface Scene {
   gridMapId?: string;
 }
 
+export type CheckinPlacement = "bright" | "steady" | "gentle";
+
+/** Result of the pre-level check-in (`src/counselor/checkin.ts`). Answer text is never stored. */
+export interface CheckinRecord {
+  chapterId: string;
+  at: string;
+  answers: { questionId: string; points: number }[];
+  totalPoints: number;
+  maxPoints: number;
+  /** 0–10 placement point shown on the compass scale. */
+  startingPoint: number;
+  placement: CheckinPlacement;
+  safetyFlag: SafetyFlag;
+}
+
 export interface GameEvent {
   id: string;
   timestamp: string;
@@ -142,6 +157,8 @@ export interface GameState {
     chaptersCompleted: string[];
     browniePoints: number;
     kindnessSparksFound: Record<string, string[]>;
+    /** Latest pre-level check-in per chapter id. */
+    checkins?: Record<string, CheckinRecord>;
   };
   meters: Record<SkillId, { fill: number; level: number }>;
   companion: { level: 1 | 2 | 3; appearanceRef: string };

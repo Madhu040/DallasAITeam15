@@ -51,7 +51,10 @@ Any change that adds, removes, or alters a file, export, endpoint, or behavior i
   `npm run typecheck` is currently failing (9 known errors — see `product.md` §3.14);
   don't add new type errors, and update the ledger if you fix them.
 - Known-broken tooling (see ledger §3.14): `npm run lint` (phantom `api/` dir),
-  `test:e2e` (no tests/e2e), `/sw.js` registration (file absent).
+  `test:e2e` (no tests/e2e), `/sw.js` registration (file absent). Also: `npm run build`
+  emits stray `src/**/*.js` that silently shadow the `.ts` sources in vitest/vite —
+  delete them if edits seem ignored, never commit them, and don't fix the build path
+  (it gets replaced when the proper hosted API/backend lands).
 
 ## Summary checklist for every task
 

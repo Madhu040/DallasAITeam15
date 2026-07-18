@@ -127,7 +127,7 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
 | Level 1 script | `docs/scripts/Scene, script, players.docx` → **The Singing Bridge** (integrated) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Singing Bridge golden path W1→W6**; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId`, hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 20 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (9 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Singing Bridge golden path W1→W6**; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId`, hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 26 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (9 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
 | Last updated | 2026-07-17 (full reality audit of the ledger) |
@@ -179,7 +179,7 @@ trunorth/
 │   ├── companion/CompanionClient.ts   # ✅ Live + Demo clients
 │   ├── config/                # ✅ app.ts, content.ts, gameState.ts (env-driven)
 │   ├── content/               # ✅ SCENES/DPs registry, scenarios, zones, gridLevels
-│   ├── counselor/             # ✅ insights + coPlay discuss prompts
+│   ├── counselor/             # ✅ insights + coPlay discuss prompts + pre-level checkin
 │   ├── engine/                # ✅ SceneEngine, DecisionResolver, WorldRuntime, Collision, GridMap
 │   ├── input/InputController.ts # ✅ WASD/arrows + interact keys
 │   ├── render/                # ✅ characters.ts (SVG cast), gridBackground.ts (grid canvas)
@@ -188,7 +188,7 @@ trunorth/
 │   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones
 │   ├── types/index.ts         # ✅ Shared contracts
 │   └── ui/                    # ✅ GameView, screens, auth helpers
-├── tests/unit/                # ✅ 19 tests — engine.test.ts (13) + grid.test.ts (6)
+├── tests/unit/                # ✅ 26 tests — engine (13) + grid (7) + checkin (6)
 ├── Dockerfile · docker-compose.yml
 ├── index.html · vite.config.ts · vitest.config.ts
 ├── package.json · .nvmrc · .env.example · .gitignore
@@ -220,8 +220,10 @@ under `content/schema/`, `public/sw.js`.
 ### 3.1 Application entry (`src/main.ts`)
 ✅ Implemented. Detects demo mode (`?demo` / `VITE_DEMO_MODE`), wires
 `LocalProgressStore` vs `DemoProgressStore` and Live vs Demo companion clients, navigates
-landing → trust → onboarding → hub → game, starts `SceneEngine`, celebration → parent
-gate → journey reflection. Attaches/detaches `worldRuntime` per screen; `beginEncounter`
+landing → trust → onboarding → hub → **check-in** → game, starts `SceneEngine`,
+celebration → parent gate → journey reflection. The `checkin` screen (between hub card
+select and `startScenario`) stores its `CheckinRecord` in `progress.checkins[chapterId]`
+and raises `flags.lastSafetyFlag` on a flagged typed answer. Attaches/detaches `worldRuntime` per screen; `beginEncounter`
 freezes movement on trigger interact; collect pickups award crystals + persist. Together
 Mode co-play step machine. Registers `/sw.js` in prod builds — **file doesn't exist**, so
 registration silently no-ops.
@@ -275,7 +277,9 @@ modules (bubbles/HUD live in `GameView` + CSS).
   (4-digit PIN, SHA-256 hash in localStorage, 3-fail lockout), `renderTrustScreen`.
 - `screens.ts` — `renderLanding`, `renderAuthForm` (parent login/register),
   `renderOnboarding` (archetype/name/avatar; default **Flicker**), `renderScenarioHub`
-  (child cards use grid canvas thumbnails when the start scene binds a grid; PNG fallback).
+  (child cards use grid canvas thumbnails when the start scene binds a grid; PNG fallback),
+  `renderCheckin` (pre-level check-in cards + compass result; skippable — see
+  [ui-screens-views.md](./docs/context/ui-screens-views.md)).
   Known issue: its local `Screen` type includes `"dashboard"`, which `main.ts` rejects
   (typecheck error).
 - `auth.ts` — session token helpers (`getToken`/`setSession`/`clearSession`),
@@ -307,10 +311,17 @@ Used by unit tests and the server companion route.
   `buildJourneyReflection(state)` (summary, strengths, growth edges, per-step insights,
   parent coaching), `childFacingLine`.
 - `coPlay.ts` — `discussPrompt(dpId)` Together-Mode conversation starters (all 10 DPs).
+- `checkin.ts` — pre-level check-in: `CHECKIN_QUESTIONS` bank (6 open-ended questions,
+  tappable 0–2-pt options + own-words path), `questionsForChapter` (3 per chapter,
+  deterministic rotation), `scoreTypedCheckinAnswer` (sanitize + `filterInput` + feeling-word
+  heuristic; distress → 0 pts + flag), `buildCheckinResult` (0–10 starting point,
+  bright/steady/gentle placement; answer text never stored), placement labels/companion
+  lines. `buildJourneyReflection` appends the baseline to its summary + parent coaching.
 
 ### 3.10 Shared types (`src/types/index.ts`)
 ✅ Implemented. GameState, Scene, DecisionPoint, companion request/response, ScenarioMeta,
-PlayMode, ProgressStore interface, AuthUser/ChildProfile, factories
+PlayMode, ProgressStore interface, AuthUser/ChildProfile, `CheckinRecord`/`CheckinPlacement`
+(+ optional `progress.checkins` map), factories
 `createDefaultMeters` (7 skills). Defaults: companion **Flicker**, chapter `ch2`, scene `w1`.
 
 ### 3.11 Server API (`server/`)
@@ -365,18 +376,28 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   `[number, number]` for the `as Scene` casts; was 10 before ch3 removal) and 1 × TS2345
   in `src/main.ts` (`screens.ts` `Screen` includes `"dashboard"`, not in `AppScreen`).
 - `npm run lint` — broken: targets a nonexistent `api/` directory.
+- **Known quirk (left as-is on purpose):** the server pass of `npm run build`
+  (`tsc -p tsconfig.server.json --noEmit false`) emits stray `.js` files **into `src/`**
+  for client files the server imports (`src/types/index.js`, `src/safety/filters.js`,
+  `src/counselor/{insights,checkin}.js`) because `rootDir: "server"` puts them outside
+  `dist-server`. These strays silently **shadow the `.ts` sources** in vitest and vite
+  (all imports use `.js` extensions) — if tests/dev ignore your edits after a build,
+  delete `src/**/*.js` strays. **Never commit them.** This whole build path is interim
+  and will be replaced when the proper hosted API/backend build lands (Jose's deploy
+  task) — don't invest in fixing it.
 - CI (`.github/workflows/ci.yml`): typecheck → validate:content → test:unit → build.
 - ⬜ `build-asset-manifest`, `red-team-suite`, `audit-bundle-size` — not in tree.
 - ⬜ Playwright e2e — `test:e2e` script + devDependency exist; **no `tests/e2e` folder or
   playwright config**.
 
 ### 3.15 Tests (`tests/`)
-🟨 Partial — **20 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
+🟨 Partial — **26 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
 bands/meters/repair, safety filters, Singing Bridge golden-path presence, ch3 absence,
 counselor insights + journey reflection, SVG cast rendering, world collision wall slide +
 bounds) + `tests/unit/grid.test.ts` (7 — grid cell vector, painting/world lookup,
 center-point slide, level registry, `?grid=` resolution, scenario/scene→grid routing,
-bridge-only river crossing).
+bridge-only river crossing) + `tests/unit/checkin.test.ts` (6 — question rotation, typed
+feeling-word scoring, distress flag, placement bands, labels/lines, reflection baseline).
 ⬜ integration / e2e / red-team folders.
 
 ---
@@ -424,4 +445,5 @@ bridge-only river crossing).
 | 2026-07-17 | Full reality audit: documented server auth/children/progress/reflect endpoints, world movement promoted to ✅, test count 11→13, recorded failing typecheck (CI red), broken lint script, missing `sw.js`; added context files `world-movement.md`, `ui-screens-views.md`, `server-api.md`. |
 | 2026-07-17 | Added parameterized 100×100 grid levels: `GridMap` (cell vector: coordinate/color/walkable, painting API), `gridLevels.ts` (2 demo levels, `?grid=<id>` testing), canvas `gridBackground.ts`, center-point grid collision in `WorldRuntime`, optional `Scene.gridMapId`; tests 13→19; context file `world-grid-levels.md`. |
 | 2026-07-17 | Made grid levels the only levels: all ch1/ch2 scenes bind `gridMapId` (everbright-meadow / singing-bridge), hub cards render grid canvas thumbnails, ch1 scenario retitled "Everbright Meadow"; **removed ch3 Forest** (content files + registry + hub card + default unlock); tests 19→20; typecheck errors 11→9. |
+| 2026-07-17 | Added **pre-level check-in**: hub → `checkin` screen before every level (3 open-ended questions from a 6-question bank, tap or own-words answers, safety-filtered) → 0–10 starting point + bright/steady/gentle placement stored in `progress.checkins`, shown on a compass scale, and surfaced in the parent journey reflection. New `src/counselor/checkin.ts`, `renderCheckin`; tests 20→26. **Deleted committed stale compiled JS (`src/counselor/insights.js`, `src/safety/filters.js`, `src/types/index.js`)** — they silently shadowed the `.ts` sources in vitest and vite builds. Root cause: the server build pass emits into `src/` (documented as a known quirk in §3.14; left as-is until the proper hosted API/backend build replaces it). |
 | 2026-07-17 | Recreated the full character cast (`src/render/characters.ts`) + `public/favicon.svg` in 8-bit pixel-art style: ASCII pixel maps rendered as crisp SVG `<rect>` grids, pixel expression overlays (brows/mouth/sparks/sparkles). Same exports, sizes, and aspect ratios — no caller changes. |
