@@ -185,7 +185,7 @@ trunorth/
 │   ├── render/                # ✅ characters.ts (SVG cast), gridBackground.ts (grid canvas)
 │   ├── safety/filters.ts      # ✅ input/output filters
 │   ├── store/ProgressStore.ts # ✅ Local + Demo stores
-│   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones
+│   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones; stage container-scaled (--px)
 │   ├── types/index.ts         # ✅ Shared contracts
 │   └── ui/                    # ✅ GameView, screens, auth helpers
 ├── tests/unit/                # ✅ 26 tests — engine (13) + grid (7) + checkin (6)
@@ -272,7 +272,10 @@ modules (bubbles/HUD live in `GameView` + CSS).
 ### 3.5 UI & parent surfaces (`src/ui/`)
 ✅ Implemented — see [ui-screens-views.md](./docs/context/ui-screens-views.md).
 - `GameView.ts` — `renderGameView` (stage, HUD meters, characters, triggers, collectibles,
-  narration, counselor panel, decision overlay with Together Mode 2-step flow),
+  narration, counselor panel, decision overlay with Together Mode 2-step flow;
+  **everything on the stage scales with viewport size** — the stage is a CSS size
+  container exposing `--px` = 1 design px, characters set `--char-size` and their SVGs
+  fill it, text uses `clamp()` legibility floors),
   `renderCelebration` (Courage Feather), `renderJourneyReflection`, `renderParentGate`
   (4-digit PIN, SHA-256 hash in localStorage, 3-fail lockout), `renderTrustScreen`.
 - `screens.ts` — `renderLanding`, `renderAuthForm` (parent login/register),
@@ -447,3 +450,4 @@ feeling-word scoring, distress flag, placement bands, labels/lines, reflection b
 | 2026-07-17 | Made grid levels the only levels: all ch1/ch2 scenes bind `gridMapId` (everbright-meadow / singing-bridge), hub cards render grid canvas thumbnails, ch1 scenario retitled "Everbright Meadow"; **removed ch3 Forest** (content files + registry + hub card + default unlock); tests 19→20; typecheck errors 11→9. |
 | 2026-07-17 | Added **pre-level check-in**: hub → `checkin` screen before every level (3 open-ended questions from a 6-question bank, tap or own-words answers, safety-filtered) → 0–10 starting point + bright/steady/gentle placement stored in `progress.checkins`, shown on a compass scale, and surfaced in the parent journey reflection. New `src/counselor/checkin.ts`, `renderCheckin`; tests 20→26. **Deleted committed stale compiled JS (`src/counselor/insights.js`, `src/safety/filters.js`, `src/types/index.js`)** — they silently shadowed the `.ts` sources in vitest and vite builds. Root cause: the server build pass emits into `src/` (documented as a known quirk in §3.14; left as-is until the proper hosted API/backend build replaces it). |
 | 2026-07-17 | Recreated the full character cast (`src/render/characters.ts`) + `public/favicon.svg` in 8-bit pixel-art style: ASCII pixel maps rendered as crisp SVG `<rect>` grids, pixel expression overlays (brows/mouth/sparks/sparkles). Same exports, sizes, and aspect ratios — no caller changes. |
+| 2026-07-17 | Made the whole game stage scale with the screen (characters were fixed 110/120px while the stage shrank): `.game-viewport` is now a CSS size container defining `--px` (1/1920 of stage width); characters get a `--char-size` var in `GameView` and their SVGs fill it (`width:100%; height:auto`); labels, speech bubbles, collectibles, move/interact hints, HUD meters, pills, zone sign, narration bar all sized in `calc(n * var(--px))` with `clamp()` legibility floors on text. Verified at 1600/700/480px windows — avatar:stage ratio constant 0.0573. `src/styles/global.css` + `src/ui/GameView.ts` only. |
