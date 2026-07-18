@@ -145,6 +145,7 @@ export function renderGameView(
       el.style.left = `${(x / 1920) * 100}%`;
       el.style.top = `${(y / 1080) * 100}%`;
       el.style.zIndex = String(10 + Math.floor(y / 20));
+      el.style.setProperty("--char-size", ch.id === "worry_cloud" ? "120" : "110");
 
       const sprite = document.createElement("div");
       sprite.className = `char-fullbody ${ch.id}${

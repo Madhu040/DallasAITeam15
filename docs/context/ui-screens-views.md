@@ -19,6 +19,15 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
   - Collectible ✨ sparks (`data-collectible-id`), clickable dashed `trigger-zone` buttons while
     `exploring`, narration bar, "…is reflecting with you" indicator during `awaitingCompanion`.
   - Calls `onWorldReady(viewport, scene, exploring)` so `worldRuntime.attach` can take over movement.
+  - **Responsive stage scaling:** `.game-viewport` (global.css) is a CSS size container
+    (`container-type: size`) defining `--px: 0.0520833cqw` = 1 design px of the 1920×1080
+    scene space. Characters set `--char-size` (110; worry cloud 120) inline and
+    `.character` width is `calc(var(--char-size) * var(--px))` with the SVG at
+    `width:100%; height:auto` (the SVG's own width/height attrs remain as fallback).
+    Labels, bubbles, collectibles, move/interact hints, HUD meters, pills, zone sign,
+    stage tag, and narration bar are sized in `calc(n * var(--px))`; text uses
+    `clamp(min, calc(n * var(--px)), n px)` so it shrinks with the stage but never below
+    a legibility floor. Positions were already %-based (world coords / 1920 or 1080).
   - Counselor side panel (`buildCounselorPanel`) during exploring/decision/consequence.
   - Decision overlay (`renderDecisionOverlay`) during `decision`/`encounter`.
 - `renderDecisionOverlay` (private) — modal dialog. Together Mode is a two-step machine:

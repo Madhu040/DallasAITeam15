@@ -187,7 +187,7 @@ trunorth/
 │   ├── render/                # ✅ characters.ts (SVG cast), gridBackground.ts (grid canvas)
 │   ├── safety/filters.ts      # ✅ input/output filters
 │   ├── store/ProgressStore.ts # ✅ Local + Demo stores
-│   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones
+│   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones; stage container-scaled (--px)
 │   ├── types/index.ts         # ✅ Shared contracts
 │   └── ui/                    # ✅ GameView, screens, auth helpers
 ├── tests/unit/                # ✅ 36 tests — engine (13) + grid (7) + checkin (6) + stageObjects (10)
@@ -285,7 +285,10 @@ modules (bubbles/HUD live in `GameView` + CSS).
   **stage objects** (emoji sprites, click fallback) + **`renderDialogOverlay`**
   (multi-page speaker dialog — see
   [world-stage-objects.md](./docs/context/world-stage-objects.md)),
-  narration, counselor panel, decision overlay with Together Mode 2-step flow),
+  narration, counselor panel, decision overlay with Together Mode 2-step flow;
+  **everything on the stage scales with viewport size** — the stage is a CSS size
+  container exposing `--px` = 1 design px, characters set `--char-size` and their SVGs
+  fill it, text uses `clamp()` legibility floors),
   `renderCelebration` (Courage Feather), `renderJourneyReflection`, `renderParentGate`
   (4-digit PIN, SHA-256 hash in localStorage, 3-fail lockout), `renderTrustScreen`.
 - `screens.ts` — `renderLanding`, `renderAuthForm` (parent login/register),
@@ -494,4 +497,5 @@ auto-advance suppression).
 | 2026-07-17 | Added **pre-level check-in**: hub → `checkin` screen before every level (3 open-ended questions from a 6-question bank, tap or own-words answers, safety-filtered) → 0–10 starting point + bright/steady/gentle placement stored in `progress.checkins`, shown on a compass scale, and surfaced in the parent journey reflection. New `src/counselor/checkin.ts`, `renderCheckin`; tests 20→26. **Deleted committed stale compiled JS (`src/counselor/insights.js`, `src/safety/filters.js`, `src/types/index.js`)** — they silently shadowed the `.ts` sources in vitest and vite builds. Root cause: the server build pass emits into `src/` (documented as a known quirk in §3.14; left as-is until the proper hosted API/backend build replaces it). |
 | 2026-07-17 | Added Vercel deploy scaffolding: `api/[[...route]].ts` (Node Function wrapping the existing Hono `app` via `hono/vercel`'s `handle()`, catch-all so one function serves every `/api/*` route) + `tsconfig.api.json` (typecheck-only config covering `server/`+`api/` without disturbing the Docker build's `tsconfig.server.json`); `npm run typecheck`'s second pass now uses it. Code-side only — the actual Vercel project (root dir, env vars incl. `DATABASE_PATH=/tmp/...`, deploy) is still a manual step for whoever holds the Vercel account. |
 | 2026-07-17 | Recreated the full character cast (`src/render/characters.ts`) + `public/favicon.svg` in 8-bit pixel-art style: ASCII pixel maps rendered as crisp SVG `<rect>` grids, pixel expression overlays (brows/mouth/sparks/sparkles). Same exports, sizes, and aspect ratios — no caller changes. |
+| 2026-07-17 | Made the whole game stage scale with the screen (characters were fixed 110/120px while the stage shrank): `.game-viewport` is now a CSS size container defining `--px` (1/1920 of stage width); characters get a `--char-size` var in `GameView` and their SVGs fill it (`width:100%; height:auto`); labels, speech bubbles, collectibles, move/interact hints, HUD meters, pills, zone sign, narration bar all sized in `calc(n * var(--px))` with `clamp()` legibility floors on text. Verified at 1600/700/480px windows — avatar:stage ratio constant 0.0573. `src/styles/global.css` + `src/ui/GameView.ts` only. |
 | 2026-07-17 | Added **declarative stage objects** (groundwork for the anxiety level & infinite stage authoring): `Scene.objects[]` — grid-cell-placed interactables with a `StageObjectInteraction` union (`openDialog` → new multi-page `renderDialogOverlay` with speaker/portrait, fed by `dlg_*.json` + `DIALOGS` registry; `finish` → new public `SceneEngine.advanceScene`/`completeChapter`, with `advance`\|`complete` per object). WorldRuntime proximity now targets triggers → objects → NPC fallback (`onObjectInteract`); objects render as emoji sprites with click fallback; narration auto-advance is skipped when a finish/advance object exists. Demo content: ch1 signpost/North Gate/Celebration Arch, ch2 w1 Wize scroll (ch2 finale untouched). validate-content now checks dialogs + objects; tests 26→36. Verified in-browser (dialog paging/freeze, gate advance, arch celebration, no auto-advance). New context file `world-stage-objects.md`. |
