@@ -4,6 +4,7 @@
   "order": 1,
   "movementTier": "B",
   "background": "bg_bridge",
+  "gridMapId": "singing-bridge",
   "narration": "Morning light fills Everbright. Flicker wakes with a tiny yawn — then the Shimmer Crystal appears across the valley! New quest: reach it and earn a Courage Feather.",
   "characters": [
     { "assetRef": "char_companion_dragon", "id": "companion", "position": [520, 760], "expression": "happy" },

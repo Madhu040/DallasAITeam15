@@ -4,6 +4,8 @@ import { renderFullBodyCharacter } from "../render/characters.js";
 import type { JourneyReflection } from "../counselor/insights.js";
 import { discussPrompt } from "../counselor/coPlay.js";
 import { zoneFromBackground, zoneForChapter } from "../content/zones.js";
+import { isGridDebug, resolveGridLevel } from "../content/gridLevels.js";
+import { renderGridBackground } from "../render/gridBackground.js";
 import { contentConfig } from "../config/content.js";
 import { isSpeechSupported, isVoiceEnabled, setVoiceEnabled, speakLine, stopSpeaking } from "../audio/speech.js";
 
@@ -62,10 +64,12 @@ export function renderGameView(
   brownie.textContent = `💎 ${state.progress.browniePoints}`;
   viewport.appendChild(brownie);
 
+  const gridLevel = scene ? resolveGridLevel(scene) : null;
+
   const stageTag = document.createElement("div");
   stageTag.className = "stage-tag";
   const zone = scene ? (zoneFromBackground(scene.background) ?? zoneForChapter(scene.chapterId)) : null;
-  stageTag.textContent = zone ? zone.name : "SCENE";
+  stageTag.textContent = gridLevel?.name ?? zone?.name ?? "SCENE";
   viewport.appendChild(stageTag);
 
   const hud = document.createElement("div");
@@ -100,22 +104,26 @@ export function renderGameView(
   }
 
   if (scene) {
-    const bg = document.createElement("div");
     const zoneMeta = zoneFromBackground(scene.background) ?? zoneForChapter(scene.chapterId);
-    const legacyClass = scene.background.includes("treehouse")
-      ? "treehouse"
-      : scene.background.includes("classroom")
-        ? "classroom"
-        : scene.background.includes("playground")
-          ? "playground"
-          : "";
-    bg.className = `scene-bg zone-${zoneMeta.id}${legacyClass ? ` ${legacyClass}` : ""}`;
-    bg.style.backgroundImage = `url(${zoneMeta.image})`;
-    viewport.appendChild(bg);
+    if (gridLevel) {
+      renderGridBackground(viewport, gridLevel, isGridDebug());
+    } else {
+      const bg = document.createElement("div");
+      const legacyClass = scene.background.includes("treehouse")
+        ? "treehouse"
+        : scene.background.includes("classroom")
+          ? "classroom"
+          : scene.background.includes("playground")
+            ? "playground"
+            : "";
+      bg.className = `scene-bg zone-${zoneMeta.id}${legacyClass ? ` ${legacyClass}` : ""}`;
+      bg.style.backgroundImage = `url(${zoneMeta.image})`;
+      viewport.appendChild(bg);
+    }
 
     const sign = document.createElement("div");
     sign.className = "zone-sign";
-    sign.textContent = zoneMeta.name;
+    sign.textContent = gridLevel?.name ?? zoneMeta.name;
     viewport.appendChild(sign);
 
     for (const ch of scene.characters) {

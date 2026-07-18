@@ -4,6 +4,7 @@
   "order": 6,
   "movementTier": "A",
   "background": "bg_bridge",
+  "gridMapId": "singing-bridge",
   "narration": "One plank at a time. The bridge creaks… and holds. Take careful steps with Flicker until you cross — courage grows from action.",
   "characters": [
     { "assetRef": "char_companion_dragon", "id": "companion", "position": [700, 760], "expression": "worried" },

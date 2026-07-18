@@ -4,6 +4,7 @@
   "order": 3,
   "movementTier": "A",
   "background": "bg_meadow",
+  "gridMapId": "everbright-meadow",
   "narration": "A trusted grown-up walks through the meadow. Asking for help is brave too.",
   "characters": [
     { "assetRef": "char_grownup", "id": "grownup", "position": [1180, 760], "expression": "calm" },

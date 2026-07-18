@@ -4,6 +4,7 @@
   "order": 1,
   "movementTier": "A",
   "background": "bg_meadow",
+  "gridMapId": "everbright-meadow",
   "narration": "In the Meadow of Curiosity, a rabbit friend sits alone while others play. Your dragon companion notices they look left out.",
   "characters": [
     { "assetRef": "char_leftout", "id": "leftout", "position": [1100, 760], "expression": "sad" },

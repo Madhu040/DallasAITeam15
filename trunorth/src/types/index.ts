@@ -111,6 +111,8 @@ export interface Scene {
   collectibles: SceneCollectible[];
   decisionPoints: string[];
   nextSceneId?: string;
+  /** Grid level id (`src/content/gridLevels.ts`) — replaces the image background. */
+  gridMapId?: string;
 }
 
 export interface GameEvent {
