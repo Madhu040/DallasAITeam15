@@ -127,7 +127,7 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
 | Level 1 script | `docs/scripts/Scene, script, players.docx` → **The Singing Bridge** (integrated) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Three child scenarios (ch1 meadow, **ch2 Singing Bridge golden path W1→W6**, ch3 forest) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; companion safety filters + demo/live clients; counselor insights + Together Mode; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 13 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (11 errors — see §3.14), so CI is red. Art is zone PNGs + inline SVG cast (placeholder style). |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Three child scenarios (ch1 meadow, **ch2 Singing Bridge golden path W1→W6**, ch3 forest) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; companion safety filters + demo/live clients; counselor insights + Together Mode; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 13 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (11 errors — see §3.14), so CI is red. Art is zone PNGs + inline SVG cast (8-bit pixel-art style). |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
 | Last updated | 2026-07-17 (full reality audit of the ledger) |
@@ -251,10 +251,12 @@ registration silently no-ops.
 ⬜ Not in repo: `TileMap` grid parser, `SceneGraph`, `EmotionalResidue` modules.
 
 ### 3.4 Rendering (`src/render/characters.ts`)
-🟨 Partial — inline SVG cast, no separate sprite/manifest pipeline.
+🟨 Partial — inline SVG cast in **8-bit pixel-art style** (ASCII pixel maps →
+`<rect>` grids with `shape-rendering="crispEdges"`), no separate sprite/manifest pipeline.
 - `renderFullBodyCharacter(opts)` — avatar (skin-tone aware), **Flicker** (red Guardian
   Dragon), **Wize** owl mentor, fox/sprite companion archetypes, helper animals, worry
   cloud, grown-up, NPCs; `ExpressionKey` mapping from scene `expression` strings.
+  Expressions rendered as pixel overlays (eyes/brows/mouth, worry sparks, happy sparkles).
 ⬜ Not in repo: Viewport layers, SceneRenderer, BubbleManager, ParticleSystem as separate
 modules (bubbles/HUD live in `GameView` + CSS).
 
@@ -333,7 +335,8 @@ PlayMode, ProgressStore interface, AuthUser/ChildProfile, factories
 
 ### 3.13 Assets (`public/assets/`)
 🟨 Partial. Zone PNGs (meadow/forest/cave/mountain) under `public/assets/zones/`;
-characters are code-drawn SVG. The Singing Bridge zone + celebration reuse `forest.png`
+characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matching
+8-bit compass star. The Singing Bridge zone + celebration reuse `forest.png`
 (no bridge art yet). No `assets-src/` provenance pipeline.
 
 > 🔧 **Ermoni & Gabby** — Level 1 art + Supabase delivery (offline fallback required).
@@ -402,3 +405,4 @@ insights + journey reflection, SVG cast rendering, world collision (wall slide +
 | 2026-07-13 | Organized repo into `docs/{specs,scripts,kickoff,context}`; added configurable `server/config.ts`, `src/config/*`, expanded `.env.example`. |
 | 2026-07-14 | Added world movement: WASD/arrows, collision, proximity interact (E/Space), companion follow, collectible pickup (`WorldRuntime`). |
 | 2026-07-17 | Full reality audit: documented server auth/children/progress/reflect endpoints, world movement promoted to ✅, test count 11→13, recorded failing typecheck (CI red), broken lint script, missing `sw.js`; added context files `world-movement.md`, `ui-screens-views.md`, `server-api.md`. |
+| 2026-07-17 | Recreated the full character cast (`src/render/characters.ts`) + `public/favicon.svg` in 8-bit pixel-art style: ASCII pixel maps rendered as crisp SVG `<rect>` grids, pixel expression overlays (brows/mouth/sparks/sparkles). Same exports, sizes, and aspect ratios — no caller changes. |
