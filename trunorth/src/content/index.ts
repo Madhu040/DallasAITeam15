@@ -1,4 +1,4 @@
-import type { DecisionPoint, Scene } from "../types/index.js";
+import type { DecisionPoint, DialogRecord, Scene } from "../types/index.js";
 
 import w1 from "../../content/chapters/ch2/w1.scene.json";
 import w2 from "../../content/chapters/ch2/w2.scene.json";
@@ -18,6 +18,9 @@ import e2 from "../../content/chapters/ch1/e2.scene.json";
 import e3 from "../../content/chapters/ch1/e3.scene.json";
 import dpLeftout from "../../content/chapters/ch1/dp_leftout_bench.json";
 import dpAskGrownup from "../../content/chapters/ch1/dp_ask_grownup.json";
+
+import dlgMeadowWelcome from "../../content/chapters/ch1/dlg_meadow_welcome.json";
+import dlgBridgeLegend from "../../content/chapters/ch2/dlg_bridge_legend.json";
 
 export const SCENES: Record<string, Scene> = {
   w1: w1 as Scene,
@@ -48,6 +51,16 @@ export function getScene(id: string): Scene | undefined {
 
 export function getDecisionPoint(id: string): DecisionPoint | undefined {
   return DECISION_POINTS[id];
+}
+
+/** Dialogs shown by `openDialog` stage objects (`content/chapters/<ch>/dlg_*.json`). */
+export const DIALOGS: Record<string, DialogRecord> = {
+  dlg_meadow_welcome: dlgMeadowWelcome as DialogRecord,
+  dlg_bridge_legend: dlgBridgeLegend as DialogRecord,
+};
+
+export function getDialog(id: string): DialogRecord | undefined {
+  return DIALOGS[id];
 }
 
 /** Level 1 — The Singing Bridge (conference demo path) */

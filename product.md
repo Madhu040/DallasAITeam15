@@ -127,10 +127,10 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
 | Level 1 script | `docs/scripts/Scene, script, players.docx` → **The Singing Bridge** (integrated) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Singing Bridge golden path W1→W6**; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId`, hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 26 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (9 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Singing Bridge golden path W1→W6**; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId`, hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 36 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (9 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
-| Last updated | 2026-07-17 (full reality audit of the ledger) |
+| Last updated | 2026-07-18 (SEL Coach panel drag/close; removed Flicker's stray orange wing pixels) |
 
 ---
 
@@ -156,8 +156,8 @@ DallasAITeam15/
 ```
 trunorth/
 ├── content/
-│   ├── chapters/ch1/          # ✅ Everbright Meadow — e1–e3 + 2 DPs (gridMapId: everbright-meadow)
-│   ├── chapters/ch2/          # ✅ Singing Bridge — w1–w6 + 6 DPs (gridMapId: singing-bridge)
+│   ├── chapters/ch1/          # ✅ Everbright Meadow — e1–e3 + 2 DPs + 1 dialog + 3 stage objects
+│   ├── chapters/ch2/          # ✅ Singing Bridge — w1–w6 + 6 DPs + 1 dialog + 1 stage object
 │   ├── demo/showcase.bundle.json     # ✅ 10 canned companion lines (demo mode)
 │   └── fallbacks/companion-fallbacks.json  # ✅ band/timeout/safety lines, all 10 DPs
 ├── data/                      # SQLite runtime files (git-ignored)
@@ -180,17 +180,17 @@ trunorth/
 │   ├── main.ts                # ✅ Boot, screens, startScenario, engine + world wiring
 │   ├── companion/CompanionClient.ts   # ✅ Live + Demo clients
 │   ├── config/                # ✅ app.ts, content.ts, gameState.ts (env-driven)
-│   ├── content/               # ✅ SCENES/DPs registry, scenarios, zones, gridLevels
+│   ├── content/               # ✅ SCENES/DPs/DIALOGS registry, scenarios, zones, gridLevels, stageObjects
 │   ├── counselor/             # ✅ insights + coPlay discuss prompts + pre-level checkin
 │   ├── engine/                # ✅ SceneEngine, DecisionResolver, WorldRuntime, Collision, GridMap
 │   ├── input/InputController.ts # ✅ WASD/arrows + interact keys
 │   ├── render/                # ✅ characters.ts (SVG cast), gridBackground.ts (grid canvas)
 │   ├── safety/filters.ts      # ✅ input/output filters
 │   ├── store/ProgressStore.ts # ✅ Local + Demo stores
-│   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones
+│   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones; stage container-scaled (--px)
 │   ├── types/index.ts         # ✅ Shared contracts
 │   └── ui/                    # ✅ GameView, screens, auth helpers
-├── tests/unit/                # ✅ 26 tests — engine (13) + grid (7) + checkin (6)
+├── tests/unit/                # ✅ 36 tests — engine (13) + grid (7) + checkin (6) + stageObjects (10)
 ├── Dockerfile · docker-compose.yml
 ├── index.html · vite.config.ts · vitest.config.ts
 ├── tsconfig.json · tsconfig.server.json · tsconfig.api.json  # api.json = typecheck-only, covers api/
@@ -236,10 +236,13 @@ registration silently no-ops.
 ✅ Implemented — **click/trigger DOM scenes** (not tile-walking). Lifecycle detail:
 [engine-runtime.md](./docs/context/engine-runtime.md).
 
-- `SceneEngine` — loadScene (narration auto-advance), startDecision/triggerEncounter,
+- `SceneEngine` — loadScene (narration auto-advance; skipped when the scene has a
+  finish/advance stage object), startDecision/triggerEncounter,
   submitChoice/submitTyped, multi-tap progress (`MULTI_TAP_REQUIRED`: dp_breathe ×5,
   dp_crossing ×4), repair loops, chapter-complete → celebration, companion + counselor
-  callbacks, input freeze during companion calls.
+  callbacks, input freeze during companion calls. Public finish-object paths:
+  `advanceScene(targetSceneId?)` and idempotent `completeChapter()` → celebration
+  (see [world-stage-objects.md](./docs/context/world-stage-objects.md)).
 - `DecisionResolver` — `resolveChoice` (option → band), `applyConsequence` (meter
   fill/level-ups, brownie points, 200-entry event log, repairAction, next scene).
   Also exports `canUsePlayfulExternalization` (unused by callers).
@@ -250,6 +253,9 @@ registration silently no-ops.
 - `worldRuntime` singleton — rAF loop, avatar movement with axis-separated AABB collision
   vs NPC feet boxes + walk bounds, companion lag-follow, collectible pickup, proximity
   interact (E/Space/Enter) with hints; feature-flagged `VITE_FEATURE_WORLD_MOVEMENT`.
+  Proximity targets are a union: trigger zones → **stage objects** → NPC fallback
+  (`onObjectInteract` callback) — see
+  [world-stage-objects.md](./docs/context/world-stage-objects.md).
 - `Collision.ts` — pure AABB helpers, `moveWithCollision` (wall sliding), walk bands.
 - `InputController` — WASD/arrows hold-polling, one-shot interact; clickable trigger
   hotspots remain as fallback.
@@ -276,7 +282,20 @@ modules (bubbles/HUD live in `GameView` + CSS).
 ### 3.5 UI & parent surfaces (`src/ui/`)
 ✅ Implemented — see [ui-screens-views.md](./docs/context/ui-screens-views.md).
 - `GameView.ts` — `renderGameView` (stage, HUD meters, characters, triggers, collectibles,
-  narration, counselor panel, decision overlay with Together Mode 2-step flow),
+  **stage objects** (emoji sprites, click fallback) + **`renderDialogOverlay`**
+  (multi-page speaker dialog — see
+  [world-stage-objects.md](./docs/context/world-stage-objects.md)),
+  counselor panel (draggable via its header handle, ✕ to dismiss; position + dismissal
+  survive re-renders, a dismissed insight returns when a new one arrives),
+  decision overlay with Together Mode 2-step flow
+  (narration bar removed 2026-07-18 — `scene.narration` is no longer displayed;
+  stage-object dialogs carry story text; engine auto-advance timing unchanged);
+  **stage z-layering** so no dialogue is ever blocked by a character:
+  characters ≤ ~64 < counselor panel 70 < speaking character + bubble / interact hint 75
+  < thinking pill 80 < modal overlays 100;
+  **everything on the stage scales with viewport size** — the stage is a CSS size
+  container exposing `--px` = 1 design px, characters set `--char-size` and their SVGs
+  fill it, text uses `clamp()` legibility floors),
   `renderCelebration` (Courage Feather), `renderJourneyReflection`, `renderParentGate`
   (4-digit PIN, SHA-256 hash in localStorage, 3-fail lockout), `renderTrustScreen`.
 - `screens.ts` — `renderLanding`, `renderAuthForm` (parent login/register),
@@ -325,7 +344,9 @@ Used by unit tests and the server companion route.
 ### 3.10 Shared types (`src/types/index.ts`)
 ✅ Implemented. GameState, Scene, DecisionPoint, companion request/response, ScenarioMeta,
 PlayMode, ProgressStore interface, AuthUser/ChildProfile, `CheckinRecord`/`CheckinPlacement`
-(+ optional `progress.checkins` map), factories
+(+ optional `progress.checkins` map), **`StageObject`/`StageObjectInteraction`
+(discriminated union: openDialog | finish) + `DialogRecord`/`DialogPage` + optional
+`Scene.objects`**, factories
 `createDefaultMeters` (7 skills). Defaults: companion **Flicker**, chapter `ch2`, scene `w1`.
 
 ### 3.11 Server API (`server/`)
@@ -358,6 +379,12 @@ PlayMode, ProgressStore interface, AuthUser/ChildProfile, `CheckinRecord`/`Check
 ### 3.12 Content (`content/`)
 ✅ Implemented (draft; SME review still pending). Every scene sets `gridMapId`, so both
 levels play on grid backgrounds (§3.3); hub shows only these two + parent coach.
+Scenes may declare **stage objects** (`objects[]`: grid-cell interactables → dialog or
+finish line) and **dialogs** (`dlg_*.json`, registered in `DIALOGS`): ch1 has a welcome
+signpost (e1), a North Gate finish/advance (e2 — replaces its auto-advance timer), and a
+Celebration Arch finish/complete (e3, alternate to `dp_ask_grownup`); ch2 w1 has Wize's
+bridge-legend scroll. Authoring guide:
+[world-stage-objects.md](./docs/context/world-stage-objects.md).
 - **Ch.2 The Singing Bridge (golden path, grid `singing-bridge`):**
   w1 quest → w2 investigate → w3 fact/story → w4 breathe (5 taps) → w5 choose →
   w6 crossing (4 taps) + Courage Feather finale. DPs: `dp_quest_start`,
@@ -382,8 +409,10 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
 ### 3.14 Build & tooling
 🟨 Partial.
 - `scripts/validate-content.ts` — walks chapter JSON for id/chapterId/emotionalArc/
-  consequences (no Ajv schemas yet). **Passing** as of 2026-07-17.
-- `npm run test:unit` — **13/13 passing**. `npm run build` — **passing** (vite build;
+  consequences, plus dialog files (`dlg_*`: id/chapterId/non-empty pages) and scene
+  `objects[]` (unique ids, 0–99 cells, resolvable dialog/finish targets) — two-pass,
+  still no Ajv schemas. **Passing** as of 2026-07-17.
+- `npm run test:unit` — **36/36 passing**. `npm run build` — **passing** (vite build;
   server tsc errors are swallowed by `|| true`).
 - **`npm run typecheck` — FAILING (9 errors), which makes CI red:**
   8 × TS2352 in `src/content/index.ts` (scene JSON `position: number[]` doesn't satisfy
@@ -414,13 +443,16 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   playwright config**.
 
 ### 3.15 Tests (`tests/`)
-🟨 Partial — **26 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
+🟨 Partial — **36 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
 bands/meters/repair, safety filters, Singing Bridge golden-path presence, ch3 absence,
 counselor insights + journey reflection, SVG cast rendering, world collision wall slide +
 bounds) + `tests/unit/grid.test.ts` (7 — grid cell vector, painting/world lookup,
 center-point slide, level registry, `?grid=` resolution, scenario/scene→grid routing,
 bridge-only river crossing) + `tests/unit/checkin.test.ts` (6 — question rotation, typed
-feeling-word scoring, distress flag, placement bands, labels/lines, reflection baseline).
+feeling-word scoring, distress flag, placement bands, labels/lines, reflection baseline)
++ `tests/unit/stageObjects.test.ts` (10 — cell→world parity, object placement/sprites,
+object/dialog content integrity incl. ch2 finale guard, advanceScene/completeChapter,
+auto-advance suppression).
 ⬜ integration / e2e / red-team folders.
 
 ---
@@ -432,6 +464,7 @@ feeling-word scoring, distress flag, placement bands, labels/lines, reflection b
 | [engine-runtime.md](./docs/context/engine-runtime.md) | `src/engine/SceneEngine.ts`, `DecisionResolver.ts`, `src/main.ts`, `src/ui/GameView.ts`, `src/content/index.ts` | Boot screens, scene phases, multi-tap + repair + celebration flow |
 | [world-movement.md](./docs/context/world-movement.md) | `src/engine/WorldRuntime.ts`, `src/engine/Collision.ts`, `src/input/InputController.ts` | Free-roam runtime: rAF loop, AABB collision, follow, collectibles, interact |
 | [world-grid-levels.md](./docs/context/world-grid-levels.md) | `src/engine/GridMap.ts`, `src/content/gridLevels.ts`, `src/render/gridBackground.ts` | 100×100 grid levels: cell vector, painting API, canvas bg, center-point collision, `?grid=` testing |
+| [world-stage-objects.md](./docs/context/world-stage-objects.md) | `StageObject`/`DialogRecord` types, `src/content/stageObjects.ts`, `DIALOGS`, WorldRuntime object proximity, `renderDialogOverlay`, SceneEngine finish methods, `main.ts` dispatch | Declarative stage objects: grid-cell interactables → multi-page dialogs + finish lines (advance/complete); authoring guide |
 | [ui-screens-views.md](./docs/context/ui-screens-views.md) | `src/ui/GameView.ts`, `src/ui/screens.ts`, `src/ui/auth.ts` | Every render function: game view, overlays, onboarding, hub, parent gate, auth |
 | [server-api.md](./docs/context/server-api.md) | `server/*` (index, main, config, auth, db, routes) | All HTTP endpoints, SQLite schema, JWT, companion pipeline steps |
 | [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md) | `server/routes/companion.ts`, `src/companion/*`, `src/safety/*`, fallbacks | Live vs demo companion paths, filters, fallback coverage |
@@ -471,3 +504,8 @@ feeling-word scoring, distress flag, placement bands, labels/lines, reflection b
 | 2026-07-17 | Added **pre-level check-in**: hub → `checkin` screen before every level (3 open-ended questions from a 6-question bank, tap or own-words answers, safety-filtered) → 0–10 starting point + bright/steady/gentle placement stored in `progress.checkins`, shown on a compass scale, and surfaced in the parent journey reflection. New `src/counselor/checkin.ts`, `renderCheckin`; tests 20→26. **Deleted committed stale compiled JS (`src/counselor/insights.js`, `src/safety/filters.js`, `src/types/index.js`)** — they silently shadowed the `.ts` sources in vitest and vite builds. Root cause: the server build pass emits into `src/` (documented as a known quirk in §3.14; left as-is until the proper hosted API/backend build replaces it). |
 | 2026-07-17 | Added Vercel deploy scaffolding: `api/[[...route]].ts` (Node Function wrapping the existing Hono `app` via `hono/vercel`'s `handle()`, catch-all so one function serves every `/api/*` route) + `tsconfig.api.json` (typecheck-only config covering `server/`+`api/` without disturbing the Docker build's `tsconfig.server.json`); `npm run typecheck`'s second pass now uses it. Code-side only — the actual Vercel project (root dir, env vars incl. `DATABASE_PATH=/tmp/...`, deploy) is still a manual step for whoever holds the Vercel account. |
 | 2026-07-17 | Recreated the full character cast (`src/render/characters.ts`) + `public/favicon.svg` in 8-bit pixel-art style: ASCII pixel maps rendered as crisp SVG `<rect>` grids, pixel expression overlays (brows/mouth/sparks/sparkles). Same exports, sizes, and aspect ratios — no caller changes. |
+| 2026-07-17 | Made the whole game stage scale with the screen (characters were fixed 110/120px while the stage shrank): `.game-viewport` is now a CSS size container defining `--px` (1/1920 of stage width); characters get a `--char-size` var in `GameView` and their SVGs fill it (`width:100%; height:auto`); labels, speech bubbles, collectibles, move/interact hints, HUD meters, pills, zone sign, narration bar all sized in `calc(n * var(--px))` with `clamp()` legibility floors on text. Verified at 1600/700/480px windows — avatar:stage ratio constant 0.0573. `src/styles/global.css` + `src/ui/GameView.ts` only. |
+| 2026-07-18 | Made the SEL Coach insight panel draggable + closable (`GameView.ts` + `global.css` only): new `.counselor-panel-header` (badge + ✕) acts as a pointer-capture drag handle with window-clamped inline `left/top`; ✕ dismisses. Module-scope state keeps the dragged position and the dismissed-insight key across the full re-renders `renderGameView` does each phase/meter update — a dismissed insight stays hidden until a different insight arrives. |
+| 2026-07-18 | Fixed dialogs being blocked by characters + removed the bottom narration bar (`GameView.ts` + `global.css` only): characters (z up to ~64 from `10 + y/20`) were punching through the decision/dialog `.overlay` (was z 30) and standing on the counselor panel (was z 25). New stage z-layering: counselor panel 70, speaking character + bubble / interact hint 75, thinking pill 80, modal overlays 100. Companion speech bubble restyled (wider `360*--px` max, border, tail, 11px floor). Narration bar deleted — `scene.narration` no longer renders (stage-object dialogs carry story text; `SceneEngine` auto-advance untouched). Also de-overlapped top pills: stage tag drops below the demo pill, together-pill below the crystal counter; move hint moved to bottom-left. Verified in-browser (w1→w3 + scroll dialog); 36/36 tests, typecheck still 9 known errors. |
+| 2026-07-17 | Added **declarative stage objects** (groundwork for the anxiety level & infinite stage authoring): `Scene.objects[]` — grid-cell-placed interactables with a `StageObjectInteraction` union (`openDialog` → new multi-page `renderDialogOverlay` with speaker/portrait, fed by `dlg_*.json` + `DIALOGS` registry; `finish` → new public `SceneEngine.advanceScene`/`completeChapter`, with `advance`\|`complete` per object). WorldRuntime proximity now targets triggers → objects → NPC fallback (`onObjectInteract`); objects render as emoji sprites with click fallback; narration auto-advance is skipped when a finish/advance object exists. Demo content: ch1 signpost/North Gate/Celebration Arch, ch2 w1 Wize scroll (ch2 finale untouched). validate-content now checks dialogs + objects; tests 26→36. Verified in-browser (dialog paging/freeze, gate advance, arch celebration, no auto-advance). New context file `world-stage-objects.md`. |
+| 2026-07-18 | Removed Flicker's detached orange wing pixels (`O: #ff9e00`) from `dragonSvg` in `src/render/characters.ts` — the floating triangles read as a stray orange mouse cursor next to the companion in-game; body/belly widened one column to fill the gap. Art-only, no export changes. |

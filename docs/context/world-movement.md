@@ -47,8 +47,11 @@ Pure AABB helpers in 1920×1080 scene space (`WORLD_W`/`WORLD_H`):
 - `tick(ts)` (private, rAF) — dt-clamped: `stepMovement` (input vector × speed through
   `moveWithCollision`), `followCompanion` (exponential-lag follow offset by facing),
   `checkCollectibles` (feet-box overlap → `onCollect(id)` + `.collected` class),
-  `updateProximity` (nearest trigger zone within pad/radius, else near-NPC fallback to the
-  scene's first trigger), then interact consumption → `onInteract(target)`.
+  `updateProximity` (priority: trigger zones → **stage objects** (nearest within radius)
+  → near-NPC fallback to the scene's first trigger; `nearTarget` is a
+  `NearInteractable` union), then interact consumption → `onInteract(target)` for
+  triggers or `onObjectInteract(objectId)` for objects. Stage objects (dialogs, finish
+  lines) are documented in [world-stage-objects.md](./world-stage-objects.md).
 - DOM sync: `applyDomPositions`/`placeEl` write %-based left/top + y-derived z-index and
   facing dataset; `sortDepth` re-appends characters by y; `renderHint` maintains
   "Press E to interact" + "Move: WASD…" hints and highlights the in-range trigger zone.
