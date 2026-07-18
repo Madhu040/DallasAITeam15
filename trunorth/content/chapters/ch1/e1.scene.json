@@ -16,5 +16,14 @@
     { "id": "jamie_trigger", "bounds": [1000, 640, 200, 180], "action": "startDecision", "target": "dp_leftout_bench" }
   ],
   "collectibles": [],
+  "objects": [
+    {
+      "id": "obj_meadow_sign",
+      "cell": [40, 76],
+      "assetRef": "sign_post",
+      "hint": "Press E to read",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_meadow_welcome" }
+    }
+  ],
   "decisionPoints": ["dp_leftout_bench"]
 }

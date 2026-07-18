@@ -855,6 +855,98 @@ body {
   50% { transform: translate(-50%, -58%) scale(1.12); }
 }
 
+.stage-object {
+  position: absolute;
+  transform: translate(-50%, -80%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: none;
+  background: none;
+  padding: 4px;
+  cursor: pointer;
+  z-index: 7;
+  font-family: inherit;
+}
+
+.stage-object-sprite {
+  font-size: 2.4rem;
+  line-height: 1;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.stage-object:hover .stage-object-sprite,
+.stage-object.in-range .stage-object-sprite {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 14px rgba(255, 214, 10, 0.75));
+}
+
+.dialog-panel {
+  position: relative;
+  max-width: 440px;
+}
+
+.dialog-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  border: none;
+  background: none;
+  font-size: 18px;
+  font-weight: 700;
+  color: #888;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.dialog-close:hover, .dialog-close:focus-visible {
+  color: var(--text-dark);
+  outline: none;
+}
+
+.dialog-speaker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.dialog-portrait svg {
+  display: block;
+}
+
+.dialog-speaker-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--tru-purple);
+}
+
+.dialog-text {
+  font-size: 16px;
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.dialog-page-counter {
+  font-size: 13px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: 0.04em;
+}
+
+.dialog-next {
+  max-width: 140px;
+}
+
 .move-hint {
   position: absolute;
   left: 50%;

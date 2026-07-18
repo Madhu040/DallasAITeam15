@@ -14,7 +14,9 @@ import {
   renderJourneyReflection,
   type CounselorPanelData,
   type CoPlayStep,
+  type DialogViewState,
 } from "./ui/GameView.js";
+import { getDialog } from "./content/index.js";
 import {
   renderLanding,
   renderAuthForm,
@@ -55,6 +57,7 @@ let parentGateNext: AppScreen = "reflection";
 let coPlayStep: CoPlayStep = "discuss";
 let pendingScenario: ScenarioMeta | null = null;
 let pendingPlayMode: "solo" | "together" = "solo";
+let activeDialog: DialogViewState | null = null;
 
 const app = document.getElementById("app")!;
 
@@ -62,6 +65,7 @@ function navigate(screen: AppScreen): void {
   if (screen !== "game") {
     worldRuntime.detach();
     stopSpeaking();
+    activeDialog = null;
   }
   currentScreen = screen;
   render();
@@ -94,10 +98,45 @@ function onWorldCollect(collectibleId: string): void {
 }
 
 function bindWorld(viewport: HTMLElement, scene: Scene, exploring: boolean): void {
-  worldRuntime.attach(viewport, scene, exploring, {
+  worldRuntime.attach(viewport, scene, exploring && activeDialog === null, {
     onInteract: (target) => beginEncounter(target),
     onCollect: onWorldCollect,
+    onObjectInteract: onStageObject,
   });
+}
+
+/** Dispatch a stage-object interaction — the extension point for new kinds. */
+function onStageObject(objectId: string): void {
+  const obj = engine?.getCurrentScene()?.objects?.find((o) => o.id === objectId);
+  if (!obj) return;
+  const interaction = obj.interaction;
+  switch (interaction.kind) {
+    case "openDialog":
+      if (!getDialog(interaction.dialogId)) return;
+      activeDialog = { id: interaction.dialogId, page: 0 };
+      worldRuntime.freeze(true);
+      renderGame();
+      break;
+    case "finish":
+      if (interaction.mode === "complete") {
+        void engine?.completeChapter();
+      } else {
+        void engine?.advanceScene(interaction.targetSceneId);
+      }
+      break;
+    default: {
+      const _exhaustive: never = interaction;
+      void _exhaustive;
+    }
+  }
+}
+
+function closeDialog(): void {
+  activeDialog = null;
+  worldRuntime.freeze(false);
+  // Defer so the closing click finishes on the old DOM — otherwise the browser
+  // retargets it to whatever (e.g. a trigger zone) appears under the cursor.
+  setTimeout(renderGame, 0);
 }
 
 async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "together" = "solo"): Promise<void> {
@@ -159,6 +198,7 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
   gameState = engine.getState();
   counselorPanel = null;
   companionLine = null;
+  activeDialog = null;
   await engine.loadScene(scenario.startSceneId);
   navigate("game");
 }
@@ -190,6 +230,15 @@ function renderGame(): void {
       renderGame();
     },
     (viewport, sceneEl, exploring) => bindWorld(viewport, sceneEl, exploring),
+    onStageObject,
+    activeDialog,
+    () => {
+      if (activeDialog) {
+        activeDialog = { ...activeDialog, page: activeDialog.page + 1 };
+        renderGame();
+      }
+    },
+    closeDialog,
   );
 }
 

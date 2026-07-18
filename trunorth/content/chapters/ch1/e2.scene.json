@@ -15,6 +15,16 @@
   "collectibles": [
     { "id": "spark_e2", "assetRef": "collectible_spark", "position": [400, 800], "kind": "kindness_spark" }
   ],
+  "objects": [
+    {
+      "id": "obj_meadow_gate",
+      "cell": [42, 7],
+      "assetRef": "finish_flag",
+      "label": "North Gate",
+      "hint": "Press E to continue",
+      "interaction": { "kind": "finish", "mode": "advance" }
+    }
+  ],
   "decisionPoints": [],
   "nextSceneId": "e3"
 }

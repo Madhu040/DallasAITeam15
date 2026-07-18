@@ -3,11 +3,12 @@
  * environment solids, pick up collectibles, and interact with nearby triggers/NPCs.
  */
 
-import type { Scene, SceneCharacter } from "../types/index.js";
+import type { Scene, SceneCharacter, StageObject } from "../types/index.js";
 import { appConfig } from "../config/app.js";
 import { InputController, type Facing } from "../input/InputController.js";
 import { moveWithGridCollision } from "./GridMap.js";
 import { resolveGridLevel, type GridLevel } from "../content/gridLevels.js";
+import { objectWorldPos, sceneObjects } from "../content/stageObjects.js";
 import {
   WORLD_H,
   WORLD_W,
@@ -24,7 +25,13 @@ import {
 export interface WorldCallbacks {
   onInteract: (decisionTarget: string) => void;
   onCollect: (collectibleId: string) => void;
+  onObjectInteract?: (objectId: string) => void;
 }
+
+/** What the avatar is currently in range of (trigger zone or stage object). */
+export type NearInteractable =
+  | { type: "trigger"; target: string }
+  | { type: "object"; objectId: string; hint?: string };
 
 interface SolidBody {
   id: string;
@@ -55,7 +62,7 @@ export class WorldRuntime {
   private companion: Vec2 = { x: 520, y: 760 };
   private facing: Facing = "down";
   private collected = new Set<string>();
-  private nearTarget: string | null = null;
+  private nearTarget: NearInteractable | null = null;
   private solids: SolidBody[] = [];
   private walkBounds = defaultWalkBounds();
   private grid: GridLevel | null = null;
@@ -170,7 +177,11 @@ export class WorldRuntime {
       this.checkCollectibles();
       this.updateProximity();
       if (this.input.consumeInteract() && this.nearTarget) {
-        this.callbacks?.onInteract(this.nearTarget);
+        if (this.nearTarget.type === "trigger") {
+          this.callbacks?.onInteract(this.nearTarget.target);
+        } else {
+          this.callbacks?.onObjectInteract?.(this.nearTarget.objectId);
+        }
       }
     }
 
@@ -243,9 +254,24 @@ export class WorldRuntime {
       const center = { x: x + w / 2, y: y + h / 2 };
       const feet = characterFeetBox(this.avatar.x, this.avatar.y);
       if (aabbOverlap(feet, expandAabb(zone, 24)) || distance(avatarFeet, center) <= radius) {
-        this.nearTarget = trigger.target;
+        this.nearTarget = { type: "trigger", target: trigger.target };
         return;
       }
+    }
+
+    // Stage objects: nearest one within the interact radius.
+    let nearestObj: StageObject | null = null;
+    let nearestDist = Infinity;
+    for (const obj of sceneObjects(this.scene)) {
+      const d = distance(avatarFeet, objectWorldPos(obj));
+      if (d <= radius && d < nearestDist) {
+        nearestObj = obj;
+        nearestDist = d;
+      }
+    }
+    if (nearestObj) {
+      this.nearTarget = { type: "object", objectId: nearestObj.id, hint: nearestObj.hint };
+      return;
     }
 
     // Fallback: stand near interactive NPCs (non-avatar/companion).
@@ -254,7 +280,7 @@ export class WorldRuntime {
       const d = distance(avatarFeet, { x: ch.position[0], y: ch.position[1] });
       if (d <= radius) {
         const trigger = this.scene.triggers[0];
-        if (trigger) this.nearTarget = trigger.target;
+        if (trigger) this.nearTarget = { type: "trigger", target: trigger.target };
         return;
       }
     }
@@ -313,17 +339,27 @@ export class WorldRuntime {
 
     if (this.nearTarget && !this.frozen) {
       hint.hidden = false;
-      hint.textContent = "Press E to interact";
+      hint.textContent =
+        (this.nearTarget.type === "object" && this.nearTarget.hint) || "Press E to interact";
       hint.style.left = `${(this.avatar.x / WORLD_W) * 100}%`;
       hint.style.top = `${((this.avatar.y - 160) / WORLD_H) * 100}%`;
     } else {
       hint.hidden = true;
     }
 
-    // Highlight nearby trigger zones
+    // Highlight the in-range trigger zone / stage object
+    const near = this.frozen ? null : this.nearTarget;
     for (const zone of this.viewport.querySelectorAll<HTMLElement>(".trigger-zone")) {
-      const active = !this.frozen && !!this.nearTarget;
-      zone.classList.toggle("in-range", active && zone.dataset.target === this.nearTarget);
+      zone.classList.toggle(
+        "in-range",
+        near?.type === "trigger" && zone.dataset.target === near.target,
+      );
+    }
+    for (const el of this.viewport.querySelectorAll<HTMLElement>(".stage-object")) {
+      el.classList.toggle(
+        "in-range",
+        near?.type === "object" && el.dataset.objectId === near.objectId,
+      );
     }
   }
 

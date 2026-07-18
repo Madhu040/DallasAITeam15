@@ -111,6 +111,18 @@ export class GridMap {
 }
 
 /**
+ * World-space center of a cell in the default 100×100 grid — pure helper for
+ * placements authored in cells (stage objects) without needing a GridMap
+ * instance. Matches `GridMap.cellCenterWorld` for default-sized maps.
+ */
+export function gridCellToWorld(col: number, row: number): Vec2 {
+  return {
+    x: (col + 0.5) * (WORLD_W / GRID_COLS),
+    y: (row + 0.5) * (WORLD_H / GRID_ROWS),
+  };
+}
+
+/**
  * Axis-separated collision for a single point (the main character's center)
  * against the grid: X then Y, each axis rejected independently so the avatar
  * slides along obstacle edges. Optional `solids` (NPC boxes) also block the point.

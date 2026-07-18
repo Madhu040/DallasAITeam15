@@ -1,5 +1,6 @@
-import type { DecisionPoint, GameState, Scene, ScenePhase } from "../types/index.js";
-import { getDecisionPoint } from "../content/index.js";
+import type { DecisionPoint, DialogRecord, GameState, Scene, ScenePhase } from "../types/index.js";
+import { getDecisionPoint, getDialog } from "../content/index.js";
+import { objectSprite, objectWorldPos, sceneObjects } from "../content/stageObjects.js";
 import { renderFullBodyCharacter } from "../render/characters.js";
 import type { JourneyReflection } from "../counselor/insights.js";
 import { discussPrompt } from "../counselor/coPlay.js";
@@ -18,6 +19,12 @@ export interface CounselorPanelData {
 
 export type CoPlayStep = "discuss" | "choose";
 
+/** Currently open stage-object dialog (id + page index), owned by `main.ts`. */
+export interface DialogViewState {
+  id: string;
+  page: number;
+}
+
 export function renderGameView(
   container: HTMLElement,
   state: GameState,
@@ -33,6 +40,10 @@ export function renderGameView(
   coPlayStep: CoPlayStep = "discuss",
   onCoPlayReady?: () => void,
   onWorldReady?: (viewport: HTMLElement, scene: Scene, exploring: boolean) => void,
+  onObject?: (objectId: string) => void,
+  dialogState: DialogViewState | null = null,
+  onDialogNext?: () => void,
+  onDialogClose?: () => void,
 ): void {
   container.innerHTML = "";
 
@@ -196,6 +207,35 @@ export function renderGameView(
       viewport.appendChild(spark);
     }
 
+    for (const obj of sceneObjects(scene)) {
+      const exploring = phase === "exploring";
+      const el = document.createElement(exploring ? "button" : "div");
+      el.className = "stage-object";
+      el.dataset.objectId = obj.id;
+      const pos = objectWorldPos(obj);
+      el.style.left = `${(pos.x / 1920) * 100}%`;
+      el.style.top = `${(pos.y / 1080) * 100}%`;
+      el.style.zIndex = String(10 + Math.floor(pos.y / 20));
+      el.setAttribute("aria-label", obj.label ?? obj.hint ?? "Stage object");
+
+      const sprite = document.createElement("span");
+      sprite.className = "stage-object-sprite";
+      sprite.textContent = objectSprite(obj.assetRef);
+      el.appendChild(sprite);
+
+      if (obj.label) {
+        const label = document.createElement("span");
+        label.className = "char-label";
+        label.textContent = obj.label;
+        el.appendChild(label);
+      }
+
+      if (exploring && onObject) {
+        (el as HTMLButtonElement).onclick = () => onObject(obj.id);
+      }
+      viewport.appendChild(el);
+    }
+
     if (phase === "exploring") {
       for (const trigger of scene.triggers) {
         const zone = document.createElement("button");
@@ -246,6 +286,14 @@ export function renderGameView(
       togetherMode,
       coPlayStep,
       onCoPlayReady,
+    );
+  } else if (dialogState && getDialog(dialogState.id)) {
+    renderDialogOverlay(
+      container,
+      getDialog(dialogState.id)!,
+      dialogState.page,
+      onDialogNext ?? (() => {}),
+      onDialogClose ?? (() => {}),
     );
   } else {
     lastSpokenOverlayKey = null;
@@ -387,6 +435,91 @@ function renderDecisionOverlay(
   overlay.appendChild(panel);
   container.appendChild(overlay);
   speakOverlayOnce(`${decisionId}:choose`, buildOverlayScript(dp));
+}
+
+function renderDialogOverlay(
+  container: HTMLElement,
+  dialog: DialogRecord,
+  pageIndex: number,
+  onNext: () => void,
+  onClose: () => void,
+): void {
+  const page = dialog.pages[Math.min(pageIndex, dialog.pages.length - 1)];
+  const isLast = pageIndex >= dialog.pages.length - 1;
+  const speaker = page.speaker ?? dialog.speaker;
+
+  const overlay = document.createElement("div");
+  overlay.className = "overlay";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-label", speaker ? `${speaker} speaks` : "Dialog");
+
+  const panel = document.createElement("div");
+  panel.className = "choice-panel dialog-panel";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "dialog-close";
+  closeBtn.setAttribute("aria-label", "Close dialog");
+  closeBtn.textContent = "✕";
+  closeBtn.onclick = () => {
+    stopSpeaking();
+    onClose();
+  };
+  panel.appendChild(closeBtn);
+
+  if (speaker) {
+    const header = document.createElement("div");
+    header.className = "dialog-speaker";
+    if (dialog.speakerAssetRef) {
+      const portrait = document.createElement("span");
+      portrait.className = "dialog-portrait";
+      portrait.innerHTML = renderFullBodyCharacter({
+        id: "npc",
+        assetRef: dialog.speakerAssetRef,
+        size: 64,
+      });
+      header.appendChild(portrait);
+    }
+    const name = document.createElement("span");
+    name.className = "dialog-speaker-name";
+    name.textContent = speaker;
+    header.appendChild(name);
+    panel.appendChild(header);
+  }
+
+  const text = document.createElement("p");
+  text.className = "dialog-text";
+  text.textContent = page.text;
+  panel.appendChild(text);
+
+  const footer = document.createElement("div");
+  footer.className = "dialog-footer";
+
+  if (dialog.pages.length > 1) {
+    const counter = document.createElement("span");
+    counter.className = "dialog-page-counter";
+    counter.textContent = `${pageIndex + 1} / ${dialog.pages.length}`;
+    footer.appendChild(counter);
+  }
+
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "btn-primary dialog-next";
+  nextBtn.textContent = isLast ? "Done" : "Next";
+  nextBtn.autofocus = true;
+  nextBtn.onclick = () => {
+    stopSpeaking();
+    (isLast ? onClose : onNext)();
+  };
+  footer.appendChild(nextBtn);
+  panel.appendChild(footer);
+
+  overlay.appendChild(panel);
+  container.appendChild(overlay);
+  nextBtn.focus();
+  speakOverlayOnce(
+    `dialog:${dialog.id}:${pageIndex}`,
+    speaker ? `${speaker} says: ${page.text}` : page.text,
+  );
 }
 
 /** Spoken version of a decision pop-up: the prompt, then each option in order. */
