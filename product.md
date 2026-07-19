@@ -573,6 +573,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 
 | Date | Change |
 |---|---|
+| 2026-07-18 | Split Little Dragon hub into **3 phases** (Forest/Meadow, Valley/Cave, Mountain/Festival) on top of main. |
 | 2026-07-13 | Rebased this ledger onto real `trunorth/` tree (removed phantom `TruNorthProject/` claims). |
 | 2026-07-13 | Integrated Level 1 **The Singing Bridge** (W1–W6, Flicker, Wize, Courage Feather). |
 | 2026-07-13 | Updated team board: Daniel L1 done; Ermoni/Gabby/Jose/Vandy/Ranya tasks retargeted. |

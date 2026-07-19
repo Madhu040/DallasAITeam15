@@ -59,7 +59,13 @@ describe("Golden path", () => {
     expect(GOLDEN_PATH).toEqual(["w1", "w2", "w3", "w4", "w5", "w6", "w7"]);
   });
 
-  it("has meadow chapter scenes and no removed forest chapter", () => {
+  it("splits Little Dragon into three chapter phases", () => {
+    expect(SCENES.w1.chapterId).toBe("ch2");
+    expect(SCENES.w3.chapterId).toBe("ch2");
+    expect(SCENES.w4.chapterId).toBe("ch3");
+    expect(SCENES.w5.chapterId).toBe("ch3");
+    expect(SCENES.w6.chapterId).toBe("ch4");
+    expect(SCENES.w7.chapterId).toBe("ch4");
     expect(SCENES.e1).toBeDefined();
     expect(SCENES.c1).toBeUndefined();
   });

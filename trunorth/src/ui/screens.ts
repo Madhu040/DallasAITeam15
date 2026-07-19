@@ -394,13 +394,13 @@ export function renderScenarioHub(
   header.className = "hub-header";
   header.innerHTML = `
     <h1>🧭 Your Journey</h1>
-    <p>${playMode === "together" ? "Pick a zone to explore side by side with your child." : "Choose a zone to explore, or open the parent coach corner."}</p>
+    <p>${playMode === "together" ? "Pick a phase to explore side by side with your child." : "Choose a Little Dragon phase (or the bonus meadow), or open the parent coach corner."}</p>
   `;
   surface.appendChild(header);
 
   const kidTitle = document.createElement("h2");
   kidTitle.className = "hub-section-title";
-  kidTitle.textContent = playMode === "together" ? "Play together" : "For kids";
+  kidTitle.textContent = playMode === "together" ? "Play together" : "Little Dragon phases";
   surface.appendChild(kidTitle);
 
   const kidGrid = document.createElement("div");
