@@ -161,7 +161,7 @@ describe("Red team — safe fallback coverage (spec §9.3 layer 5)", () => {
 describe("Red team — model pinning (reproducible safety baseline)", () => {
   it("uses a pinned dated model ID, never a floating alias", () => {
     // A floating `-latest` alias can change under us and silently invalidate
-    // everything this suite certifies (Consolidated tech spec v3.0 / ADR-002).
+    // everything this suite certifies (Consolidated tech spec v3.0 / ADR-004).
     const model = serverConfig.companion.model;
     expect(model).not.toContain("-latest");
     expect(model).toMatch(/-\d{8}$/);
