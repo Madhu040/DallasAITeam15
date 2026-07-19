@@ -638,6 +638,29 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 
 ## 5. Open gaps (feeds the task board)
 
+> ### 📍 Current position (2026-07-19)
+>
+> **We are in the spec's §22 Phase 4 — "Week 4–5: Hardening" — with 1 of 7 items done.**
+> (Consolidated tech spec §22 defines Phases 1–5. ⚠️ These are **not** the same as the
+> "Phase 0–4" labels used in the §6 changelog below, which were an ad-hoc working sequence.
+> **Use the spec's §22 numbering from here on**; the changelog labels are historical.)
+>
+> | §22 Phase 4 item | State |
+> |---|---|
+> | Red-team suite green | ✅ done |
+> | Empty/error/resume states | 🟨 distress-resume built; in-character API-failure surface + auto-retry incomplete |
+> | Projector-resolution verification | ⬜ |
+> | Recorded backup video | ⬜ *(human task)* |
+> | Accessibility pass on showcase | ⬜ *(also §22A.5 — doubles as a credibility story)* |
+> | Performance budget + release notes | ⬜ |
+> | Scope freeze | ⬜ *(owner decision)* |
+>
+> Earlier §22 phases are essentially complete except: asset manifest / style lock / provenance
+> (ADR-005), JSON-Schema validators, the 16:9 viewport lock, meter juice, and the
+> `baselineStrength` onboarding seed. **§22 Phase 5 is `[EXT]` post-MVP** (backend,
+> `RemoteProgressStore`, dashboard, mini-games, voice) and should not start before the
+> showcase path is frozen.
+>
 > Rows below the divider were surfaced by the **2026-07-19 Master-Spec coverage audit** —
 > full feature-by-feature matrix in [spec-coverage.md](./docs/context/spec-coverage.md).
 > Spec § references point at the Master Spec (intent); this table stays the live tracker.
