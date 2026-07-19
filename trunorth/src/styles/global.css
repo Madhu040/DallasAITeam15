@@ -1,3 +1,28 @@
+/*
+ * Self-hosted variable fonts (SIL Open Font License) — Nunito for the child-facing
+ * surface, Inter for parent/grown-up surfaces.
+ *
+ * These are bundled rather than loaded from Google Fonts so the showcase runs with no
+ * internet at all (spec §13A.3) and demo mode makes zero external asset fetches
+ * (§13A.1). Both are single variable files covering the whole weight range.
+ * `font-display: swap` keeps first paint immediate.
+ */
+@font-face {
+  font-family: "Nunito";
+  src: url("/fonts/nunito-latin-var.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-latin-var.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg-dark: #1a0a2e;
   --bg-parent: #2d1b4e;
