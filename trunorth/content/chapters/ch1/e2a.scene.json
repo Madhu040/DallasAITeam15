@@ -1,0 +1,21 @@
+{
+  "id": "e2a",
+  "chapterId": "ch1",
+  "order": 3,
+  "movementTier": "A",
+  "background": "bg_meadow",
+  "gridMapId": "everbright-meadow",
+  "narration": "The rabbit friend wants to join the others, but hangs back near the pond, ears low. New things can feel big.",
+  "characters": [
+    { "assetRef": "char_leftout", "id": "leftout", "position": [1120, 760], "expression": "worried" },
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [520, 780], "expression": "calm" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [700, 800], "expression": "neutral" },
+    { "assetRef": "char_deer", "id": "helper_deer", "position": [1400, 780], "expression": "happy" }
+  ],
+  "triggers": [
+    { "id": "shy_trigger", "bounds": [1020, 640, 200, 190], "action": "startDecision", "target": "dp_reassure_shy" }
+  ],
+  "collectibles": [],
+  "decisionPoints": ["dp_reassure_shy"],
+  "nextSceneId": "e2b"
+}

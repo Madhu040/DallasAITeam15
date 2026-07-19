@@ -1,0 +1,21 @@
+{
+  "id": "e2b",
+  "chapterId": "ch1",
+  "order": 4,
+  "movementTier": "A",
+  "background": "bg_meadow",
+  "gridMapId": "everbright-meadow",
+  "narration": "In the tall grass, one last shiny sunflower catches the light. You and the deer friend both reach for it at the very same moment.",
+  "characters": [
+    { "assetRef": "char_deer", "id": "helper_deer", "position": [1080, 760], "expression": "neutral" },
+    { "assetRef": "char_leftout", "id": "leftout", "position": [1360, 780], "expression": "happy" },
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [520, 780], "expression": "neutral" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [720, 800], "expression": "neutral" }
+  ],
+  "triggers": [
+    { "id": "share_trigger", "bounds": [980, 640, 200, 190], "action": "startDecision", "target": "dp_share_flower" }
+  ],
+  "collectibles": [],
+  "decisionPoints": ["dp_share_flower"],
+  "nextSceneId": "e2c"
+}

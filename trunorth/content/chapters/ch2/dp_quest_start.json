@@ -1,7 +1,7 @@
 {
   "id": "dp_quest_start",
-  "prompt": "Flicker frets: \"What if something terrible happens?\" Nova still wants the Sky Festival. Ready to begin the Star Crystal quest \u2014 with Flicker along?",
-  "inputMode": "choice",
+  "prompt": "Flicker frets: \"What if something terrible happens?\" Nova still wants the Sky Festival. Ready to begin the Star Crystal quest \u2014 with Flicker along? Tap a choice, or type what you'd tell Flicker.",
+  "inputMode": "both",
   "themeSensitivity": "standard",
   "selSkills": [
     "courage",

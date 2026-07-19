@@ -1,0 +1,20 @@
+{
+  "id": "e2c",
+  "chapterId": "ch1",
+  "order": 5,
+  "movementTier": "A",
+  "background": "bg_meadow",
+  "gridMapId": "everbright-meadow",
+  "narration": "Turning to share the flower, your elbow bumps the deer friend's flower crown and it tumbles into the grass. Their smile fades.",
+  "characters": [
+    { "assetRef": "char_deer", "id": "helper_deer", "position": [1120, 760], "expression": "sad" },
+    { "assetRef": "char_companion_dragon", "id": "companion", "position": [540, 780], "expression": "calm" },
+    { "assetRef": "char_avatar", "id": "avatar", "position": [760, 800], "expression": "neutral" }
+  ],
+  "triggers": [
+    { "id": "repair_trigger", "bounds": [1020, 640, 200, 190], "action": "startDecision", "target": "dp_repair_oops" }
+  ],
+  "collectibles": [],
+  "decisionPoints": ["dp_repair_oops"],
+  "nextSceneId": "e3"
+}

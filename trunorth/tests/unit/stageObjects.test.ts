@@ -140,8 +140,8 @@ describe("SceneEngine finish paths", () => {
     const engine = buildEngine(state, callbacks);
 
     await engine.advanceScene();
-    expect(state.progress.currentSceneId).toBe("e3");
-    expect(callbacks.onSceneChange).toHaveBeenCalledWith("e3");
+    expect(state.progress.currentSceneId).toBe("e2a");
+    expect(callbacks.onSceneChange).toHaveBeenCalledWith("e2a");
     expect(callbacks.onError).not.toHaveBeenCalled();
   });
 

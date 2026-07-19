@@ -16,8 +16,14 @@ import dpCrossing from "../../content/chapters/ch2/dp_crossing.json";
 
 import e1 from "../../content/chapters/ch1/e1.scene.json";
 import e2 from "../../content/chapters/ch1/e2.scene.json";
+import e2a from "../../content/chapters/ch1/e2a.scene.json";
+import e2b from "../../content/chapters/ch1/e2b.scene.json";
+import e2c from "../../content/chapters/ch1/e2c.scene.json";
 import e3 from "../../content/chapters/ch1/e3.scene.json";
 import dpLeftout from "../../content/chapters/ch1/dp_leftout_bench.json";
+import dpReassureShy from "../../content/chapters/ch1/dp_reassure_shy.json";
+import dpShareFlower from "../../content/chapters/ch1/dp_share_flower.json";
+import dpRepairOops from "../../content/chapters/ch1/dp_repair_oops.json";
 import dpAskGrownup from "../../content/chapters/ch1/dp_ask_grownup.json";
 
 import dlgMeadowWelcome from "../../content/chapters/ch1/dlg_meadow_welcome.json";
@@ -33,6 +39,9 @@ export const SCENES: Record<string, Scene> = {
   w7: w7 as unknown as Scene,
   e1: e1 as unknown as Scene,
   e2: e2 as unknown as Scene,
+  e2a: e2a as unknown as Scene,
+  e2b: e2b as unknown as Scene,
+  e2c: e2c as unknown as Scene,
   e3: e3 as unknown as Scene,
 };
 
@@ -44,6 +53,9 @@ export const DECISION_POINTS: Record<string, DecisionPoint> = {
   dp_choose_path: dpChoosePath as DecisionPoint,
   dp_crossing: dpCrossing as DecisionPoint,
   dp_leftout_bench: dpLeftout as DecisionPoint,
+  dp_reassure_shy: dpReassureShy as DecisionPoint,
+  dp_share_flower: dpShareFlower as DecisionPoint,
+  dp_repair_oops: dpRepairOops as DecisionPoint,
   dp_ask_grownup: dpAskGrownup as DecisionPoint,
 };
 

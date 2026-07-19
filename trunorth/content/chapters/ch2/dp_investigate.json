@@ -1,7 +1,7 @@
 {
   "id": "dp_investigate",
-  "prompt": "Flicker says: \"What if we get lost?\" Use a Question Feather. Which curiosity question do you ask?",
-  "inputMode": "choice",
+  "prompt": "Flicker says: \"What if we get lost?\" Use a Question Feather. Tap a curiosity question — or type your own.",
+  "inputMode": "both",
   "themeSensitivity": "standard",
   "selSkills": [
     "worry_brave",
