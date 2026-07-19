@@ -1,10 +1,26 @@
+> # ⚠️ SUPERSEDED — DO NOT REVIEW AGAINST THIS DOCUMENT
+>
+> **This is the Phase-1 baseline (Draft v1). It was superseded on 2026-07-19 by
+> [`Consolidated TruNorth-Technical-Specification.md`](./Consolidated%20TruNorth-Technical-Specification.md) (v3.0)**,
+> which carries the same Sections 1–23 *updated in place* with Phase 2's platform decisions,
+> plus Part II (governance) and Part III (enterprise).
+>
+> Known decisions in this file that v3.0 **changed** (see its Appendix F): Vite 6.x → **8.x pinned**;
+> Node 22 → **24.x LTS preferred**; "Edge or Netlify Functions" → **Vercel Node runtime**;
+> `claude-3-5-haiku-latest` → **Claude Haiku 4.5, pinned dated ID**; accessibility list → **WCAG 2.2 AA**.
+>
+> Kept for history only. Current authority: **`TruNorth Master Spec.md`** (product intent) →
+> **Consolidated v3.0** (engineering intent). See `product.md` §1.
+
+---
+
 # TruNorth — Technical Specification
 
 **Document type:** Engineering implementation guide  
 **Derived from:** `TruNorth Master Spec.md` (Draft v2)  
 **Audience:** Full-stack developers, technical leads, DevOps, QA  
 **Owner:** Madhusudhan Chillara (Dallas AI · Summer 2026 Cohort)  
-**Status:** Draft v1 — build-ready technical companion to the product spec  
+**Status:** ⚠️ **SUPERSEDED** (was: Draft v1 — build-ready technical companion to the product spec)  
 
 ---
 

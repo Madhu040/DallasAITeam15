@@ -3,11 +3,17 @@
 > **Documents:** [`docs/specs/TruNorth Master Spec.md`](../specs/TruNorth%20Master%20Spec.md) (intent, 1798 lines)
 > measured against the implemented tree in `trunorth/` as recorded in [`product.md`](../../product.md) (reality).
 >
-> ⚠️ **Which spec is authoritative?** This audit was run against the **Master Spec**. `product.md` §1
-> currently names [`TruNorth Technical Specification.md`](../specs/TruNorth%20Technical%20Specification.md)
-> (a different, shorter 1334-line doc) as the primary. `docs/specs/` also holds a 1629-line
-> "Consolidated" variant. **The team should designate one primary spec** — the coverage below
-> assumes the Master Spec. Tracked in `product.md` §5.
+> **Spec hierarchy (resolved 2026-07-19).** The three specs in `docs/specs/` are *layered, not competing* —
+> both engineering docs declare "Derived from: `TruNorth Master Spec.md` (Draft v2)", and the Consolidated
+> spec states the conflict order itself:
+> **Master Spec → SME/counsel rulings → Consolidated technical spec (v3.0) → ADRs → repo README.**
+> This audit measures against the **Master Spec** (top of that hierarchy), so it remains valid.
+> [`TruNorth Technical Specification.md`](../specs/TruNorth%20Technical%20Specification.md) is the
+> Phase-1 **Draft v1 and is superseded** by Consolidated v3.0 — banner-marked, kept for history only.
+>
+> **Not covered here:** the Consolidated v3.0 *engineering* deltas (Vite 8.x pin, Node 24, pinned
+> Haiku 4.5 model ID, WCAG 2.2 AA, Part II governance artifacts, Part III enterprise). Those are
+> tracked as rows in `product.md` §5.
 > **Point-in-time audit — 2026-07-19**, taken immediately after Phase 3 (commit `b2ceb82`).
 > This file is a *snapshot*, not a live tracker. `product.md` §3 remains authoritative for
 > "what is built"; the Master Spec remains authoritative for "what is intended";
