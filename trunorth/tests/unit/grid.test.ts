@@ -63,7 +63,7 @@ describe("grid levels", () => {
 
   it("routes every child scenario and scene to a registered grid level", () => {
     const childScenarios = SCENARIOS.filter((s) => s.audience === "child");
-    expect(childScenarios.map((s) => s.id).sort()).toEqual(["ch1", "ch2"]);
+    expect(childScenarios.map((s) => s.id).sort()).toEqual(["ch1", "ch2", "ch3", "ch4"]);
     for (const scenario of childScenarios) {
       const gridId = getScene(scenario.startSceneId)?.gridMapId;
       expect(gridId, `${scenario.id} start scene has a gridMapId`).toBeTruthy();

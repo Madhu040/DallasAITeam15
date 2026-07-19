@@ -34,7 +34,7 @@
   "consequences": [
     {
       "band": "strong",
-      "sceneId": "w6",
+      "sceneId": "w5",
       "fx": [
         "first_step"
       ],
@@ -46,7 +46,7 @@
     },
     {
       "band": "partial",
-      "sceneId": "w6",
+      "sceneId": "w5",
       "meterDeltas": {
         "empathy": 0.2
       }

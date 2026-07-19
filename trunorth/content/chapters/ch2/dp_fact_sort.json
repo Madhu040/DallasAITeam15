@@ -33,7 +33,7 @@
   "consequences": [
     {
       "band": "strong",
-      "sceneId": "w4",
+      "sceneId": "w3",
       "fx": [
         "curiosity_glow"
       ],
@@ -44,7 +44,7 @@
     },
     {
       "band": "partial",
-      "sceneId": "w4",
+      "sceneId": "w3",
       "meterDeltas": {
         "worry_brave": 0.2
       }
