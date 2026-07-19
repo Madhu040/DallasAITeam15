@@ -28,6 +28,19 @@ import dpAskGrownup from "../../content/chapters/ch1/dp_ask_grownup.json";
 
 import dlgMeadowWelcome from "../../content/chapters/ch1/dlg_meadow_welcome.json";
 import dlgStarLegend from "../../content/chapters/ch2/dlg_star_legend.json";
+import dlgFlowerCrown from "../../content/chapters/ch1/dlg_flower_crown.json";
+import dlgLonelyBall from "../../content/chapters/ch1/dlg_lonely_ball.json";
+import dlgDeerTracks from "../../content/chapters/ch1/dlg_deer_tracks.json";
+import dlgPondEdge from "../../content/chapters/ch1/dlg_pond_edge.json";
+import dlgTrailStones from "../../content/chapters/ch1/dlg_trail_stones.json";
+import dlgHidingBush from "../../content/chapters/ch1/dlg_hiding_bush.json";
+import dlgDroppedHat from "../../content/chapters/ch1/dlg_dropped_hat.json";
+import dlgFlowerPatch from "../../content/chapters/ch1/dlg_flower_patch.json";
+import dlgEmptyBasket from "../../content/chapters/ch1/dlg_empty_basket.json";
+import dlgBrokenCrown from "../../content/chapters/ch1/dlg_broken_crown.json";
+import dlgScatteredPetals from "../../content/chapters/ch1/dlg_scattered_petals.json";
+import dlgHelpBell from "../../content/chapters/ch1/dlg_help_bell.json";
+import dlgBenchNote from "../../content/chapters/ch1/dlg_bench_note.json";
 
 export const SCENES: Record<string, Scene> = {
   w1: w1 as Scene,
@@ -71,6 +84,19 @@ export function getDecisionPoint(id: string): DecisionPoint | undefined {
 export const DIALOGS: Record<string, DialogRecord> = {
   dlg_meadow_welcome: dlgMeadowWelcome as DialogRecord,
   dlg_star_legend: dlgStarLegend as DialogRecord,
+  dlg_flower_crown: dlgFlowerCrown as DialogRecord,
+  dlg_lonely_ball: dlgLonelyBall as DialogRecord,
+  dlg_deer_tracks: dlgDeerTracks as DialogRecord,
+  dlg_pond_edge: dlgPondEdge as DialogRecord,
+  dlg_trail_stones: dlgTrailStones as DialogRecord,
+  dlg_hiding_bush: dlgHidingBush as DialogRecord,
+  dlg_dropped_hat: dlgDroppedHat as DialogRecord,
+  dlg_flower_patch: dlgFlowerPatch as DialogRecord,
+  dlg_empty_basket: dlgEmptyBasket as DialogRecord,
+  dlg_broken_crown: dlgBrokenCrown as DialogRecord,
+  dlg_scattered_petals: dlgScatteredPetals as DialogRecord,
+  dlg_help_bell: dlgHelpBell as DialogRecord,
+  dlg_bench_note: dlgBenchNote as DialogRecord,
 };
 
 export function getDialog(id: string): DialogRecord | undefined {

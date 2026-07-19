@@ -65,7 +65,7 @@ async function clickIfPresent(page: Page, pattern: RegExp, timeout = 2_500): Pro
 }
 
 async function bootToShowcaseScene(page: Page): Promise<void> {
-  await page.goto("/?demo=1");
+  await page.goto("/?demo=1&zoom=1");
   await clickText(page, /Play Now/i);
   await clickIfPresent(page, /I understand/i);
   if (await clickIfPresent(page, /Dragon \(Flicker\)/i)) {
@@ -80,6 +80,22 @@ async function bootToShowcaseScene(page: Page): Promise<void> {
     await clickIfPresent(page, /Skip and start playing/i, 5_000);
   }
   await expect(page.getByText(/Move: WASD/i)).toBeVisible({ timeout: 15_000 });
+  await settleLayout(page);
+}
+
+/**
+ * Layout measurements must not race the stylesheet or webfonts.
+ *
+ * This suite intermittently failed its ≥64px hit-target assertion on a loaded machine while
+ * passing in isolation — the button was being measured before `min-height: 64px` had
+ * applied, so a one-shot `boundingBox()` caught a pre-CSS layout. Waiting for fonts and a
+ * couple of frames makes the measurement deterministic; the assertions below also poll.
+ */
+async function settleLayout(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  });
 }
 
 test.describe("Projector resolutions (spec §13A.6, §13A.8, Consolidated §6.1/§6.6)", () => {
@@ -137,6 +153,8 @@ test.describe("Projector resolutions (spec §13A.6, §13A.8, Consolidated §6.1/
       const choice = page.getByRole("button", { name: /want to play with us/i });
       await expect(choice).toBeVisible({ timeout: 15_000 });
 
+      await settleLayout(page);
+
       const choiceBox = await choice.boundingBox();
       expect(choiceBox!.x).toBeGreaterThanOrEqual(-1);
       expect(choiceBox!.y).toBeGreaterThanOrEqual(-1);
@@ -153,10 +171,13 @@ test.describe("Projector resolutions (spec §13A.6, §13A.8, Consolidated §6.1/
 
       // 5. Hit targets: §17A.4 requires 64px minimum for the Ch.1 (ages 5–7) band. The
       //    projector case is where a shrinking layout would quietly violate it.
-      expect(
-        choiceBox!.height,
-        `choice hit target is ${choiceBox!.height}px at ${mode.name} — §17A.4 wants ≥64px for Ch.1`,
-      ).toBeGreaterThanOrEqual(64);
+      //    Polled rather than measured once — see settleLayout().
+      await expect
+        .poll(
+          async () => (await choice.boundingBox())?.height ?? 0,
+          { message: `choice hit target below §17A.4's 64px floor at ${mode.name}`, timeout: 5_000 },
+        )
+        .toBeGreaterThanOrEqual(64);
     });
   }
 
@@ -164,7 +185,7 @@ test.describe("Projector resolutions (spec §13A.6, §13A.8, Consolidated §6.1/
     await page.setViewportSize({ width: 1920, height: 1080 });
 
     const started = Date.now();
-    await page.goto("/?demo=1");
+    await page.goto("/?demo=1&zoom=1");
     await page.getByRole("button", { name: /Play Now/i }).first().waitFor({ state: "visible" });
     const loadMs = Date.now() - started;
 

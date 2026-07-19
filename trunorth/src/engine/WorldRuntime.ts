@@ -41,6 +41,20 @@ interface SolidBody {
 const SOLID_SKIP = new Set(["avatar", "companion", "worry_cloud"]);
 
 /**
+ * Camera zoom, from config with a `?zoom=N` URL override for testing. e2e boots with
+ * `?zoom=1` so the framing (which moves elements around) never destabilises the logic
+ * tests; a dedicated camera test exercises the real zoom.
+ */
+function resolveCameraZoom(): number {
+  if (typeof window !== "undefined") {
+    const raw = new URLSearchParams(window.location.search).get("zoom");
+    const parsed = raw === null ? NaN : Number(raw);
+    if (!Number.isNaN(parsed) && parsed >= 1 && parsed <= 4) return parsed;
+  }
+  return appConfig.world.cameraZoom;
+}
+
+/**
  * Character sprites anchor at the feet (translate(-50%, -100%), ~110px tall), so
  * the visual center sits this far above the position point. Grid collision tests
  * the avatar's center, per the level design convention.
@@ -59,6 +73,9 @@ export class WorldRuntime {
   private frozen = true;
 
   private avatar: Vec2 = { x: 640, y: 800 };
+  /** Smoothed camera focus point (world coords). Lerps toward the avatar each frame. */
+  private cam: Vec2 = { x: WORLD_W / 2, y: WORLD_H / 2 };
+  private readonly cameraZoom = resolveCameraZoom();
   private companion: Vec2 = { x: 520, y: 760 };
   private facing: Facing = "down";
   private collected = new Set<string>();
@@ -95,9 +112,12 @@ export class WorldRuntime {
         this.avatar = { x: spawn.x, y: spawn.y + AVATAR_CENTER_OFFSET_Y };
         this.companion = { x: this.avatar.x - 100, y: this.avatar.y };
       }
+      // Snap the camera to the new spawn so a scene change doesn't swoop across the map.
+      this.cam = { x: this.avatar.x, y: this.avatar.y };
     }
 
     this.applyDomPositions();
+    this.applyCamera(0);
     this.syncCollectibleDom();
     this.renderHint();
 
@@ -191,7 +211,42 @@ export class WorldRuntime {
     }
 
     this.applyDomPositions();
+    this.applyCamera(dt);
     this.renderHint();
+  }
+
+  /**
+   * Following camera — transforms the whole world layer to keep the avatar near centre,
+   * clamped so it never shows past the level edges. Pure display: the avatar's world
+   * coordinates, collision, and proximity are untouched, so only *what's shown* changes.
+   *
+   * The transform is `scale(z) translate(tx%, ty%)`; the translate percentages are relative
+   * to the layer's own size, so this is resolution-independent (works identically on a
+   * laptop and a projector). See the math note in `applyCamera`.
+   */
+  private applyCamera(dt: number): void {
+    const layer = this.viewport;
+    if (!layer) return;
+    const z = this.cameraZoom;
+    if (z <= 1.001) {
+      if (layer.style.transform) layer.style.transform = "";
+      return;
+    }
+
+    // Smoothly chase the avatar (dt-based, frame-rate independent). dt = 0 snaps.
+    const k = dt <= 0 ? 1 : 1 - Math.pow(0.0009, dt);
+    this.cam.x += (this.avatar.x - this.cam.x) * k;
+    this.cam.y += (this.avatar.y - this.cam.y) * k;
+
+    const fx = this.cam.x / WORLD_W;
+    const fy = this.cam.y / WORLD_H;
+    // Centre the focus point: with `scale(z) translate(T)`, a point at fraction f lands at
+    // z*(f*W + T). Setting that to W/2 gives T% = (0.5/z - f)*100.
+    const min = (1 / z - 1) * 100; // most negative translate before an edge shows
+    const tx = Math.min(0, Math.max(min, (0.5 / z - fx) * 100));
+    const ty = Math.min(0, Math.max(min, (0.5 / z - fy) * 100));
+    layer.style.transformOrigin = "0 0";
+    layer.style.transform = `scale(${z}) translate(${tx.toFixed(3)}%, ${ty.toFixed(3)}%)`;
   }
 
   private stepMovement(dt: number): void {
@@ -236,12 +291,19 @@ export class WorldRuntime {
     const feet = characterFeetBox(this.avatar.x, this.avatar.y);
     for (const c of this.scene.collectibles) {
       if (this.collected.has(c.id)) continue;
+
+      // A gated Kindness Spark (§7.6) is not rendered until its kind action has happened,
+      // and GameView owns that decision. Treat the rendered element as the source of truth
+      // so the runtime can't hand the child a spark they haven't earned yet — and so the
+      // gate logic lives in exactly one place.
+      const el = this.viewport?.querySelector(`[data-collectible-id="${c.id}"]`);
+      if (!el || el.classList.contains("collected")) continue;
+
       const box = characterFeetBox(c.position[0], c.position[1], 48, 48);
       if (aabbOverlap(feet, expandAabb(box, 12))) {
         this.collected.add(c.id);
         this.callbacks?.onCollect(c.id);
-        const el = this.viewport?.querySelector(`[data-collectible-id="${c.id}"]`);
-        if (el) el.classList.add("collected");
+        el.classList.add("collected");
       }
     }
   }

@@ -85,6 +85,19 @@ body {
   --px: 0.0520833cqw;
 }
 
+/**
+ * Camera layer — holds all world-space content (background, characters, objects, sparks,
+ * hotspots, move hint). WorldRuntime transforms this to follow the avatar (see applyCamera).
+ * Same box as the viewport, so children keep their existing `%` positions; the viewport
+ * clips it (overflow:hidden already). Screen chrome stays on the viewport, outside this.
+ */
+.world-layer {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
 .scene-bg {
   position: absolute;
   inset: 0;
@@ -251,6 +264,32 @@ body {
   z-index: 70;
   max-height: 42vh;
   overflow: auto;
+}
+
+/**
+ * Child-facing variant: this is the companion talking to their friend, not a report card.
+ * Warmer, softer, no clinical chrome. The grown-up version keeps the coach styling above
+ * and only appears in Together Mode, where a parent is deliberately watching (§12.4, §1.1).
+ */
+.counselor-panel.companion-note {
+  background: linear-gradient(180deg, rgba(255,252,245,0.97), rgba(255,246,224,0.97));
+  border: 2px solid rgba(255, 214, 10, 0.55);
+  border-radius: 20px;
+  max-height: 30vh;
+}
+
+.counselor-panel.companion-note .counselor-badge {
+  background: var(--tru-gold);
+  color: #4a2c00;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.counselor-panel.companion-note .counselor-child {
+  font-size: clamp(13px, calc(19 * var(--px)), 19px);
+  line-height: 1.5;
+  margin-bottom: 0;
+  font-weight: 600;
 }
 
 /* Drag handle for the whole panel (body keeps overflow:auto scrolling). */
@@ -500,16 +539,60 @@ body {
   z-index: 10;
 }
 
+/**
+ * Skill meter — §7.2 "each meter has visible fill state and level thresholds", and
+ * §17A.4 "meter changes animate visibly and are large enough to read from across a room".
+ *
+ * This was a static emoji circle with a fixed border: filling a skill changed nothing on
+ * screen, so the §17B.2 particle flight arrived at a target that never responded. The
+ * conic-gradient ring is the fill, driven by `--fill` (0-100) set in GameView. Enlarged
+ * because §13A.4 asks for legibility from ~15m on a projector.
+ */
 .meter {
-  width: clamp(30px, calc(48 * var(--px)), 48px);
-  height: clamp(30px, calc(48 * var(--px)), 48px);
+  position: relative;
+  width: clamp(42px, calc(68 * var(--px)), 68px);
+  height: clamp(42px, calc(68 * var(--px)), 68px);
   border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.3);
   display: grid;
   place-items: center;
-  font-size: clamp(0.75rem, calc(19 * var(--px)), 1.2rem);
-  background: rgba(0,0,0,0.3);
-  transition: transform 0.3s ease;
+  font-size: clamp(1rem, calc(26 * var(--px)), 1.6rem);
+  background:
+    conic-gradient(var(--tru-gold) calc(var(--fill, 0) * 1%), rgba(255,255,255,0.16) 0);
+  transition: transform 0.3s ease, background 0.6s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+}
+
+/* Inner disc, so the gradient reads as a ring rather than a filled pie. */
+.meter::before {
+  content: "";
+  position: absolute;
+  inset: clamp(4px, calc(7 * var(--px)), 7px);
+  border-radius: 50%;
+  background: rgba(20, 10, 34, 0.86);
+}
+
+.meter-face {
+  position: relative;
+  z-index: 1;
+  line-height: 1;
+}
+
+.meter-level {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  z-index: 2;
+  min-width: clamp(16px, calc(24 * var(--px)), 24px);
+  height: clamp(16px, calc(24 * var(--px)), 24px);
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--tru-gold);
+  color: #4a2c00;
+  font-size: clamp(9px, calc(14 * var(--px)), 14px);
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
 
 .meter.juice { transform: scale(1.2); animation: meterPop 0.5s ease; }
@@ -1071,6 +1154,131 @@ body {
   pointer-events: none;
   white-space: nowrap;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* Discovery counter — a quiet chip, deliberately not a progress bar (§7.7). */
+.discovery-chip {
+  position: absolute;
+  top: max(8px, calc(12 * var(--px)));
+  left: max(96px, calc(150 * var(--px)));
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  font-size: clamp(11px, calc(16 * var(--px)), 16px);
+  font-weight: 700;
+  padding: calc(5 * var(--px)) calc(13 * var(--px));
+  border-radius: 999px;
+  border: 2px solid rgba(255, 214, 10, 0.35);
+  z-index: 11;
+  white-space: nowrap;
+}
+
+.discovery-chip.complete {
+  background: rgba(255, 214, 10, 0.92);
+  color: #4a2c00;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/**
+ * Discoverable stage objects should read as "there is something here".
+ *
+ * Animate the SPRITE, never the button. Animating `.stage-object` itself means the
+ * element's box never settles, which makes it unclickable to automation (and to anything
+ * that waits for a stable hit target) — it broke the existing North Gate e2e click.
+ */
+.stage-object-sprite {
+  display: inline-block;
+  animation: object-beckon 2.6s ease-in-out infinite;
+}
+
+@keyframes object-beckon {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(calc(-7 * var(--px))) scale(1.07); }
+}
+
+/* Sparks: bigger and brighter, so they pull the eye across the meadow. */
+.world-collectible {
+  font-size: clamp(26px, calc(52 * var(--px)), 52px) !important;
+  filter: drop-shadow(0 0 16px rgba(255, 214, 10, 0.95)) !important;
+}
+
+/* ——— Reward juice: the Glow Gauge (spec §17B.2) ———
+   Earned-moment effects only. Ambient scenes stay quiet per the §17A.4 calm-first
+   stimulation budget — these classes are added for well under 2s and then removed. */
+
+.juice-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 85; /* above characters + bubbles, below modal overlays (100) */
+}
+
+.juice-particle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: clamp(14px, calc(30 * var(--px)), 30px);
+  height: clamp(14px, calc(30 * var(--px)), 30px);
+  border-radius: 50%;
+  will-change: transform, opacity;
+}
+
+/* The companion physically reacts — the first half of "cause and effect". */
+.character.is-celebrating .char-fullbody {
+  animation: companion-cheer 0.62s ease-in-out;
+}
+
+@keyframes companion-cheer {
+  0%   { transform: translateY(0) scale(1); }
+  28%  { transform: translateY(calc(-16 * var(--px))) scale(1.09) rotate(-5deg); }
+  55%  { transform: translateY(0) scale(1.02) rotate(4deg); }
+  78%  { transform: translateY(calc(-7 * var(--px))) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* The meter catches the burst. */
+.meter.meter-caught {
+  animation: meter-catch 0.5s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes meter-catch {
+  0%   { transform: scale(1); box-shadow: 0 0 0 rgba(255,214,10,0); }
+  40%  { transform: scale(1.35); box-shadow: 0 0 calc(26 * var(--px)) rgba(255,214,10,.95); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,214,10,0); }
+}
+
+/* The world responds — §17B.2: "the grass blooms where I walk". */
+.world-bloom {
+  position: absolute;
+  font-size: clamp(30px, calc(76 * var(--px)), 76px);
+  transform: translate(-50%, -50%) scale(0);
+  animation: bloom-in 2.2s ease-out forwards;
+  z-index: 86;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,.28));
+}
+
+@keyframes bloom-in {
+  0%   { transform: translate(-50%, -50%) scale(0) rotate(-22deg); opacity: 0; }
+  35%  { transform: translate(-50%, -50%) scale(1.18) rotate(6deg); opacity: 1; }
+  55%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -60%) scale(1) rotate(0deg); opacity: 0; }
+}
+
+/* A brief, gentle warming of the whole scene — the "slight lift" in saturation the
+   stimulation budget allows for a strong-choice consequence, nothing more. */
+.game-viewport.world-warmed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 84;
+  background: radial-gradient(circle at 50% 62%, rgba(255,214,10,.42), transparent 68%);
+  animation: warm-pulse 1.9s ease-out forwards;
+}
+
+@keyframes warm-pulse {
+  0%   { opacity: 0; }
+  22%  { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

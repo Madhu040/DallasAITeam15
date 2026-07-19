@@ -98,6 +98,13 @@ export const appConfig = {
     interactRadiusPx: viteNumber("VITE_INTERACT_RADIUS", 140),
     /** Companion follow smoothing (higher = stickier / slower catch-up). */
     companionFollowLag: viteNumber("VITE_COMPANION_FOLLOW_LAG", 0.88),
+    /**
+     * Following-camera zoom. 1 = off (the whole level fits on screen, the old diorama).
+     * >1 zooms in and follows the avatar, so the world extends off-screen and moving
+     * becomes exploring. 1.8 shows roughly a third of the level at once. URL `?zoom=N`
+     * overrides for testing (e2e boots with `?zoom=1` to keep framing out of logic tests).
+     */
+    cameraZoom: viteNumber("VITE_CAMERA_ZOOM", 1.8),
   },
   productName: viteString("VITE_PRODUCT_NAME", "TruNorth"),
 };

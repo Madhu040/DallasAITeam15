@@ -58,7 +58,7 @@ async function clickIfPresent(page: Page, pattern: RegExp, timeout = 2_500): Pro
 }
 
 async function bootToHub(page: Page): Promise<void> {
-  await page.goto("/?demo=1");
+  await page.goto("/?demo=1&zoom=1");
   await clickText(page, /Play Now/i);
   await clickIfPresent(page, /I understand/i);
   if (await clickIfPresent(page, /Dragon \(Flicker\)/i)) {
@@ -79,7 +79,7 @@ async function startShowcaseScene(page: Page): Promise<void> {
 
 test.describe("Accessibility — showcase scene (spec §20, §17A.4, §22A.5)", () => {
   test("landing and hub screens have no WCAG 2.2 AA violations", async ({ page }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/?demo=1&zoom=1");
     const landing = await scan(page).analyze();
     expect(landing.violations, `landing screen:${format(landing.violations)}`).toEqual([]);
 
@@ -141,9 +141,7 @@ test.describe("Accessibility — showcase scene (spec §20, §17A.4, §22A.5)", 
     expect(hasRing, `no visible focus indicator: ${JSON.stringify(ring)}`).toBe(true);
 
     await page.keyboard.press("Enter");
-    await expect(
-      page.getByRole("heading", { name: /Counselor insight|Together reflection/i }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(".counselor-panel")).toBeVisible({ timeout: 15_000 });
   });
 
   test("respects prefers-reduced-motion (§20 reduced motion)", async ({ page }) => {

@@ -6,8 +6,9 @@ import type { JourneyReflection } from "../counselor/insights.js";
 import { discussPrompt } from "../counselor/coPlay.js";
 import { zoneFromBackground, zoneForChapter } from "../content/zones.js";
 import { isGridDebug, resolveGridLevel } from "../content/gridLevels.js";
+import { visibleSparks } from "../content/sparks.js";
 import { renderGridBackground } from "../render/gridBackground.js";
-import { contentConfig } from "../config/content.js";
+import { celebrationFor } from "../config/content.js";
 import { isSpeechSupported, isVoiceEnabled, setVoiceEnabled, speakLine, stopSpeaking } from "../audio/speech.js";
 import { COLOR_TUNES, type TogetherPlayer } from "../together/inviteStore.js";
 
@@ -93,6 +94,24 @@ export function renderGameView(
   brownie.textContent = `💎 ${state.progress.browniePoints}`;
   viewport.appendChild(brownie);
 
+  /**
+   * Discovery counter — "🔍 1 of 3". Tells the child there IS something to look for and
+   * how much is left, which is what makes exploring feel like a search rather than
+   * wandering. Deliberately a quiet chip, not a progress bar: §7.7 warns that HUD chrome
+   * "measures the child" and turns a felt story into a task.
+   */
+  const discoverables = (scene?.objects ?? []).filter(
+    (o) => o.interaction.kind === "openDialog",
+  );
+  if (scene && discoverables.length > 0) {
+    const found = (state.progress.discoveries?.[scene.id] ?? []).length;
+    const chip = document.createElement("div");
+    chip.className = found >= discoverables.length ? "discovery-chip complete" : "discovery-chip";
+    chip.textContent = `🔍 ${found} of ${discoverables.length}`;
+    chip.setAttribute("aria-label", `Discovered ${found} of ${discoverables.length} things to look at`);
+    viewport.appendChild(chip);
+  }
+
   const gridLevel = scene ? resolveGridLevel(scene) : null;
 
   // A scene can recast the follower companion (ch2: Wize guides while Flicker
@@ -114,11 +133,30 @@ export function renderGameView(
   hud.setAttribute("role", "group");
   hud.setAttribute("aria-label", "Skill meters");
   for (const skill of ["empathy", "calm", "courage"] as const) {
+    const { fill, level } = state.meters[skill];
     const meter = document.createElement("div");
     meter.className = "meter";
-    meter.setAttribute("aria-label", `${skill} level ${state.meters[skill].level}`);
+    // Flight destination for the §17B.2 particle burst — see src/render/juice.ts.
+    meter.dataset.meterSkill = skill;
+    // §7.2 requires a *visible fill state*. Until now the meter was a static emoji circle
+    // with a fixed border, so a skill filling up changed nothing on screen — the particle
+    // flight landed on a target that never responded. The ring below is that fill.
+    meter.style.setProperty("--fill", String(Math.max(0, Math.min(100, fill))));
+    meter.setAttribute(
+      "aria-label",
+      `${skill.replace(/_/g, " ")}: level ${level}, ${Math.round(fill)}% full`,
+    );
     const icons: Record<string, string> = { empathy: "❤️", calm: "🌊", courage: "⭐" };
-    meter.textContent = icons[skill] ?? "●";
+    const face = document.createElement("span");
+    face.className = "meter-face";
+    face.textContent = icons[skill] ?? "●";
+    meter.appendChild(face);
+    if (level > 1) {
+      const badge = document.createElement("span");
+      badge.className = "meter-level";
+      badge.textContent = String(level);
+      meter.appendChild(badge);
+    }
     hud.appendChild(meter);
   }
   viewport.appendChild(hud);
@@ -142,8 +180,19 @@ export function renderGameView(
 
   if (scene) {
     const zoneMeta = zoneFromBackground(scene.background) ?? zoneForChapter(scene.chapterId);
+
+    // The camera layer. All *world-space* content (background, characters, collectibles,
+    // stage objects, hotspots, move hint) lives inside this and is transformed as one by
+    // WorldRuntime to follow the avatar — turning the fixed one-screen diorama into a
+    // world you scroll through. Screen chrome (HUD, pills, counter, discovery chip,
+    // overlays) stays on `viewport` and does not move. The layer is the same box as the
+    // viewport, so every child's `%` position is unchanged — the camera is a pure display
+    // transform over the same 1920×1080 world coordinates.
+    const world = document.createElement("div");
+    world.className = "world-layer";
+
     if (gridLevel) {
-      renderGridBackground(viewport, gridLevel, isGridDebug());
+      renderGridBackground(world, gridLevel, isGridDebug());
     } else {
       const bg = document.createElement("div");
       const legacyClass = scene.background.includes("treehouse")
@@ -155,7 +204,7 @@ export function renderGameView(
             : "";
       bg.className = `scene-bg zone-${zoneMeta.id}${legacyClass ? ` ${legacyClass}` : ""}`;
       bg.style.backgroundImage = `url(${zoneMeta.image})`;
-      viewport.appendChild(bg);
+      world.appendChild(bg);
     }
 
     const sign = document.createElement("div");
@@ -223,18 +272,21 @@ export function renderGameView(
         el.style.zIndex = "75";
       }
 
-      viewport.appendChild(el);
+      world.appendChild(el);
     }
 
-    for (const item of scene.collectibles) {
+    // §7.6: gated sparks only exist once the kind action has happened, so a second run is
+    // "find what I missed" rather than a replay of the same lesson.
+    for (const item of visibleSparks(scene, state)) {
+      const alreadyFound = (state.progress.kindnessSparksFound[scene.id] ?? []).includes(item.id);
       const spark = document.createElement("div");
-      spark.className = "world-collectible";
+      spark.className = alreadyFound ? "world-collectible collected" : "world-collectible";
       spark.dataset.collectibleId = item.id;
       spark.style.left = `${(item.position[0] / 1920) * 100}%`;
       spark.style.top = `${(item.position[1] / 1080) * 100}%`;
       spark.setAttribute("aria-label", "Kindness spark");
       spark.textContent = "✨";
-      viewport.appendChild(spark);
+      world.appendChild(spark);
     }
 
     for (const obj of sceneObjects(scene)) {
@@ -263,7 +315,7 @@ export function renderGameView(
       if (exploring && onObject) {
         (el as HTMLButtonElement).onclick = () => onObject(obj.id);
       }
-      viewport.appendChild(el);
+      world.appendChild(el);
     }
 
     if (phase === "exploring") {
@@ -278,11 +330,12 @@ export function renderGameView(
         zone.style.width = `${(w / 1920) * 100}%`;
         zone.style.height = `${(h / 1080) * 100}%`;
         zone.onclick = () => onTrigger(trigger.target);
-        viewport.appendChild(zone);
+        world.appendChild(zone);
       }
     }
 
-    onWorldReady?.(viewport, scene, phase === "exploring");
+    viewport.appendChild(world);
+    onWorldReady?.(world, scene, phase === "exploring");
   }
 
   if (phase === "awaitingCompanion") {
@@ -299,7 +352,7 @@ export function renderGameView(
     (phase === "consequence" || phase === "decision" || phase === "exploring") &&
     counselorKey(counselor) !== dismissedCounselorKey
   ) {
-    root.appendChild(buildCounselorPanel(counselor));
+    root.appendChild(buildCounselorPanel(counselor, togetherMode, state.profile.companionName));
   }
 
   container.appendChild(root);
@@ -345,9 +398,52 @@ function counselorKey(counselor: CounselorPanelData): string {
   return `${counselor.title}|${counselor.child}|${counselor.parent}|${counselor.together ?? ""}`;
 }
 
-function buildCounselorPanel(counselor: CounselorPanelData): HTMLElement {
+/**
+ * Reflection panel.
+ *
+ * ⚠️ **Two different audiences, and they must not be mixed.**
+ *
+ * A child playing alone must never be shown that they are being assessed. Until now this
+ * panel rendered an "SEL Coach Insight" badge, a `For grown-ups:` paragraph carrying the
+ * clinical parent tip (e.g. *"Naming and questioning worry (ACT/CBT) reduces fusion with
+ * catastrophic thoughts for ages 5–8"*), and a "not a clinical diagnosis" disclaimer —
+ * all of it on screen, mid-game, to a five-year-old.
+ *
+ * That breaks the §1.1 stealth-learning pillar (the child should experience a story, not a
+ * test) and §12.4, which requires grown-up surfaces to be a *deliberately different* screen
+ * the child can tell at a glance is not for them. §7.7 makes the same argument about a HUD
+ * progress bar: chrome that "measures the child" turns a felt story into a task.
+ *
+ * So:
+ * - **Solo child play** → the companion speaks. One warm line, in their friend's voice.
+ *   No badge, no grown-up paragraph, no clinical disclaimer.
+ * - **Together Mode** → a parent is deliberately sitting alongside, so the coach framing and
+ *   the parent tip are appropriate and stay.
+ *
+ * Parent-facing content is not lost: it already has a proper home behind the parent gate in
+ * `renderJourneyReflection`, which is where a grown-up is actually the reader.
+ */
+function buildCounselorPanel(
+  counselor: CounselorPanelData,
+  togetherMode: boolean,
+  companionName: string,
+): HTMLElement {
   const panel = document.createElement("aside");
-  panel.className = "counselor-panel";
+  panel.className = togetherMode ? "counselor-panel" : "counselor-panel companion-note";
+
+  if (!togetherMode) {
+    // Child-facing: their companion reflecting with them, not a report about them.
+    panel.setAttribute("aria-label", `${companionName} says`);
+    panel.innerHTML = `
+      <div class="counselor-panel-header">
+        <div class="counselor-badge">${escapeText(companionName)}</div>
+        <button class="counselor-close" type="button" aria-label="Close message">✕</button>
+      </div>
+      <p class="counselor-child">${escapeText(counselor.child)}</p>
+    `;
+    return finishCounselorPanel(panel, counselor);
+  }
+
   panel.setAttribute("aria-label", "Counselor insight");
   panel.innerHTML = `
     <div class="counselor-panel-header">
@@ -360,6 +456,13 @@ function buildCounselorPanel(counselor: CounselorPanelData): HTMLElement {
     ${counselor.together ? `<p class="counselor-together"><strong>Try together:</strong> ${escapeText(counselor.together)}</p>` : ""}
     <p class="counselor-note">Supportive guidance — not a clinical diagnosis.</p>
   `;
+  return finishCounselorPanel(panel, counselor);
+}
+
+function finishCounselorPanel(
+  panel: HTMLElement,
+  counselor: CounselorPanelData,
+): HTMLElement {
 
   const applyPos = (left: number, top: number) => {
     panel.style.left = `${left}px`;
@@ -627,23 +730,41 @@ export function renderCelebration(
   chapterTitle: string,
   onReflect: () => void,
   onHub: () => void,
+  chapterId = "ch2",
+  sparks?: { found: number; total: number },
 ): void {
   container.innerHTML = "";
   const overlay = document.createElement("div");
   overlay.className = "overlay celebration-overlay";
   const celeb = document.createElement("div");
   celeb.className = "celebration mountain-celebration";
-  const celebCfg = contentConfig.celebration;
+  const celebCfg = celebrationFor(chapterId);
   celeb.style.backgroundImage = `url(${celebCfg.backgroundImage})`;
+
+  /**
+   * §7.6 — the spark tally is deliberately **not maxed** on a first play. That's the whole
+   * mechanism: the child sees what they missed, and the only way to find the rest is to
+   * explore and be kind. Framed as an invitation, never as a score or a failure.
+   */
+  const sparkLine =
+    sparks && sparks.total > 0
+      ? `<p class="celebration-sparks">✨ You found <strong>${sparks.found} of ${sparks.total}</strong> Kindness Sparks${
+          sparks.found < sparks.total
+            ? " — some only appear when you're kind or curious. Want to find the rest?"
+            : " — you found every single one!"
+        }</p>`
+      : "";
+
   celeb.innerHTML = `
     <div class="celebration-content">
       <div class="celebration-trophy">${escapeText(celebCfg.trophyLabel)}</div>
       <h1>${escapeText(celebCfg.title)}</h1>
       <p class="celebration-zone">${escapeText(chapterTitle)}</p>
-      <p class="celebration-lessons"><strong>Today Flicker learned:</strong> “${escapeText(celebCfg.flickerLesson)}”</p>
+      <p class="celebration-lessons"><strong>Today ${escapeText(celebCfg.companionName)} learned:</strong> “${escapeText(celebCfg.companionLesson)}”</p>
       <p class="celebration-lessons"><strong>Today you learned:</strong> “${escapeText(celebCfg.playerLesson)}”</p>
+      ${sparkLine}
       <ul class="achievement-checklist">
-        ${contentConfig.achievementChecklist.map((item) => `<li>✓ ${item}</li>`).join("")}
+        ${celebCfg.achievements.map((item) => `<li>✓ ${escapeText(item)}</li>`).join("")}
       </ul>
       <p class="celebration-quote">${escapeText(celebCfg.quote)}</p>
     </div>
@@ -653,7 +774,10 @@ export function renderCelebration(
   reflectBtn.className = "btn-primary";
   reflectBtn.style.maxWidth = "260px";
   reflectBtn.style.margin = "0 auto 10px";
-  reflectBtn.textContent = "See counselor insights";
+  // This button leads to the parent gate, so it is addressed to the grown-up, not the
+  // child — "counselor insights" told the child an assessment of them exists (§1.1, §12.4).
+  // §12.1 also frames the gate as a connection ritual rather than a report.
+  reflectBtn.textContent = "Grown-up corner";
   reflectBtn.onclick = onReflect;
   celeb.appendChild(reflectBtn);
 

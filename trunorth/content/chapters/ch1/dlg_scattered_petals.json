@@ -1,0 +1,16 @@
+{
+  "id": "dlg_scattered_petals",
+  "chapterId": "ch1",
+  "speaker": "Flicker",
+  "speakerAssetRef": "char_companion_dragon",
+  "pages": [
+    {
+      "text": "Petals everywhere. Someone's heart sank right here.",
+      "speaker": "Flicker"
+    },
+    {
+      "text": "The petals can be gathered up. So can the feeling, mostly.",
+      "speaker": "Flicker"
+    }
+  ]
+}

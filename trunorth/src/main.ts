@@ -5,7 +5,7 @@ import { LocalProgressStore, DemoProgressStore } from "./store/ProgressStore.js"
 import { LiveCompanionClient, DemoCompanionClient } from "./companion/CompanionClient.js";
 import { createInitialGameState } from "./config/gameState.js";
 import { appConfig, isDemoMode } from "./config/app.js";
-import type { GameState, ScenePhase, ScenarioMeta, Scene } from "./types/index.js";
+import type { GameState, ScenePhase, ScenarioMeta, Scene, ProgressStore } from "./types/index.js";
 import {
   renderGameView,
   renderCelebration,
@@ -16,7 +16,9 @@ import {
   type CoPlayStep,
   type DialogViewState,
 } from "./ui/GameView.js";
-import { getDialog } from "./content/index.js";
+import { getDialog, SCENES } from "./content/index.js";
+import { playMeterJuice, playWorldBloom } from "./render/juice.js";
+import { chapterSparkTotal, chapterSparksFound } from "./content/sparks.js";
 import {
   renderLanding,
   renderAuthForm,
@@ -69,6 +71,8 @@ const API_URL = appConfig.apiUrl;
 let currentScreen: AppScreen = "landing";
 let gameState: GameState = createInitialGameState(demoMode);
 let engine: SceneEngine | null = null;
+/** The active progress store, so out-of-band writes (e.g. discoveries) can persist. */
+let activeStore: ProgressStore | null = null;
 let activeDecisionId: string | null = null;
 let companionLine: string | null = null;
 let counselorPanel: CounselorPanelData | null = null;
@@ -204,18 +208,52 @@ function bindWorld(viewport: HTMLElement, scene: Scene, exploring: boolean): voi
   });
 }
 
+/**
+ * Record that the child examined a discoverable, and pay them for exploring.
+ *
+ * This is what turns walking around into a loop rather than scenery: each discovery is
+ * worth a point immediately, and finding **everything** in a scene pays a bonus. Spec §7.1
+ * asks for "immediate, low-stakes fun" points that are deliberately *not* tied to emotional
+ * scoring — so curiosity is rewarded on its own terms, separately from the SEL decision.
+ */
+function recordDiscovery(objectId: string): void {
+  const sceneId = engine?.getState().progress.currentSceneId;
+  if (!sceneId) return;
+
+  const discoveries = (gameState.progress.discoveries ??= {});
+  const found = discoveries[sceneId] ?? [];
+  if (found.includes(objectId)) return; // already seen — no double-dipping
+
+  discoveries[sceneId] = [...found, objectId];
+  gameState.progress.browniePoints += 1;
+
+  const total = discoverableCount(engine?.getCurrentScene());
+  if (total > 0 && discoveries[sceneId].length === total) {
+    // Found everything here — a real bonus, so thoroughness pays off.
+    gameState.progress.browniePoints += 2;
+  }
+  void activeStore?.save(gameState);
+}
+
+/** How many examinable objects a scene has (finish/advance objects are not discoveries). */
+function discoverableCount(scene: Scene | null | undefined): number {
+  return (scene?.objects ?? []).filter((o) => o.interaction.kind === "openDialog").length;
+}
+
 /** Dispatch a stage-object interaction — the extension point for new kinds. */
 function onStageObject(objectId: string): void {
   const obj = engine?.getCurrentScene()?.objects?.find((o) => o.id === objectId);
   if (!obj) return;
   const interaction = obj.interaction;
   switch (interaction.kind) {
-    case "openDialog":
+    case "openDialog": {
       if (!getDialog(interaction.dialogId)) return;
+      recordDiscovery(objectId);
       activeDialog = { id: interaction.dialogId, page: 0 };
       worldRuntime.freeze(true);
       renderGame();
       break;
+    }
     case "finish":
       if (interaction.mode === "complete") {
         void engine?.completeChapter();
@@ -250,6 +288,7 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
   const store = demoMode
     ? new DemoProgressStore(gameState)
     : new LocalProgressStore();
+  activeStore = store;
 
   await store.save(gameState);
 
@@ -275,6 +314,13 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
     },
     onSceneChange: () => {
       gameState = engine?.getState() ?? gameState;
+      // The companion states what we're looking for the moment we arrive, so the child
+      // has a reason to move before anything else happens (Scene.goal — see types).
+      const goal = engine?.getCurrentScene()?.goal;
+      if (goal) {
+        companionLine = goal;
+        speakLine(goal);
+      }
       renderGame();
     },
     onCompanionLine: (line) => {
@@ -286,7 +332,23 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
       counselorPanel = insight;
       renderGame();
     },
-    onMeterJuice: () => renderGame(),
+    /**
+     * Spec §17B.2 — a strong choice is one connected beat: companion reacts, particles fly
+     * into the meter, meter fills, world blooms. This hook previously only re-rendered,
+     * which meant the reward was a number changing somewhere off to the side.
+     *
+     * Runs after the re-render so the particle flight measures the *current* DOM positions
+     * of the companion and the target meter.
+     */
+    onMeterJuice: (skill) => {
+      renderGame();
+      requestAnimationFrame(() => {
+        const viewport = document.querySelector<HTMLElement>(".game-viewport");
+        if (!viewport) return;
+        playMeterJuice(viewport, skill);
+        playWorldBloom(viewport);
+      });
+    },
     onCelebration: () => {
       gameState = engine?.getState() ?? gameState;
       navigate("celebration");
@@ -535,6 +597,11 @@ function render(): void {
           navigate("parentGate");
         },
         goToHub,
+        gameState.profile.chapterId,
+        {
+          found: chapterSparksFound(Object.values(SCENES), gameState.profile.chapterId, gameState),
+          total: chapterSparkTotal(Object.values(SCENES), gameState.profile.chapterId),
+        },
       );
       break;
 

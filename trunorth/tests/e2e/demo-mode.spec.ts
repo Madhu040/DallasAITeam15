@@ -40,7 +40,7 @@ async function clickIfPresent(page: Page, pattern: RegExp, timeout = 2_500): Pro
 
 /** Landing → trust → onboarding → hub. Tolerates already-seen states. */
 async function bootToHub(page: Page): Promise<void> {
-  await page.goto("/?demo=1");
+  await page.goto("/?demo=1&zoom=1");
   await clickText(page, /Play Now/i);
   await clickIfPresent(page, /I understand/i);
   // Onboarding (skipped automatically if a save already exists)
@@ -64,7 +64,7 @@ async function startEverbrightMeadow(page: Page): Promise<void> {
 
 /** Open the scene's decision via the click-fallback hotspot, then pick the strong option. */
 async function resolveDecision(page: Page, strongOption: RegExp): Promise<void> {
-  await clickIfPresent(page, /Close insight/i, 1_500);
+  await clickIfPresent(page, /Close message|Close insight/i, 1_500);
   await clickText(page, /Interact with hot spot/i, 15_000);
   await clickText(page, strongOption, 15_000);
 }
@@ -86,9 +86,7 @@ test.describe("Demo mode — stage readiness (DoD §27)", () => {
 
     // Play a scored decision — the one beat that would hit the companion proxy in live mode.
     await resolveDecision(page, /want to play with us/i);
-    await expect(
-      page.getByRole("heading", { name: /Counselor insight|Together reflection/i }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(".counselor-panel")).toBeVisible({ timeout: 15_000 });
 
     expect(external, `demo mode reached external origins:\n${external.join("\n")}`).toEqual([]);
     expect(apiCalls, `demo mode called the API:\n${apiCalls.join("\n")}`).toEqual([]);
@@ -114,9 +112,7 @@ test.describe("Demo mode — stage readiness (DoD §27)", () => {
     await startEverbrightMeadow(page);
     await resolveDecision(page, /want to play with us/i);
 
-    await expect(
-      page.getByRole("heading", { name: /Counselor insight|Together reflection/i }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(".counselor-panel")).toBeVisible({ timeout: 15_000 });
   });
 
   test("completes the Everbright Meadow golden path (DoD item 1 — engine time only)", async ({
@@ -129,7 +125,7 @@ test.describe("Demo mode — stage readiness (DoD §27)", () => {
 
     // e1 → e2 → e2a → e2b → e2c → e3 → celebration. All five ch1 decision points.
     await resolveDecision(page, /want to play with us/i);          // dp_leftout_bench
-    await clickIfPresent(page, /Close insight/i, 2_000);
+    await clickIfPresent(page, /Close message|Close insight/i, 2_000);
     await clickText(page, /North Gate/i, 15_000);                   // walk-to-gate stage object
     await resolveDecision(page, /okay to feel shy/i);               // dp_reassure_shy
     await resolveDecision(page, /take turns/i);                     // dp_share_flower

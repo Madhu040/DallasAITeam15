@@ -2,6 +2,59 @@ import { readdirSync, readFileSync, statSync } from "fs";
 import { join, basename } from "path";
 
 const chaptersDir = join(import.meta.dirname, "../content/chapters");
+/**
+ * Stage objects must not be buried under a character or sitting inside a decision
+ * trigger. Authoring the Ch.1 discovery pass produced seven such collisions in one go —
+ * labels rendered on top of each other and objects were unreachable because the trigger
+ * fired first. Cheap to check, invisible until someone plays the scene.
+ */
+const OBJECT_CLEARANCE_PX = 150;
+
+function checkObjectPlacement(
+  name: string,
+  data: {
+    objects?: { id?: string; cell?: unknown }[];
+    characters?: { id?: string; position?: unknown }[];
+    triggers?: { id?: string; bounds?: unknown }[];
+  },
+): void {
+  const objects = data.objects ?? [];
+  if (objects.length === 0) return;
+
+  for (const obj of objects) {
+    const cell = obj.cell;
+    if (!Array.isArray(cell) || cell.length !== 2) continue;
+    const ox = ((cell[0] as number) + 0.5) * (1920 / 100);
+    const oy = ((cell[1] as number) + 0.5) * (1080 / 100);
+
+    for (const ch of data.characters ?? []) {
+      const pos = ch.position;
+      if (!Array.isArray(pos) || pos.length !== 2) continue;
+      const dist = Math.hypot(ox - (pos[0] as number), oy - (pos[1] as number));
+      if (dist < OBJECT_CLEARANCE_PX) {
+        fail(
+          name,
+          `object "${obj.id}" is ${Math.round(dist)}px from character "${ch.id}" ` +
+            `(needs ${OBJECT_CLEARANCE_PX}px clearance so labels don't collide)`,
+        );
+      }
+    }
+
+    for (const tr of data.triggers ?? []) {
+      const b = tr.bounds;
+      if (!Array.isArray(b) || b.length !== 4) continue;
+      const [x, y, w, h] = b as number[];
+      if (ox >= x - 40 && ox <= x + w + 40 && oy >= y - 40 && oy <= y + h + 40) {
+        fail(
+          name,
+          `object "${obj.id}" sits inside trigger "${tr.id}" — the decision will fire ` +
+            `before the child can examine it`,
+        );
+      }
+    }
+  }
+}
+
 let errors = 0;
 
 function walk(dir: string): string[] {
@@ -105,6 +158,7 @@ for (const file of files) {
     fail(name, "missing id or chapterId");
   } else {
     validateObjects(name, data);
+    checkObjectPlacement(name, data);
   }
   console.log(`✅ ${name}`);
 }

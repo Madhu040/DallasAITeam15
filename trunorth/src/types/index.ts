@@ -109,6 +109,17 @@ export interface SceneCollectible {
   assetRef: string;
   position: [number, number];
   kind: string;
+  /**
+   * Spec §7.6 — Kindness Sparks. A gated spark appears only **after** the child does
+   * something kind, so a second playthrough is "find what I missed" rather than "do the
+   * lesson again", and the only way to find them is to be curious and kind.
+   *
+   * Value is a decision-point id: the spark stays hidden until that decision has been
+   * resolved in the `strong` band.
+   *
+   * Hard constraint from §7.6: sparks are **never required to progress**. A child who
+   * ignores every spark still completes the chapter and gets the full experience.
+   */
   gate?: string;
 }
 
@@ -160,6 +171,15 @@ export interface Scene {
   characters: SceneCharacter[];
   triggers: SceneTrigger[];
   collectibles: SceneCollectible[];
+  /**
+   * What the child is trying to do in this scene, spoken by the companion on arrival.
+   *
+   * Without this the loop was: spawn -> walk into a hitbox -> answer. Movement had no
+   * purpose because nothing told the child there was anything to look for. A stated goal
+   * turns wandering into searching (spec §5 core loop; §7.7's "journeying through a world"
+   * rather than completing a task).
+   */
+  goal?: string;
   decisionPoints: string[];
   nextSceneId?: string;
   /** Grid level id (`src/content/gridLevels.ts`) — replaces the image background. */
@@ -210,6 +230,8 @@ export interface GameState {
     chaptersCompleted: string[];
     browniePoints: number;
     kindnessSparksFound: Record<string, string[]>;
+    /** Stage objects the child has examined, per scene id — drives the discovery count. */
+    discoveries?: Record<string, string[]>;
     /** Latest pre-level check-in per chapter id. */
     checkins?: Record<string, CheckinRecord>;
   };
