@@ -4,14 +4,14 @@ export const SCENARIOS: ScenarioMeta[] = [
   {
     id: "ch2",
     audience: "child",
-    title: "The Singing Bridge",
-    subtitle: "Worry & Courage",
+    title: "The Little Dragon Who Wouldn't Stop Guarding",
+    subtitle: "Worry & Courage · Ages 5–7",
     description:
-      "In Everbright, Flicker the Guardian Dragon panics at a creaky bridge. Investigate, sort facts from stories, breathe, and choose to keep walking.",
+      "Explorer Nova collects Star Crystals for the Sky Festival with Flicker, a lovable overprotective Guardian Dragon. Practice curiosity, kindness, and courage — without fighting anxiety.",
     startSceneId: "w1",
-    ageBand: "8-10",
-    skills: ["worry_brave", "calm", "courage"],
-    estimatedMinutes: 12,
+    ageBand: "5-7",
+    skills: ["worry_brave", "calm", "courage", "empathy"],
+    estimatedMinutes: 14,
   },
   {
     id: "ch1",

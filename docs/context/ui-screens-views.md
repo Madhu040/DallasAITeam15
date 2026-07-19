@@ -72,7 +72,7 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
   returns collected profile data.
 - `renderScenarioHub(container, completedChapters, playMode, onSelectSolo, onSelectTogether, onParentCoach, onBack)` —
   child scenario cards (done/together badges, age + minutes) from `SCENARIOS` (now 2:
-  ch2 Singing Bridge, ch1 Everbright Meadow); thumbnails are grid canvases
+  ch2 The Little Dragon Who Wouldn't Stop Guarding, ch1 Everbright Meadow); thumbnails are grid canvases
   (`createGridThumbnail`) when the start scene binds a `gridMapId`, PNG zone thumbs
   otherwise; parent-audience card wired to the PIN-gated coach corner.
 - `renderCheckin(container, scenario, companionName, onDone, onBack)` — pre-level

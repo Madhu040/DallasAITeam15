@@ -8,6 +8,7 @@ export function createInitialGameState(demoMode = false): GameState {
   return {
     version: 1,
     profile: {
+      childDisplayName: "Nova",
       ageBand: defaults.ageBand,
       chapterId: defaults.chapterId,
       avatar: { skinTone: "tone_3", hair: "hair_curly" },

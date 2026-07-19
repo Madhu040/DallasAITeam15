@@ -31,14 +31,27 @@ only uses a grid when one resolves for it.
 - `GridLevel { id, name, spawnCell: [col,row], map: GridMap }`.
 - Builders (cached in `getGridLevel(id)`):
   - **`everbright-meadow`** — tree border, pond, boulder clusters, dirt trail with a
-    gate through the north tree line. Spawn [50, 80].
+    gate through the north tree line. Spawn [50, 80]. Used by ch1 (e1–e3).
   - **`singing-bridge`** — river band (rows 38–59) splits north/south banks; the
     plank bridge (cols 46–53) is the only crossing; rails, top cliff wall, side
-    walls, crystal outcrops. Spawn [50, 85].
+    walls, crystal outcrops. Spawn [50, 85]. **Orphaned as of 2026-07-18** — no
+    scene binds it since ch2's narrative was replaced (kept in the registry as a
+    working reference implementation; still reachable via `?grid=singing-bridge`).
+  - **`forest-of-questions`** — mossy clearing, tree border, winding dirt path,
+    curious glades. Spawn [50, 85]. Used by ch2 w1–w2.
+  - **`meadow-of-curiosity`** — open field, hedge border, giant worry-flower
+    ellipses (big + small), path to a welcome gate. Spawn [50, 85]. Used by ch2 w3–w4.
+  - **`cave-of-purpose`** — stone chamber, rock-wall border, pillar obstacles,
+    glowing memory-crystal veins. Spawn [50, 85]. Used by ch2 w5.
+  - **`mountain-festival`** — sky band, switchback climbing path, festival-stage
+    platform at the summit (where the w7 finish object sits). Spawn [50, 90]. Used
+    by ch2 w6–w7.
 - `listGridLevelIds()`, `resolveGridLevel(scene, search?)` — **URL `?grid=<id>`
-  wins** (testing), else `scene.gridMapId`. **Every scene JSON now sets `gridMapId`**
-  (ch1 e1–e3 → `everbright-meadow`, ch2 w1–w6 → `singing-bridge`), so grids are the
-  levels; ch3 Forest was removed 2026-07-17. `isGridDebug()` — `?gridDebug=1`.
+  wins** (testing), else `scene.gridMapId`. **Every scene JSON sets `gridMapId`**
+  (ch1 e1–e3 → `everbright-meadow`; ch2 w1–w7 → `forest-of-questions` /
+  `meadow-of-curiosity` / `cave-of-purpose` / `mountain-festival` depending on the
+  beat), so grids are the levels; ch3 Forest was removed 2026-07-17. `isGridDebug()`
+  — `?gridDebug=1`.
 - Adding a level = write a builder + register it in `LEVEL_BUILDERS`, then point the
   scene JSONs' `gridMapId` (or a new scenario's scenes) at it.
 
@@ -65,10 +78,13 @@ scenarios without a grid.
 
 ## Testing
 
-- `tests/unit/grid.test.ts` — 6 tests: cell vector shape/coords, painting + world
+- `tests/unit/grid.test.ts` — 8 tests: cell vector shape/coords, painting + world
   lookup, axis-separated slide, registry integrity (size + walkable spawns), query
-  vs scene resolution, bridge-only river crossing.
-- Manual: `npm run demo` → `http://localhost:4173/?demo=1&grid=singing-bridge`
+  vs scene resolution, every child scenario/scene routes to a registered grid,
+  bridge-only river crossing (legacy `singing-bridge` grid), Flicker's widened
+  solid sealing the path in w6 vs clear in w7 (grid-agnostic, reads `w6`'s own
+  `gridMapId`).
+- Manual: `npm run demo` → `http://localhost:4173/?demo=1&grid=mountain-festival`
   (any scenario) · `&gridDebug=1` for the walkability overlay.
 - Verified in-browser (2026-07-17): spawn seeding, river/cliff/side-wall blocking
   with edge sliding, bridge-only crossing. Note: the rAF loop pauses when the
