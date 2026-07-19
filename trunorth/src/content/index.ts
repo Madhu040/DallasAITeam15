@@ -27,13 +27,13 @@ export const SCENES: Record<string, Scene> = {
   w1: w1 as Scene,
   w2: w2 as Scene,
   w3: w3 as Scene,
-  w4: w4 as Scene,
+  w4: w4 as unknown as Scene,
   w5: w5 as Scene,
-  w6: w6 as Scene,
+  w6: w6 as unknown as Scene,
   w7: w7 as unknown as Scene,
-  e1: e1 as Scene,
-  e2: e2 as Scene,
-  e3: e3 as Scene,
+  e1: e1 as unknown as Scene,
+  e2: e2 as unknown as Scene,
+  e3: e3 as unknown as Scene,
 };
 
 export const DECISION_POINTS: Record<string, DecisionPoint> = {

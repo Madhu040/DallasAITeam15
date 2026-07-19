@@ -1,4 +1,4 @@
-import type { GameEvent, GameState, ScoreBand, SkillId } from "../types/index.js";
+import type { GameState, ScoreBand, SkillId } from "../types/index.js";
 import { checkinPlacementLabel } from "./checkin.js";
 
 export interface CounselorInsight {

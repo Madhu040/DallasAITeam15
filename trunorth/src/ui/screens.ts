@@ -16,7 +16,7 @@ import {
 } from "../counselor/checkin.js";
 import type { ScenarioMeta, CheckinRecord } from "../types/index.js";
 
-type Screen = "landing" | "login" | "register" | "dashboard";
+type Screen = "landing" | "login" | "register";
 
 export function renderLanding(
   container: HTMLElement,

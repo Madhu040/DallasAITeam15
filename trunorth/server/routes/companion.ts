@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import Anthropic from "@anthropic-ai/sdk";
-import fallbacks from "../../content/fallbacks/companion-fallbacks.json";
+import fallbacks from "../../content/fallbacks/companion-fallbacks.json" with { type: "json" };
 import { filterInput, filterOutput } from "../../src/safety/filters.js";
 import { insightForStep } from "../../src/counselor/insights.js";
 import { serverConfig } from "../config.js";
