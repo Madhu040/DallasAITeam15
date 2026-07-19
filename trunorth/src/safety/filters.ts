@@ -114,8 +114,32 @@ export function filterInput(input: string): InputFilterResult {
   return { allowed: true, safetyFlag: "none" };
 }
 
+/**
+ * Identity-claiming phrasings the companion must never use (Appendix A §4 item 11 —
+ * "judge or label the child's character" — and the §9.8 identity-framing guard).
+ *
+ * The rule: praise must stay **past-tense and situational** ("I saw you do that just now"),
+ * never identity-assigning ("that's your superpower"). Citing evidence builds confidence a
+ * child can verify; assigning an identity lands as pressure — "I have to keep being the kind
+ * one or I'm not me." The spec calls this out specifically because earlier drafts used it.
+ *
+ * This is enforced at the output filter and not only in the system prompt, because a live
+ * Haiku 4.5 call was observed emitting "that's a superpower" despite the prompt (2026-07-19).
+ */
+const IDENTITY_FRAMING = [
+  "your superpower",
+  "a superpower",
+  "you always",
+  "that's just who you are",
+  "thats just who you are",
+  "who you are",
+  "you're the kind of",
+  "youre the kind of",
+];
+
 export function filterOutput(line: string): boolean {
   const blocked = ["diagnos", "therapy", "medication", "prescription", "meet me", "address is"];
   const lower = line.toLowerCase();
-  return !blocked.some((b) => lower.includes(b));
+  if (blocked.some((b) => lower.includes(b))) return false;
+  return !IDENTITY_FRAMING.some((b) => lower.includes(b));
 }

@@ -52,7 +52,29 @@ curl -s localhost:3001/api/health   # → "companionModel":"claude-haiku-4-5-202
 Automated guard in `tests/unit/redteam.test.ts`: the model must not contain `-latest` and
 must end in a `-YYYYMMDD` date.
 
-> ⚠️ **Not yet verified: the live call.** No `ANTHROPIC_API_KEY` is configured in this
-> environment, so only config plumbing and the no-key path (`scoreLocally` + fallback
-> library) have been exercised. A real Haiku 4.5 request/response against the §9.4 JSON
-> contract is **still owed** before any keyed deploy. Tracked in `product.md` §5.
+### Live verification — completed 2026-07-19
+
+Real `claude-haiku-4-5-20251001` calls were exercised against the §9.4 contract with a
+configured key. Results:
+
+| Check | Result |
+|---|---|
+| Structured JSON parses; all §9.4 fields present | ✅ |
+| `scoreBand` / `skill` / `confidence` | ✅ 0.92–0.95 on strong answers; 0.65 on an ambiguous one |
+| Confidence floor (0.55) behaviour | ✅ ambiguous answer stayed `partial` without needing to be forced |
+| `companionLine` ≤120 chars | ✅ observed 87–98 |
+| Latency vs 8 s timeout | ✅ ~3.3 s |
+| Adversarial input blocked **pre-model** | ✅ jailbreak rejected in 0.03 s — no API call, so adversarial traffic costs nothing |
+
+**The live run found two defects the offline path did not have, both now fixed:**
+
+1. **`matchedCriterion` was silently dropped.** §9.4 requires it and §8.3 says the model must
+   cite the criterion it matched — but `buildSystemPrompt` never asked for it and
+   `parseModelResponse` never read it, so the live path returned *less* than the offline
+   rubric scorer. Now requested and parsed; re-verified returning `"offered_inclusion"`.
+2. **The model emitted "that's a superpower"** — the exact identity-claiming phrasing the
+   §9.8 guard forbids and names as a correction target. The system prompt had no such rule
+   and `filterOutput` only screened clinical/meet-up terms. Now forbidden in the prompt
+   **and** rejected by the output filter (a prompt rule is not a guarantee), with regression
+   cases in `tests/unit/redteam.test.ts`. Re-verified: lines now come back in the approved
+   past-tense situational form.

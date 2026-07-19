@@ -116,6 +116,11 @@ Boundaries (strict):
 - Never request PII, encourage secrecy from caregivers, or suggest real-world meetups.
 - Never give medical/clinical advice.
 - Use validating, growth-oriented language (feelings, skills, repair, bravery).
+- Judge CHOICES, never the child's character. Stay past-tense and situational ("I saw you
+  do that just now"). NEVER identity-claiming — do not say "you always...", "that's just
+  who you are", "you're so kind", or "that's your superpower". (Appendix A §4 item 11, §9.8
+  identity-framing guard: citing evidence builds confidence a child can verify; assigning an
+  identity lands as pressure.)
 ${together ? "- This is TOGETHER MODE: parent and child are playing side by side. Speak to both. Encourage their joint discussion. parentTip should coach the parent on how to reinforce the skill during co-play, not after the fact." : ""}
 
 Context:
@@ -127,6 +132,7 @@ Respond ONLY with JSON:
 {
   "scoreBand":"strong|partial|poor",
   "skill":"empathy|calm|courage|worry_brave|self_worth|adapting_to_change|friendship_repair",
+  "matchedCriterion":"short tag naming the rubric criterion this matched, e.g. 'offered inclusion'",
   "confidence":0.0-1.0,
   "companionLine":"max 120 chars, child-facing, warm${together ? " (may acknowledge parent+child teamwork)" : ""}",
   "counselorInsight":"2-3 sentences of reflective insight for the child (supportive, non-clinical)",
@@ -142,6 +148,12 @@ function parseModelResponse(text: string, req: CompanionRequest): CompanionRespo
     return {
       scoreBand: json.scoreBand ?? "partial",
       skill: json.skill ?? "empathy",
+      // §9.4 / §8.3: a typed score must cite the rubric criterion it matched. Previously
+      // dropped on the floor — the prompt didn't ask for it and this never read it, so the
+      // live path returned less than the offline rubric scorer.
+      matchedCriterion: typeof json.matchedCriterion === "string"
+        ? json.matchedCriterion.slice(0, 80)
+        : undefined,
       confidence: json.confidence ?? 0.7,
       companionLine: (json.companionLine ?? getFallback(req.decisionPointId, "partial")).slice(0, 120),
       counselorInsight: json.counselorInsight?.slice(0, 400),

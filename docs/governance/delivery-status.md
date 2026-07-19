@@ -80,6 +80,12 @@ and regression-guarded in `tests/unit/redteam.test.ts`:
 Also hardened: distress is now evaluated **first**, so a distressed child reaches the distress
 path even when the message also trips profanity.
 
+**Two further defects surfaced by live-model verification (2026-07-19):** `matchedCriterion`
+was silently dropped on the live path (required by §9.4/§8.3), and Haiku 4.5 emitted
+*"that's a superpower"* — the exact identity-claiming phrasing the §9.8 guard forbids and
+names as a correction target. Both fixed; the identity guard is enforced in the system prompt
+**and** at the output filter, because a prompt instruction is not an enforcement mechanism.
+
 > This is the argument for §9.6's "safety testing is a deliverable, not a checkbox" — the safety
 > stack looked complete on paper and had four holes in it.
 
@@ -91,4 +97,4 @@ path even when the message also trips profanity.
 |---|---|---|
 | 🔒 SME sign-off on distress wording, the 3 new Ch.1 DPs, and Ch.2 narrative copy | Vandy + SME | Shipping any of it to a real child (spec §8.6) |
 | 🔒 Counsel review of COPPA posture | Owner + Counsel | ADR-006 → the entire EXT tier |
-| ⬜ Live model verification with a real API key | Build | ADR-004 is config-verified only; the live Haiku 4.5 call is unproven |
+| ✅ ~~Live model verification with a real API key~~ | Build | **Done 2026-07-19** — real Haiku 4.5 calls verified against the §9.4 contract; found and fixed 2 live-path defects (see ADR-004) |
