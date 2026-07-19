@@ -6,8 +6,14 @@
 >
 > The spec *states* the DoD and the risks; it cannot say **where we stand against them**.
 > That is this file's only job. Point-in-time — **2026-07-19**, after §22 Phase 4 hardening
-> items 1–5 (red-team, error surface, accessibility, performance budget, projector).
-> Live gap list remains `product.md` §5.
+> items 1–5 (red-team, error surface, accessibility, performance budget, projector) **and an
+> owner-directed game-feel arc** (assessment-leak fix, reward juice, Ch.1 explore loop,
+> following camera — local commits `f9d2174`/`d48e317`, unpushed).
+> Live gap list + the **NEXT-5 roadmap** remain `product.md` §5 (see the 📍 Current-position
+> block). In short, next 5: **(1) asset manifest** [immediate — 30/31 AI PNGs ready],
+> (2) Ch.2 explore loop, (3) sound, (4) ambient life + diegetic path (§7.7), (5) verify CI
+> actually runs on GitHub + close the human Phase-4 items (screen-reader pass, backup video,
+> scope freeze).
 
 **Legend:** ✅ met · 🟨 partial · ⬜ not met · 🔒 blocked on a non-engineering sign-off
 

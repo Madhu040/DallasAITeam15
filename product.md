@@ -679,6 +679,30 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 
 > ### 📍 Current position (2026-07-19)
 >
+> **Active track: a "game-feel" arc on top of Phase 4 (owner-directed, from playtest
+> feedback).** Landed this session (local commits `f9d2174`/`d48e317`, nothing pushed):
+> killed the in-game assessment leak (child no longer sees coach/clinical text), reward
+> juice (§17B.2), Chapter 1 rebuilt as an **explore→discover→decide loop** (spoken goals +
+> 13 discovery dialogs + Kindness Sparks), per-chapter celebration, and a **following zoom
+> camera** (§5). 135 unit + 18 e2e green.
+>
+> > **NEXT 5, in order** (roadmap so it survives a context reset):
+> > 1. **Asset manifest** *(immediate)* — `assetRef → file` (spec §10.3); 30/31 AI PNGs are
+> >    validated & ready in `public/assets/` (see the §5 "Production art" row). Must fall
+> >    back to the code-drawn SVG cast / emoji so `?demo=1` never breaks on a missing file;
+> >    `deer.png` is the 1 known blocker (stays on placeholder). Commit the PNGs with it.
+> > 2. **Chapter 2 explore loop** — w1–w7 are still spawn→hitbox→answer (the shape ch1 left).
+> >    Ch.2 is the showcase chapter, so this matters most. Same goal+discoveries treatment; SME-draft copy.
+> > 3. **Sound** — zero audio beyond speech synth (spec §17B.4). Footsteps/chime/discovery
+> >    sting/ambience; CC0 (Kenney) so no licensing; never the *only* feedback channel (§13A.6).
+> > 4. **Ambient life + diegetic stepping-stone path** (§7.7 — still an open task) — water
+> >    shimmer, clouds, grass sway under the §17A.4 calm-first budget.
+> > 5. **Verify CI actually runs** (the repo-root move is unconfirmed on GitHub) + close the
+> >    human Phase-4 items (screen-reader pass, backup video, scope freeze).
+>
+> **Underlying Phase 4 status: 5 of 7 items done** (below). The game-feel arc is additive on
+> top; the scope freeze (item 7) still gates Phase 5.
+>
 > **We are in the spec's §22 Phase 4 — "Week 4–5: Hardening" — with 5 of 7 items done.**
 > (Consolidated tech spec §22 defines Phases 1–5. ⚠️ These are **not** the same as the
 > "Phase 0–4" labels used in the §6 changelog below, which were an ad-hoc working sequence.
