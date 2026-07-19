@@ -7,3 +7,4 @@
 # Microsoft Office temp/lock files
 ~$*
 .~lock.*
+.DS_Store
