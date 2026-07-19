@@ -84,6 +84,12 @@ export const appConfig = {
   timing: {
     narrationAutoAdvanceMs: viteNumber("VITE_NARRATION_AUTO_ADVANCE_MS", 2200),
     demoCompanionDelayMs: viteNumber("VITE_DEMO_COMPANION_DELAY_MS", 350),
+    /**
+     * Pause before the single §17D auto-retry of a failed companion call. Long enough
+     * that the in-character "my words got tangled" line is readable, short enough to stay
+     * inside the §13A.5 stage budget alongside the 8s server-side timeout.
+     */
+    companionRetryDelayMs: viteNumber("VITE_COMPANION_RETRY_DELAY_MS", 600),
   },
   world: {
     /** Avatar speed in scene pixels per second (1920×1080 space). */

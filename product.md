@@ -149,10 +149,10 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | **Product/SEL/safety intent:** `docs/specs/TruNorth Master Spec.md` (Draft v2). **Engineering intent:** `docs/specs/Consolidated TruNorth-Technical-Specification.md` (v3.0). Conflict order per that doc's own hierarchy: Master Spec → SME/counsel rulings → Consolidated tech spec → ADRs → repo README. ⚠️ `docs/specs/TruNorth Technical Specification.md` is **Draft v1 and superseded** by the Consolidated v3.0 — do not review against it. Coverage audit: [spec-coverage.md](./docs/context/spec-coverage.md) |
 | Level 1 script | `docs/scripts/Updated-Script-6-8anxiety .docx` → **The Little Dragon Who Wouldn't Stop Guarding** (integrated 2026-07-18, supersedes the original Singing Bridge script) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 57 unit tests + content validate. **Scored Ask-for-Help beat** on the Ch.1 path (`dp_ask_grownup` → cross-cutting `ask_for_help` skill, no meter) and **distress-aware resume** (`resumeCheckin` screen when a session ended in `safetyFlag: distress`; re-entry copy is SME-draft) added 2026-07-19. **Phase 2 (widened interaction curve, 2026-07-19):** Ch.1 grew from 2 → **5 decision points** (new scenes e2a/e2b/e2c: reassure a shy friend → share/take turns → repair an accident, meeting spec §6.3's 4–6/chapter floor), and **2 of ch2's 6 DPs (`dp_quest_start`, `dp_investigate`) are now `inputMode: "both"`** so typed replies land in the Little Dragon level (typed DPs 1 → 3 across the game). **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI, automated tests for Play Together. **CI is green**: `typecheck`/`lint`/`validate:content`/`test:unit`/`build` all exit 0 (see §3.14 — fixed 2026-07-19). Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 57 unit tests + content validate. **Scored Ask-for-Help beat** on the Ch.1 path (`dp_ask_grownup` → cross-cutting `ask_for_help` skill, no meter) and **distress-aware resume** (`resumeCheckin` screen when a session ended in `safetyFlag: distress`; re-entry copy is SME-draft) added 2026-07-19. **Phase 2 (widened interaction curve, 2026-07-19):** Ch.1 grew from 2 → **5 decision points** (new scenes e2a/e2b/e2c: reassure a shy friend → share/take turns → repair an accident, meeting spec §6.3's 4–6/chapter floor), and **2 of ch2's 6 DPs (`dp_quest_start`, `dp_investigate`) are now `inputMode: "both"`** so typed replies land in the Little Dragon level (typed DPs 1 → 3 across the game). **Phase 4 hardening (2026-07-19):** §17D in-character API-failure surface + one auto-retry + authored fallback, demo-mode `filterInput` gap closed, axe WCAG 2.2 AA + keyboard-only accessibility suite, §19 bundle-size budget enforced in CI, and §13A.6 projector-resolution verification — 118 unit + 11 e2e tests. **Not built:** Supabase assets, hosted deploy, client remote sync, JSON-Schema CI, automated tests for Play Together, manual screen-reader pass (§22A.5), recorded backup video. **CI is green**: `typecheck`/`lint`/`validate:content`/`test:unit`/`build`/`audit:bundle`/`test:e2e` all exit 0 (see §3.14). Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx, ESLint 9 + typescript-eslint |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
-| Last updated | 2026-07-19 (Phase 3: rubric-based typed scoring + lint wired into CI) |
+| Last updated | 2026-07-19 (§22 Phase 4 hardening: §17D error surface + accessibility + perf budget + projector resolutions) |
 
 ---
 
@@ -164,6 +164,10 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 DallasAITeam15/
 ├── product.md                 # Living ledger + task board (this file)
 ├── README.md
+├── .github/workflows/ci.yml   # ✅ CI: typecheck → lint → validate:content → test:unit →
+│                              #    build → audit:bundle → playwright e2e.
+│                              #    MUST stay at the repo root (Actions ignores subdirs);
+│                              #    runs with working-directory: trunorth
 ├── docs/
 │   ├── README.md              # Design intent overview
 │   ├── specs/                 # Technical specifications
@@ -188,7 +192,8 @@ trunorth/
 │   ├── favicon.svg
 │   └── manifest.json          # PWA manifest (note: main.ts registers /sw.js, which doesn't exist)
 ├── scripts/
-│   └── validate-content.ts    # 🟨 structural checks (no Ajv schemas yet)
+│   ├── validate-content.ts    # 🟨 structural checks (no Ajv schemas yet)
+│   └── audit-bundle-size.ts   # ✅ spec §19 performance budgets, in CI (fails on breach)
 ├── api/
 │   └── [[...route]].ts        # ✅ Vercel Node Function — forwards /api/* to the Hono `app`
 ├── server/                    # ✅ Hono API (dev: tsx watch) 🔧 Jose (deploy)
@@ -202,7 +207,8 @@ trunorth/
 ├── src/
 │   ├── main.ts                # ✅ Boot, screens, startScenario, engine + world + Play Together wiring
 │   ├── audio/speech.ts        # ✅ On-device companion voice toggle (SpeechSynthesis)
-│   ├── companion/CompanionClient.ts   # ✅ Live + Demo clients
+│   ├── companion/CompanionClient.ts   # ✅ Live (1 auto-retry) + Demo (safety-filtered) clients
+│   ├── companion/fallbackLines.ts     # ✅ client-side authored fallback copy + §17D retry line
 │   ├── config/                # ✅ app.ts (incl. LAN-aware resolveApiUrl), content.ts, gameState.ts (env-driven)
 │   ├── content/               # ✅ SCENES/DPs/DIALOGS registry, scenarios, zones, gridLevels, stageObjects
 │   ├── counselor/             # ✅ insights + coPlay discuss prompts + pre-level checkin + typedScoring
@@ -216,15 +222,15 @@ trunorth/
 │   ├── types/index.ts         # ✅ Shared contracts
 │   ├── util/id.ts             # ✅ newId() — LAN/non-secure-context UUID fallback
 │   └── ui/                    # ✅ GameView, screens, togetherScreens, auth helpers
-├── tests/unit/                # ✅ 108 tests — engine (13) + grid (8) + checkin (6) + stageObjects (10) + phase1 (6) + phase2 (7) + phase3 (7) + redteam (51)
-├── tests/e2e/                 # ✅ 3 Playwright tests — demo-mode offline + hard-blocked network + golden-path timing
+├── tests/unit/                # ✅ 118 tests — engine (13) + grid (8) + checkin (6) + stageObjects (10) + phase1 (6) + phase2 (7) + phase3 (7) + phase4-errors (10) + redteam (51)
+├── tests/e2e/                 # ✅ 11 Playwright tests — demo-mode (3) + accessibility (4) + projector (4)
 ├── public/fonts/              # ✅ self-hosted Nunito + Inter variable woff2 (SIL OFL) — no CDN, offline-safe
 ├── playwright.config.ts       # ✅ e2e config; webServer runs `vite preview` (production build)
 ├── Dockerfile · docker-compose.yml
 ├── index.html · vite.config.ts · vitest.config.ts
 ├── tsconfig.json · tsconfig.server.json · tsconfig.api.json  # api.json = typecheck-only, covers api/
 ├── package.json · .nvmrc · .env.example · .gitignore
-└── .github/workflows/ci.yml   # typecheck, validate:content, test:unit, build
+└── (CI lives at the REPO ROOT — see the root tree above; GitHub Actions ignores subdirs)
 ```
 
 > Update this tree whenever directories or top-level files change.
@@ -371,12 +377,26 @@ modules (bubbles/HUD live in `GameView` + CSS).
 - Together Mode discuss prompts (same-browser co-play, distinct from Play Together
   invites): `counselor/coPlay.ts`.
 
-### 3.6 AI companion client (`src/companion/CompanionClient.ts`)
+### 3.6 AI companion client (`src/companion/CompanionClient.ts`, `fallbackLines.ts`)
 ✅ Implemented — see [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md).
 - `LiveCompanionClient` — POST `{API}/api/companion` with optional bearer token.
-- `DemoCompanionClient` — offline bundle lookup `{scene}:{dp}:{band}` where band comes from
-  the shared **rubric scorer** (`scoreTypedResponse`, §3.9) using `req.typedRubricRef`; surfaces
-  `matchedCriterion`; always attaches counselor insight tips.
+  **One auto-retry on failure (spec §17D, Phase 4):** a thrown network error *or* a non-OK
+  status triggers a single retry after `timing.companionRetryDelayMs` (600 ms); the optional
+  `hooks.onRetry` fires first so the companion speaks in-character while it retries. A second
+  failure throws `CompanionUnavailableError`. Capped at exactly one retry (test-enforced).
+- `DemoCompanionClient` — **runs `filterInput` first** (Phase 4 — closes the gap where demo
+  mode scored typed text with no safety filter), returning the `safety` fallback line +
+  `redirect: true` + the real `safetyFlag` on a block. Otherwise: offline bundle lookup
+  `{scene}:{dp}:{band}` where band comes from the shared **rubric scorer**
+  (`scoreTypedResponse`, §3.9) using `req.typedRubricRef`; surfaces `matchedCriterion`;
+  always attaches counselor insight tips.
+- `fallbackLines.ts` — **new (Phase 4).** Client-side access to
+  `content/fallbacks/companion-fallbacks.json` (previously server-only): `fallbackLine(dpId,
+  band)`, `GENERIC_FALLBACK_LINE`, and `API_RETRY_LINE` (the §17D in-character
+  "my words got a little tangled" line — **SME-draft, sign-off pending**).
+- `SceneEngine`'s catch paths in `submitTyped`/`fetchCompanionFeedback` now serve
+  `fallbackLine(dp.id, band)` and resolve the decision anyway, replacing a hardcoded generic
+  string — so a dead proxy produces authored copy and a continuing story, never a dead end.
 
 ### 3.7 Safety (`src/safety/filters.ts`)
 ✅ Implemented. `filterInput` (jailbreak/distress/PII/profanity/length),
@@ -576,10 +596,22 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   task) — don't invest in fixing it.
 - CI (`.github/workflows/ci.yml`): typecheck → **lint** → validate:content → test:unit → build
   → **playwright install chromium → test:e2e** (report uploaded as an artifact on failure).
-- ⬜ `build-asset-manifest`, `audit-bundle-size` — not in tree. **`red-team-suite` ✅ shipped**
-  as `tests/unit/redteam.test.ts` (§3.15).
-- ✅ **Playwright e2e** — `playwright.config.ts` + `tests/e2e/demo-mode.spec.ts` (3 tests),
-  serving the production build via `vite preview`. Covers DoD §27 items 1 and 3.
+- ⬜ `build-asset-manifest` — not in tree. **`red-team-suite` ✅ shipped**
+  as `tests/unit/redteam.test.ts` (§3.15). **`audit-bundle-size` ✅ shipped** (below).
+- ✅ **`scripts/audit-bundle-size.ts`** (`npm run audit:bundle`, in CI after `build`) —
+  spec §19 performance budgets as a build-artifact audit; exits non-zero on breach and
+  prints the largest contributors. Two tiers: the spec's own **15 MB** showcase-bundle
+  ceiling, plus tighter per-asset-class budgets (JS 250 kB raw / 80 kB gzip, CSS 60 kB,
+  fonts 200 kB) set with headroom over today's build, because a 15 MB ceiling alone would
+  sit green through a 10× regression. **Current: 1.38 MB total, JS 145.8 kB (44.1 kB gzip,
+  55% of budget), CSS 21.5 kB, fonts 85.5 kB** — the four zone PNGs are the largest assets
+  at ~250–324 kB each. Raising a budget is allowed; doing it silently is not (see the
+  file header).
+- ✅ **Playwright e2e — 11 tests** across 3 suites, serving the production build via
+  `vite preview`: `demo-mode.spec.ts` (3 — DoD §27 items 1 and 3),
+  `accessibility.spec.ts` (4 — spec §20/§17A.4/§22A.5, axe-core WCAG 2.2 AA scan +
+  keyboard-only + focus ring + reduced motion), `projector.spec.ts` (4 — spec §13A.6
+  resolutions + §19 load budget). Dev dep added: `@axe-core/playwright`.
 
 ### 3.15 Tests (`tests/`)
 🟨 Partial — **57 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
@@ -604,8 +636,15 @@ e1→e2→e2a→e2b→e2c→e3 chain; each new ch1 DP has 3-band options + forwa
 insight + co-play coverage)
 + `tests/unit/phase3.test.ts` (7 — rubric scorer: generic base preserved, inclusion/curiosity/
 brave_start decision-specific bands, strong-wins-over-poor, unknown-rubric fallback,
-`matchedCriterion` surfaced, every typed DP wired to a registered `typedRubricRef`).
-⬜ integration / e2e / red-team folders. ⬜ No tests yet for Play Together (§3.16).
+`matchedCriterion` surfaced, every typed DP wired to a registered `typedRubricRef`)
++ `tests/unit/phase4-errors.test.ts` (10 — §17D retry ladder: retry-once-then-succeed,
+non-OK status also retried, capped at exactly one retry, retry copy carries no raw-error
+vocabulary, authored per-DP fallback served (not the generic string), every registered DP
+has `timeout` + `safety` copy; demo-mode `filterInput`: distress/PII/jailbreak blocked
+offline, ordinary answers still scored, **and every authored option label passes
+`filterInput` unblocked** — the regression guard for the `"hello"`/`"hell"` class of bug).
+✅ **e2e is no longer an open gap** — `tests/e2e/` holds 11 Playwright tests (§3.14).
+⬜ No tests yet for Play Together (§3.16).
 
 ### 3.16 Play Together invites (`server/routes/together.ts`, `src/together/`, `src/ui/togetherScreens.ts`)
 ✅ Implemented (no auth, 2-hour room TTL, no automated tests yet). Cross-device
@@ -640,7 +679,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 
 > ### 📍 Current position (2026-07-19)
 >
-> **We are in the spec's §22 Phase 4 — "Week 4–5: Hardening" — with 1 of 7 items done.**
+> **We are in the spec's §22 Phase 4 — "Week 4–5: Hardening" — with 5 of 7 items done.**
 > (Consolidated tech spec §22 defines Phases 1–5. ⚠️ These are **not** the same as the
 > "Phase 0–4" labels used in the §6 changelog below, which were an ad-hoc working sequence.
 > **Use the spec's §22 numbering from here on**; the changelog labels are historical.)
@@ -648,11 +687,11 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 > | §22 Phase 4 item | State |
 > |---|---|
 > | Red-team suite green | ✅ done |
-> | Empty/error/resume states | 🟨 distress-resume built; in-character API-failure surface + auto-retry incomplete |
-> | Projector-resolution verification | ⬜ |
+> | Empty/error/resume states | ✅ done 2026-07-19 — distress-resume + in-character API-failure line + single auto-retry + authored fallback (§17D), verified in-browser with the API dead |
+> | Projector-resolution verification | ✅ done 2026-07-19 — `tests/e2e/projector.spec.ts`, 1024×768 / 1366×768 / 1920×1080 in CI. ⚠️ *not* a substitute for confirming the actual venue spec (§13A.6 is a rehearsal task) |
 > | Recorded backup video | ⬜ *(human task)* |
-> | Accessibility pass on showcase | ⬜ *(also §22A.5 — doubles as a credibility story)* |
-> | Performance budget + release notes | ⬜ |
+> | Accessibility pass on showcase | 🟨 automated half done 2026-07-19 (axe WCAG 2.2 AA + keyboard-only + focus ring + reduced motion, in CI; **found and fixed 2 real defects**). ⬜ the §22A.5 deliverable — a **manual screen-reader pass by the team's visually-impaired member** — is still open and is the part that becomes the credibility story |
+> | Performance budget + release notes | 🟨 budget ✅ enforced in CI (`audit:bundle`, spec §19); release notes ⬜ |
 > | Scope freeze | ⬜ *(owner decision)* |
 >
 > Earlier §22 phases are essentially complete except: asset manifest / style lock / provenance
@@ -682,13 +721,13 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 | Level 1 art for the 4 new ch2 grid biomes (forest/meadow/cave/mountain path) | Ermoni + Gabby | ⬜ still reuses existing zone PNGs |
 | Ask-for-Help decision point — spec treats a scored beat on the Ch.1 path as non-negotiable (safety on-ramp) | (unassigned) | ✅ fixed 2026-07-19 (`dp_ask_grownup` now scores the new `ask_for_help` cross-cutting skill) |
 | Typed input barely used — was only 1 of 8 DPs (`dp_leftout_bench`) | (unassigned) | 🟨 improved 2026-07-19 (Phase 2 + Phase 3): 3 of 11 registered DPs now `"both"`, and offline typed scoring is now **rubric-based** (`typedScoring.ts`, per-DP `typedRubricRef`) instead of a flat keyword list. Could widen to more DPs; the rubric is still substring-matching (no stemming/negation handling) when no LLM key is set |
-| Demo/offline typed input isn't safety-filtered — `DemoCompanionClient` scores typed text but (unlike the server `/api/companion`) never calls `filterInput`, so distress/PII in a typed answer isn't caught in pure demo mode | (unassigned) | ⬜ noticed 2026-07-19 (Phase 3); server path is filtered |
+| Demo/offline typed input isn't safety-filtered — `DemoCompanionClient` scores typed text but (unlike the server `/api/companion`) never calls `filterInput`, so distress/PII in a typed answer isn't caught in pure demo mode | (unassigned) | ✅ fixed 2026-07-19 (Phase 4) — `filterInput` now runs first in `DemoCompanionClient`, mirroring the server's order. Side effect: the §17D distress-resume path is reachable offline for the first time |
 | No audio/SFX beyond the voice toggle (`src/audio/speech.ts`) — no chimes, ambient bed, or event-mapped sound | (unassigned) | ⬜ |
 | Reward "juice" (companion reaction + particle flight on a strong choice) — `onMeterJuice` hook exists (§3.2) but only re-renders; no visual effect | (unassigned) | ⬜ |
 | Companion visual leveling — `companion.appearanceRef`/`level` field exists (§3.10) but is never read; no sprite change on level-up | (unassigned) | ⬜ |
 | Red-team adversarial input test suite (jailbreak/distress/off-topic battery) | (unassigned) | ✅ shipped 2026-07-19 (Phase 4) — `tests/unit/redteam.test.ts`, 45 cases in CI. **Found and fixed 4 real live-path defects**, incl. `"hello"` being blocked as profanity (substring match on "hell"), unfiltered meet-up requests, unfiltered PII solicitation, and over-narrow jailbreak patterns. 🔒 distress *wording* still needs SME sign-off |
 | Live model verification of the pinned Haiku 4.5 against the §9.4 contract | Build | ✅ done 2026-07-19 — verified with a real key. **Found 2 live-path defects, both fixed:** `matchedCriterion` was silently dropped (§9.4/§8.3), and the model emitted "that's a superpower" — the identity-claiming phrasing §9.8 forbids. See ADR-004 |
-| Demo-mode `filterInput` gap now also covered by the red-team suite's scope note — `DemoCompanionClient` still scores typed text without safety filtering | (unassigned) | ⬜ carried from Phase 3 |
+| Demo-mode `filterInput` gap now also covered by the red-team suite's scope note — `DemoCompanionClient` still scores typed text without safety filtering | (unassigned) | ✅ fixed 2026-07-19 (Phase 4) — see the row above; duplicate of it |
 | Time the golden path against the §27 DoD 3-minute budget | (unassigned) | 🟨 **engine time measured 2026-07-19: 6.2s** vs a 180s child budget (e2e). Still 🟨 — a scripted walk-through isn't a child; the DoD criterion needs the §22A.2 human playtest |
 | Playwright offline assertion for demo mode (§27 DoD item 3) | (unassigned) | ✅ shipped 2026-07-19 — `tests/e2e/demo-mode.spec.ts` (3 tests, wired into CI). **Found a real defect:** the app loaded Nunito/Inter from the Google Fonts CDN, so an offline stage would have silently fallen back to system fonts. Fonts are now self-hosted in `public/fonts/` |
 | E2E golden path W1→W7 (ch2 Little Dragon) — the e2e suite currently walks the **ch1** chapter only | (unassigned) | 🟨 harness now exists, so adding the ch2 path is cheap |
@@ -697,7 +736,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 | — *(rows below from the 2026-07-19 spec-coverage audit)* | — | — |
 | **Which spec is authoritative?** — resolved by reading the docs themselves: they are layered, not competing. Master Spec (product intent) → Consolidated v3.0 (engineering intent); `TruNorth Technical Specification.md` is Draft v1 and **superseded** | Madhu | ✅ resolved 2026-07-19 — §1 updated, Draft v1 banner-marked SUPERSEDED |
 | Engineering spec v3.0 prefers **Node 24.x LTS** (22.x = compat fallback); repo is on the fallback (`.nvmrc` 22) — `engines` tightened to Vite 8's real floor `^20.19.0 \|\| >=22.12.0` | (unassigned) | 🟨 acceptable per spec, but a deliberate call |
-| Engineering spec v3.0 sets a formal **WCAG 2.2 AA** target (upgrades the Master Spec's §17A.4 checklist); no audit has been run | Test lane | ⬜ pairs with the §22A.5 accessibility proof pass |
+| Engineering spec v3.0 sets a formal **WCAG 2.2 AA** target (upgrades the Master Spec's §17A.4 checklist); no audit has been run | Test lane | 🟨 automated audit shipped 2026-07-19 (Phase 4) — axe-core scan at `wcag2a/2aa/21a/21aa/22aa` over landing, hub, gameplay stage and decision overlay, in CI. **Found and fixed 2 real defects** (see the accessibility row below). Automated tooling catches roughly a third of WCAG issues, so this is a floor, not a certification |
 | Engineering spec v3.0 Part II governance artifacts | Madhu | 🟨 **added 2026-07-19** — `docs/adr/` (ADR-001…006, spec §25 requires exactly this path) + `docs/governance/delivery-status.md` (DoD §27 + risk register §26 tracked against reality). The gap register (§24) and confidence matrix (§28) live in the spec itself and are not duplicated. ⬜ **3 ADRs remain undecided: 003 (EXT DB+auth), 005 (asset provenance), 006 (raw-input retention)** — owner/counsel/art calls, deliberately not resolved by the implementer |
 | Engineering spec v3.0 Vite pin | (unassigned) | ✅ fixed 2026-07-19 — pinned `vite 8.1.5`; required a coordinated `vitest` 3→4 major bump (spec didn't anticipate this); `engines` tightened to Vite 8's real floor. See ADR-001 |
 | Engineering spec v3.0 model pin | (unassigned) | ✅ fixed 2026-07-19 — `claude-haiku-4-5-20251001`, guarded by a red-team test that rejects any `-latest` alias. See ADR-004 |
@@ -717,7 +756,11 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 | Parent dashboard with developmental metrics + guided-conversation prompts (spec §14) | (unassigned) | 🟨 `[EXT]`; `buildJourneyReflection` is a post-play summary, not trends |
 | Chapter 3 (11–15, free typing, resilience) (spec §4) | (unassigned) | ⬜ spec marks it a stretch goal |
 | Recorded backup demo video (spec §13A.7) — rung 4 of the stage fallback ladder | (unassigned) | ⬜ |
-| Accessibility proof pass — screen-reader + keyboard-only + contrast on the showcase scene (spec §22A.5) | Test lane | ⬜ spec wants it as a *told* part of the demo |
+| Accessibility proof pass — screen-reader + keyboard-only + contrast on the showcase scene (spec §22A.5) | Test lane | 🟨 **keyboard-only + contrast ✅ automated 2026-07-19** (`tests/e2e/accessibility.spec.ts`, 4 tests in CI). **Found and fixed 2 real defects:** (1) the landing screen's primary CTA `.btn-primary` was `--text-dark` on `--accent` = **2.36:1**, a serious WCAG AA failure on the first button anyone presses — fixed with a new `--accent-deep` token (~10:1 white-on-purple), also applied to `.typed-submit` and `.companion-thinking` which were scraping by at 4.58:1; (2) the `prefers-reduced-motion` reset capped duration but not iteration count, so `infinite` animations (avatar walk-bob, companion thinking pulse) kept looping imperceptibly and driving the compositor forever — `animation-iteration-count: 1` added. ⬜ **The screen-reader pass is still open and is the actual §22A.5 deliverable** — a human task owned by the team's visually-impaired member, whose account is what makes it a *told* credibility story |
+| ⚠️ **The CI workflow was never running on GitHub.** It lived at `trunorth/.github/workflows/ci.yml`, but GitHub Actions only discovers workflows under the **repo-root** `.github/workflows/`. **Confirmed against the repo's Actions tab on 2026-07-19: zero workflows, zero runs** — so every "in CI" claim previously made in this ledger (lint, red-team, e2e, bundle budget) was *configured* but never once enforced on a push | (unassigned) | ✅ fixed 2026-07-19 (Phase 4) — moved to repo-root `.github/workflows/ci.yml` with `defaults.run.working-directory: trunorth` (there is no root `package.json`, so `npm ci` would otherwise fail on step 1) and `cache-dependency-path: trunorth/package-lock.json`. ⚠️ **Unverified until someone pushes** — no one has yet seen this workflow succeed on GitHub, so treat the first push as the real test |
+| Projector-resolution verification (spec §13A.6, §13A.8; Consolidated §6.1/§6.6) | Test lane | ✅ automated 2026-07-19 — `tests/e2e/projector.spec.ts` at 1024×768 / 1366×768 / 1920×1080: no page overflow, stage + HUD unclipped, decision overlay on screen, ≥12px text, ≥64px hit targets (§17A.4), stage holds 16:9. ⚠️ still needs the physical §13A.6 rehearsal — confirming the venue's actual projector spec is not something CI can do |
+| **Decision overlay does not scale with resolution** (surfaced by the projector suite, 2026-07-19) — the choice button measures **452×64px / 16px text at 1024×768, 1366×768 and 1920×1080 alike**, unlike characters/HUD which scale with `--px`. It sits exactly on the §17A.4 64px floor everywhere, so it passes, but on a large venue projector the most important surface in the demo is proportionally the smallest it ever gets — cuts against §13A.4 "readable from 50 feet" | (unassigned) | ⬜ new |
+| Performance budget enforced in CI (spec §19) | (unassigned) | ✅ shipped 2026-07-19 (Phase 4) — `scripts/audit-bundle-size.ts` + `npm run audit:bundle` in CI. Currently 1.38 MB dist / 145.8 kB JS / 44.1 kB gzip, all well inside budget. Not yet covered by a measurement: the §19 **frame-rate** (60fps / no sustained <45fps on a Chromebook profile) and **particle-cap** rows — those need a device profile, not a build artifact |
 | §22A credibility items: SEL evidence/citation (§22A.1), real-child playtest clip (§22A.2), business-case risk statement (§22A.8) | Vandy / Ranya / Business | ⬜ content + scheduling, not engineering |
 | **SME sign-off is the shared blocker** — distress re-entry copy, the 3 new Ch.1 DPs, and the Ch.2 narrative are all draft; spec §8.6 says no chapter locks until the SME reviews scenarios, option bands, coaching lines, and the typed rubric | Vandy + SME | 🟡 gates shipping any of it to a real child |
 
@@ -727,6 +770,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 
 | Date | Change |
 |---|---|
+| 2026-07-19 | **§22 Phase 4 hardening, items 2–5: error surface, accessibility, performance budget, projector resolutions. 4 real defects found and fixed.** (a) **DoD §27 item 6 — §17D API-failure surface.** `LiveCompanionClient` now runs the spec's ladder: attempt → **one** in-character retry (`onRetry` hook fires `API_RETRY_LINE`, "My words got a little tangled — let me try that again!", so the child sees the companion rather than a spinner; input stays frozen per §17B.9 guard 1) → `CompanionUnavailableError` → `SceneEngine`'s catch serves the **hand-authored per-decision fallback** and resolves the decision anyway. Previously there was no retry at all and the catch emitted a hardcoded `"Let's keep going — you're doing great."`; the client had no access to `companion-fallbacks.json` whatsoever (server-only import) — so the one case where authored copy matters most, a dead proxy on stage, was the one case that got a generic string. New `src/companion/fallbackLines.ts` bridges it. Retries are capped at exactly one, test-enforced, because an unbounded loop on stage is worse than a fallback. **Verified end-to-end in a real browser in live mode with every `/api/**` call aborted:** exactly 2 attempts, and the child saw *"My words got a little tangled…"* → *"You made room for Jamie — belonging starts with one kind invite."* → counselor insight → story continued. (b) **Closed the demo-mode `filterInput` gap** carried from Phase 3: `DemoCompanionClient` now filters before scoring, mirroring the server's order — demo mode, the mode *guaranteed* to be running on stage, was the only one with no safety filter on typed input. Side effect worth noting: this makes the §17D distress-resume path reachable offline for the first time. Added a regression guard asserting **every authored option label passes `filterInput`** — the same class of bug as the red-team suite's `"hello"`/`"hell"` false positive, now guarded before it can recur through the new filter call. (c) **Accessibility pass (spec §20 / §17A.4 / §22A.5)** — new `tests/e2e/accessibility.spec.ts` (4 tests in CI): axe-core scan at `wcag2a/2aa/21a/21aa/22aa` over landing, hub, gameplay stage and decision overlay; a scored decision completed by **Tab/Enter alone** with an asserted *rendered* focus ring (not just a stylesheet selector); and a `prefers-reduced-motion` check. **Found 2 real defects:** the landing screen's primary CTA was **2.36:1 contrast** (`--text-dark` on `--accent`) — a serious AA failure on the first button anyone presses — fixed via a new `--accent-deep` token at ~10:1, also applied to `.typed-submit`/`.companion-thinking` which were only scraping past at 4.58:1; and the reduced-motion reset capped `animation-duration` but not `animation-iteration-count`, so `infinite` animations kept looping imperceptibly and driving the compositor forever (works against the §19 Chromebook frame-rate budget). ⚠️ **The §22A.5 deliverable is still open** — the manual screen-reader pass by the team's visually-impaired member is the part that becomes a told credibility story; automated tooling catches roughly a third of WCAG issues and is a floor, not a certification. (d) **Performance budget (spec §19)** — new `scripts/audit-bundle-size.ts` + `npm run audit:bundle`, in CI after `build`, non-zero exit on breach (verified by deliberately breaching it). Two tiers: the spec's 15 MB showcase ceiling plus tighter per-asset-class budgets with headroom, because 15 MB alone would sit green through a 10× regression. Current: 1.38 MB dist, 145.8 kB JS (44.1 kB gzip, 55% of budget), 21.5 kB CSS, 85.5 kB fonts; the 4 zone PNGs dominate at ~250–324 kB each. (e) **Projector resolutions (spec §13A.6/§13A.8, Consolidated §6.1/§6.6)** — new `tests/e2e/projector.spec.ts` at 1024×768 / 1366×768 / 1920×1080: no page overflow, stage + HUD unclipped, overlay on screen, ≥12px text, ≥64px hit targets, and the stage verified to hold **16:9** (settling a ledger open question — the `--px` container does maintain aspect and never stretches; what's missing from §17B.7 is only the explicit letterbox *treatment*). Initial load measured at ~40–100ms against the §19 3s budget. **Surfaced a new gap:** the decision overlay is fixed-size — 452×64px / 16px text at *every* resolution — so on a big venue projector the most important surface in the demo is proportionally the smallest it ever gets (§13A.4). Logged in §5, not silently accepted. Tests 108→118 unit, 3→11 e2e. New dev dep `@axe-core/playwright`. All of typecheck/lint/validate:content/test:unit/build/audit:bundle/test:e2e green. |
 | 2026-07-19 | **Live model verification (ADR-004) — found and fixed 2 live-path defects.** With a real key configured, exercised `claude-haiku-4-5-20251001` against the §9.4 contract: structured JSON parses, `confidence` 0.92–0.95 on strong answers and 0.65 on an ambiguous one (the 0.55 floor behaved without needing to force `partial`), `companionLine` 87–98 chars (under the 120 cap), ~3.3 s latency vs the 8 s timeout, and **adversarial input blocked pre-model in 0.03 s** — `filterInput` runs before the API call, so jailbreak traffic costs nothing. Two defects the offline path did **not** have: (1) **`matchedCriterion` was silently dropped** — §9.4 requires it and §8.3 says the model must cite the criterion it matched, but `buildSystemPrompt` never asked for it and `parseModelResponse` never read it, so the live path returned *less* than the offline rubric scorer; now requested + parsed, re-verified returning `"offered_inclusion"`. (2) **Haiku 4.5 emitted "that's a superpower"** — the exact identity-claiming phrasing the §9.8 identity-framing guard forbids and explicitly names as a correction target; the system prompt had no such rule and `filterOutput` only screened clinical/meet-up terms. Now forbidden in the prompt **and** rejected by `filterOutput` (a prompt rule is not an enforcement mechanism), with 6 regression cases; re-verified live, lines now return in the approved past-tense situational form. Also fixed a config break introduced by the e2e work: vitest's default include was collecting `tests/e2e/*.spec.ts` and failing on Playwright's `test.describe` — `vitest.config.ts` now includes `tests/unit/**/*.test.ts` only. Tests 102→108. |
 | 2026-07-19 | **E2E stage-readiness suite (DoD §27 items 1 & 3) + self-hosted fonts.** Added `playwright.config.ts` + `tests/e2e/demo-mode.spec.ts` (3 tests, wired into CI after `build`, report uploaded on failure), serving the **production build** via `vite preview` because §13A's stage claims are about the built artifact. Tests: (1) zero off-origin and zero `/api/` requests during scored play in demo mode; (2) the same path replayed with the network **hard-blocked** (§13A.3 "no internet at all") — stronger than observation because it catches a *conditional* external fetch; (3) the full 5-DP ch1 golden path to celebration, reporting engine time. **Writing test 1 immediately found a real stage-readiness defect:** `index.html` loaded Nunito + Inter from the **Google Fonts CDN**, violating §13A.1 ("all assets preloaded/bundled") — on a stage with failed WiFi the game would have silently rendered in system fallback fonts, different typography from every rehearsal and a direct hit to §17B.5 guard-3 legibility and §13A.4 "readable from 50 feet". Fixed by self-hosting both as single variable woff2 files (`public/fonts/`, SIL Open Font License, ~85 kB total) with `@font-face` in `global.css` and `<link rel="preload">`; verified no `fonts.googleapis.com`/`fonts.gstatic.com` reference survives in `dist/`. **Golden-path engine time measured: 6.2s** against the 180s child budget — the engine is nowhere near the constraint (~174s of reading headroom). DoD item 3 → ✅; item 1 stays 🟨 because a scripted walk-through is not a child and the criterion still needs the §22A.2 human playtest. DoD now **4 of 8 met**. Also fixed a locator lesson worth recording: several controls (trigger hotspot, stage objects) expose their name only via `aria-label`, so Playwright `hasText` silently misses them — the suite uses `getByRole({ name })` throughout. |
 | 2026-07-19 | **Phase 4: red-team safety suite + spec-conformance fixes + Part II governance.** (a) **Red-team suite (spec §9.6 — "a deliverable, not a checkbox"):** new `tests/unit/redteam.test.ts` (45 cases, in CI) covering jailbreak/prompt-injection, real-world meet-up, PII solicitation, child PII disclosure, distress/self-harm, profanity, output-filter rejection, input hardening, fallback coverage, and model pinning. Running it for the first time **found four real live-path defects, now fixed in `src/safety/filters.ts`**: (1) *the most serious* — profanity used substring matching, so `"hello".includes("hell")` was true and *"hello Jamie, want to play with us?"* — effectively the ideal answer to the game's first typed DP — was **blocked as profanity**; now word-boundary matched; (2) real-world meet-up requests passed through and were scored normally, despite Appendix A §4.3 forbidding the topic; (3) PII *solicitation* ("what is your address") was unfiltered — only the child disclosing their own PII was caught; (4) jailbreak patterns were too narrow ("ignore your instructions", "disregard your guidelines", "you are now DAN", "no limits" all passed). Also hardened: distress is now evaluated **first**, so a distressed child reaches the distress path even when the message also trips profanity; distress lexicon extended with recognized ideation euphemisms and marked **SME-owned**. Jailbreak patterns deliberately key on rule-breaking markers rather than the word "pretend", so imaginative play ("pretend you are a puppy") is not blocked — guarded by explicit false-positive tests. (b) **Spec-conformance (Consolidated v3.0 Appendix F):** pinned the companion model `claude-3-5-haiku-latest` → **`claude-haiku-4-5-20251001`** (ADR-004) — a floating alias would silently invalidate everything the red-team suite certifies; and pinned **`vite` 8.1.5** (ADR-001), which required a coordinated **`vitest` 3→4** major bump the spec didn't anticipate, plus `engines` tightened to Vite 8's real floor. (c) **Part II governance (spec §25):** created `docs/adr/` — ADR-001 (Vite), ADR-002 (Vercel Node runtime, ratifying existing code), ADR-004 (model pin + lifecycle) **Accepted**; ADR-003 (EXT DB+auth), ADR-005 (asset provenance), ADR-006 (raw-input retention) deliberately left **Open** as owner/counsel/art decisions the implementer must not make. Added `docs/governance/delivery-status.md` tracking the §27 Definition of Done (**3 of 8 met**) and the §26 risk register against reality. Tests 57→102. Verified: typecheck/lint/validate/build green, and all four safety fixes re-probed over real HTTP against the running API. **Live model call still unverified** — no API key available, so only config plumbing and the no-key path were exercised. |

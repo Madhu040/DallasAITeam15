@@ -27,6 +27,14 @@
   --bg-dark: #1a0a2e;
   --bg-parent: #2d1b4e;
   --accent: #9d4edd;
+  /**
+   * Accent for use as a BACKGROUND BEHIND TEXT (spec §20 — 4.5:1 dialogue contrast).
+   * `--accent` itself is only 4.58:1 against white and 2.36:1 against `--text-dark`, so
+   * text sitting directly on it either scraped past AA or failed it outright. This deeper
+   * purple gives ~10:1 against white; use it wherever a filled accent button/pill carries
+   * a label, and keep `--accent` for borders, glows, fills and icon strokes.
+   */
+  --accent-deep: #5a189a;
   --accent-warm: #ffd60a;
   --accent-glow: #ffd60a;
   --tru-purple: #7b2cbf;
@@ -658,7 +666,7 @@ body {
 .typed-submit {
   width: 100%;
   min-height: 48px;
-  background: var(--accent);
+  background: var(--accent-deep);
   color: white;
   border: none;
   border-radius: 12px;
@@ -673,7 +681,7 @@ body {
   bottom: max(48px, calc(80 * var(--px)));
   left: 50%;
   transform: translateX(-50%);
-  background: var(--accent);
+  background: var(--accent-deep);
   color: white;
   padding: calc(10 * var(--px)) calc(20 * var(--px));
   border-radius: 999px;
@@ -814,8 +822,8 @@ body {
 .btn-primary {
   width: 100%;
   padding: 12px;
-  background: var(--accent);
-  color: var(--text-dark);
+  background: var(--accent-deep);
+  color: #fff;
   border: none;
   border-radius: 8px;
   font-weight: 600;
@@ -1068,7 +1076,16 @@ body {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    /**
+     * Without this, `infinite` animations (the avatar walk-bob, the companion thinking
+     * pulse, meter juice) keep *looping* — just imperceptibly fast. That still drives the
+     * compositor forever, which works against the §19 frame-rate budget on the Chromebook
+     * profile and is not what §20 "reduced motion disables shake/particles" asks for.
+     * Capping iterations at 1 actually stops them.
+     */
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

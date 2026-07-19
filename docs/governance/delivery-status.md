@@ -5,7 +5,8 @@
 > [`product.md`](../../product.md) §3.
 >
 > The spec *states* the DoD and the risks; it cannot say **where we stand against them**.
-> That is this file's only job. Point-in-time — **2026-07-19**, after Phase 4.
+> That is this file's only job. Point-in-time — **2026-07-19**, after §22 Phase 4 hardening
+> items 1–5 (red-team, error surface, accessibility, performance budget, projector).
 > Live gap list remains `product.md` §5.
 
 **Legend:** ✅ met · 🟨 partial · ⬜ not met · 🔒 blocked on a non-engineering sign-off
@@ -21,11 +22,46 @@
 | 3 | **No network request occurs in demo mode**; Playwright offline test passes | ✅ | `tests/e2e/demo-mode.spec.ts` (3 tests, in CI): asserts zero off-origin and zero `/api/` requests during scored play, **and** replays the path with the network hard-blocked (§13A.3). Writing it **found a real defect** — see below |
 | 4 | Proxy never exposes the API key; falls back safely on timeout / malformed output | ✅ | Key is server-side only (`serverConfig`, never `VITE_`-prefixed); timeout → `scoreLocally`, malformed → `parseModelResponse` catch → fallback. Covered by `redteam.test.ts` |
 | 5 | Every decision point has a complete `emotionalArc` **and** full fallback coverage | ✅ | `validate-content` enforces `emotionalArc`; `redteam.test.ts` asserts every registered DP has `safety` + `timeout` fallback lines |
-| 6 | Parent gate, trust screen, and safe error surface implemented | 🟨 | Gate ✅ (`renderParentGate`, PIN + 3-fail cool-down), trust screen ✅ (`renderTrustScreen`). Error surface 🟨 — in-character API-failure line + single auto-retry only partly built (§17D) |
+| 6 | Parent gate, trust screen, and safe error surface implemented | ✅ | Gate ✅ (`renderParentGate`, PIN + 3-fail cool-down), trust screen ✅ (`renderTrustScreen`). **Error surface ✅ 2026-07-19** — `LiveCompanionClient` runs the §17D ladder (attempt → one in-character retry showing `API_RETRY_LINE` → hand-authored per-decision fallback, decision resolved anyway). Verified in a real browser in live mode with every `/api/**` call aborted: exactly 2 attempts, child saw the tangled-words line then the authored fallback, story continued. Retry copy is 🔒 SME-draft |
 | 7 | Data capture **excludes raw child typed input** | ✅ | `GameEvent` stores no `rawInput`; no telemetry/Sentry in the tree. Formalize via **ADR-006** before EXT |
-| 8 | Accessibility, projector legibility, performance, and **red-team** suites pass thresholds | 🟨 | **Red-team ✅ shipped** (`redteam.test.ts`, 45 cases, in CI). Accessibility ⬜ no audit; projector legibility ⬜ untested at venue res; performance ⬜ no budget measured |
+| 8 | Accessibility, projector legibility, performance, and **red-team** suites pass thresholds | 🟨 | All four suites now exist and pass in CI: **red-team ✅** (`redteam.test.ts`, in CI), **accessibility 🟨** (`accessibility.spec.ts` — axe WCAG 2.2 AA + keyboard-only + focus ring + reduced motion; found and fixed 2 real defects), **projector ✅** (`projector.spec.ts` — 1024×768 / 1366×768 / 1920×1080), **performance ✅** (`audit:bundle`, spec §19, fails CI on breach). Held at 🟨 for two honest reasons: the §22A.5 **manual screen-reader pass** has not happened and is the actual deliverable, and §13A.6 asks for verification at the **venue's** projector, which CI cannot do |
 
-**Summary: 4 of 8 fully met** (was 3 before the e2e work).
+**Summary: 5 of 8 fully met** (was 4 before the Phase 4 hardening work).
+
+### What the accessibility pass found (2026-07-19)
+
+Same pattern as the red-team and offline suites — the rules were written down and partly
+unimplemented, and only running something found it:
+
+1. **The landing screen's primary CTA failed WCAG AA at 2.36:1.** `.btn-primary` put
+   `--text-dark` (#3d3d3d) on `--accent` (#9d4edd) — the first button anyone presses in
+   the demo, well under the 4.5:1 §20 requires. Fixed with a new `--accent-deep` token
+   (#5a189a, ~10:1 against white). The audit also caught `.typed-submit` and
+   `.companion-thinking` scraping past at **4.58:1** — passing, but with almost no margin
+   on a projector; both moved to the deeper token too.
+2. **`prefers-reduced-motion` did not actually stop motion.** The reset capped
+   `animation-duration` to 0.01ms but left `animation-iteration-count`, so `infinite`
+   animations (avatar walk-bob, companion thinking pulse) kept looping forever, just
+   imperceptibly — still driving the compositor, which works against the §19 Chromebook
+   frame-rate budget and is not what §20 "reduced motion disables shake/particles" asks for.
+
+> **What this pass is not.** Automated tooling catches roughly a third of WCAG issues. The
+> §22A.5 ask — a screen-reader + keyboard pass run by the team's visually-impaired member,
+> whose account becomes a told part of the demo — is untouched by any of this. A green CI
+> run is the floor that makes that session worth their time, not a substitute for it.
+
+### What the projector pass found (2026-07-19)
+
+Verifying 1024×768 / 1366×768 / 1920×1080 settled one open question and opened one gap:
+
+- **Settled:** the `--px` size container *does* hold the stage at 16:9 (1024×768 → a
+  1024×576 stage) and never stretches it, so the 4:3 case is safe. What §17B.7 is still
+  missing is only the explicit letterbox *treatment*, not the aspect lock.
+- **New gap:** the decision overlay is **fixed-size** — 452×64px with 16px text at every
+  resolution tested, unlike characters and HUD which scale. It sits exactly on the §17A.4
+  64px floor everywhere, so it passes, but it means that on a large venue projector the
+  single most important surface in the demo is proportionally the *smallest* it ever gets.
+  That cuts directly against §13A.4 "readable from 50 feet". Logged in `product.md` §5.
 
 ### What the offline test found (2026-07-19)
 
@@ -44,8 +80,9 @@ in `index.html`. Verified: no `fonts.googleapis.com`/`fonts.gstatic.com` referen
 > Same lesson as the red-team suite: demo mode *looked* offline-safe and wasn't. The
 > stage-safety claims in §13A only become true when something asserts them.
 
-**Remaining cheapest wins:** #6 (in-character API-failure surface + auto-retry) and #8's
-accessibility pass — the latter is also §22A.5, where it doubles as a credibility story.
+**Both of those wins were taken on 2026-07-19** — see items 6 and 8 above. The remaining
+DoD gaps are no longer engineering: #1 needs the §22A.2 human playtest, and #8's last leg
+is the §22A.5 manual screen-reader pass.
 
 ---
 
@@ -59,8 +96,8 @@ accessibility pass — the latter is also §22A.5, where it doubles as a credibi
 | **R04** | Demo network failure | Offline demo, preloaded assets, local server, recorded video | 🟨 **Materially improved 2026-07-19** — demo mode is now *proven* offline by CI (hard-blocked-network e2e), and the Google-Fonts CDN dependency that would have degraded typography on a WiFi failure is removed (fonts self-hosted). ⬜ **recorded backup video still does not exist** — rung 4 of the fallback ladder is missing |
 | **R05** | Asset inconsistency / IP uncertainty | Style lock, provenance ledger, regeneration policy | ⬜ Open — **ADR-005**. No manifest, no provenance ledger; built art diverges from spec §10 |
 | **R06** | Branching / content explosion | Bounded bands, repair actions, schema validation, review | ✅ Three bands only, converging routing, `validate-content` in CI. 🟨 no Ajv JSON-Schema pack yet |
-| **R07** | Poor accessibility / keyboard flow | WCAG 2.2 AA, keyboard E2E, manual screen-reader pass | ⬜ Keyboard play works, some ARIA labels exist, but **no audit, no E2E, no screen-reader pass**. Spec §22A.5 wants this as a *told* part of the demo |
-| **R08** | Performance on Chromebook / projector | Bundle budget, particle caps, viewport tests, low-end profile | 🟨 Bundle is small (~146 kB JS / 45 kB gzip) and builds in <1s, but **no budget is enforced** and no low-end/projector test has run |
+| **R07** | Poor accessibility / keyboard flow | WCAG 2.2 AA, keyboard E2E, manual screen-reader pass | 🟨 **Materially improved 2026-07-19** — axe WCAG 2.2 AA audit **and** a keyboard-only E2E now run in CI, and writing them found and fixed 2 real defects (2.36:1 contrast on the primary CTA; reduced-motion not actually stopping infinite animations). ⬜ **The manual screen-reader pass has still not happened** — it is the §22A.5 deliverable and the mitigation's third leg |
+| **R08** | Performance on Chromebook / projector | Bundle budget, particle caps, viewport tests, low-end profile | 🟨 **Materially improved 2026-07-19** — the bundle budget is now **enforced in CI** (`audit:bundle`, spec §19; 1.38 MB dist / 145.8 kB JS / 44.1 kB gzip, 55% of budget) and viewport tests run at 1024×768 / 1366×768 / 1920×1080 with a 3s load-budget assertion. ⬜ Still unmeasured: the §19 **frame-rate** row (60fps, no sustained <45fps) and **particle cap** (≤12) — both need a real low-end device profile, not a build artifact |
 
 ### R01 — what the red-team suite actually found (2026-07-19)
 

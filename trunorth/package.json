@@ -16,6 +16,7 @@
     "lint": "eslint src server api --max-warnings 0",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.api.json",
     "validate:content": "tsx scripts/validate-content.ts",
+    "audit:bundle": "tsx scripts/audit-bundle-size.ts",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "db:migrate": "tsx server/db/migrate.ts",
@@ -31,6 +32,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.51.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.12",

@@ -1,0 +1,43 @@
+# NOTE: this file must live at the REPO ROOT under .github/workflows/. GitHub Actions
+# does not discover workflows in subdirectories — while this lived at
+# trunorth/.github/workflows/ci.yml the repo had zero workflow runs and none of the
+# checks below were ever enforced on a push, despite the ledger describing them as
+# "in CI". The app itself lives in trunorth/, hence the working-directory default.
+name: ci
+on: [push, pull_request]
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: trunorth
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          # `defaults.run` does not apply to action inputs, so the lockfile needs an
+          # explicit repo-root-relative path for the npm cache to resolve.
+          cache-dependency-path: trunorth/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run validate:content
+      - run: npm run test:unit
+      - run: npm run build
+      # Spec §19 performance budgets — a build-artifact audit. Fails the pipeline on a
+      # bundle-size regression rather than letting it drift until the stage demo is slow.
+      - run: npm run audit:bundle
+      # DoD §27 item 3 names the Playwright offline test explicitly. Runs against the
+      # production build served by vite preview (see playwright.config.ts webServer).
+      # Also carries the §20/§22A.5 accessibility scan and §13A.6 projector-resolution suite.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          # Action inputs are repo-root-relative regardless of defaults.run — correct as-is.
+          path: trunorth/playwright-report/
+          retention-days: 7
