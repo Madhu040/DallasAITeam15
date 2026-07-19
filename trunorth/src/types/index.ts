@@ -16,7 +16,8 @@ export type ScenePhase =
   | "paused"
   | "parentGate";
 
-export type SkillId =
+/** The 7 canonical skills that each have a visible, persisted meter (spec §7.2). */
+export type MeterSkillId =
   | "empathy"
   | "calm"
   | "courage"
@@ -24,6 +25,16 @@ export type SkillId =
   | "adapting_to_change"
   | "friendship_repair"
   | "worry_brave";
+
+/**
+ * A scorable skill tag. Extends the metered skills with `ask_for_help`, a
+ * cross-cutting micro-skill (spec §7.2/§8.4) that is scored and logged to the
+ * event log but deliberately has NO meter of its own — it doubles as the
+ * distress-protocol on-ramp. The meter map (`GameState.meters`) is keyed by
+ * `MeterSkillId`, so a consequence that scores `ask_for_help` fills no meter
+ * (the resolver skips skills with no meter).
+ */
+export type SkillId = MeterSkillId | "ask_for_help";
 
 export type InputMode = "choice" | "typed" | "both";
 export type ThemeSensitivity = "standard" | "sensitive";
@@ -202,7 +213,7 @@ export interface GameState {
     /** Latest pre-level check-in per chapter id. */
     checkins?: Record<string, CheckinRecord>;
   };
-  meters: Record<SkillId, { fill: number; level: number }>;
+  meters: Record<MeterSkillId, { fill: number; level: number }>;
   companion: { level: 1 | 2 | 3; appearanceRef: string };
   emotionalResidue: Record<string, Record<string, ResidueLevel>>;
   parentGate: { lastPassedChapter: string | null; pinHash?: string };
@@ -278,7 +289,7 @@ export interface ChildProfile {
 }
 
 export function createDefaultMeters(): GameState["meters"] {
-  const skills: SkillId[] = [
+  const skills: MeterSkillId[] = [
     "empathy", "calm", "courage", "self_worth",
     "adapting_to_change", "friendship_repair", "worry_brave",
   ];

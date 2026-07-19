@@ -835,6 +835,8 @@ body {
 .onboarding-card p { margin-bottom: 24px; opacity: 0.8; }
 
 .checkin-card .btn-secondary { margin-top: 12px; }
+.checkin-resume-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.checkin-resume-actions .btn-secondary { margin-top: 0; }
 .checkin-progress { font-size: 13px; opacity: 0.6; margin-bottom: 12px; letter-spacing: 0.04em; }
 .checkin-divider { margin: 16px 0 8px; opacity: 0.7; font-size: 14px; }
 .checkin-compass { font-size: 3rem; margin-bottom: 8px; }

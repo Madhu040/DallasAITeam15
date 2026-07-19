@@ -12,6 +12,7 @@ import {
   checkinPlacementLabel,
   checkinCompanionLine,
   CHECKIN_DISTRESS_LINE,
+  RESUME_DISTRESS,
   type CheckinAnswer,
 } from "../counselor/checkin.js";
 import type { ScenarioMeta, CheckinRecord } from "../types/index.js";
@@ -365,6 +366,67 @@ export function renderCheckin(
   }
 
   renderQuestion();
+  surface.appendChild(card);
+  container.appendChild(surface);
+}
+
+/**
+ * Distress-aware re-entry (spec §17D). Shown at boot ONLY when the previous
+ * session ended with `safetyFlag: distress`, in place of the standard
+ * welcome-back. It is a calm, low-pressure on-ramp — never scored, never
+ * gamified, and it never surfaces the distress to the child as a "status."
+ * Copy is SME-draft (see `RESUME_DISTRESS`).
+ */
+export function renderResumeCheckin(
+  container: HTMLElement,
+  companionName: string,
+  onContinue: () => void,
+): void {
+  container.innerHTML = "";
+  const surface = document.createElement("div");
+  surface.className = "onboarding";
+  const card = document.createElement("div");
+  card.className = "onboarding-card checkin-card";
+
+  const compass = document.createElement("div");
+  compass.className = "checkin-compass";
+  compass.setAttribute("aria-hidden", "true");
+  compass.textContent = "🫂";
+  card.appendChild(compass);
+
+  const line = document.createElement("p");
+  line.className = "checkin-companion-line";
+  line.textContent = `${companionName}: ${RESUME_DISTRESS.opening}`;
+  card.appendChild(line);
+
+  const actions = document.createElement("div");
+  actions.className = "checkin-resume-actions";
+
+  const keepGoing = document.createElement("button");
+  keepGoing.className = "btn-primary";
+  keepGoing.textContent = RESUME_DISTRESS.continueLabel;
+  keepGoing.onclick = onContinue;
+
+  const sit = document.createElement("button");
+  sit.className = "btn-secondary";
+  sit.textContent = RESUME_DISTRESS.sitLabel;
+  sit.onclick = () => {
+    // "Sit here for a bit" — a calm pause, then a single low-pressure way
+    // forward. Doing nothing is a valid choice; this never scores or advances
+    // the child anywhere they didn't ask to go.
+    line.textContent = `${companionName}: ${RESUME_DISTRESS.sitAwhile}`;
+    actions.innerHTML = "";
+    const ready = document.createElement("button");
+    ready.className = "btn-primary";
+    ready.textContent = RESUME_DISTRESS.readyLabel;
+    ready.onclick = onContinue;
+    actions.appendChild(ready);
+  };
+
+  actions.appendChild(keepGoing);
+  actions.appendChild(sit);
+  card.appendChild(actions);
+
   surface.appendChild(card);
   container.appendChild(surface);
 }

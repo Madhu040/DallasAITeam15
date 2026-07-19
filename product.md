@@ -147,10 +147,10 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
 | Level 1 script | `docs/scripts/Updated-Script-6-8anxiety .docx` → **The Little Dragon Who Wouldn't Stop Guarding** (integrated 2026-07-18, supersedes the original Singing Bridge script) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 37 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI, automated tests for Play Together. **CI is green**: `typecheck`/`lint`/`validate:content`/`test:unit`/`build` all exit 0 (see §3.14 — fixed 2026-07-19). Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 43 unit tests + content validate. **Scored Ask-for-Help beat** on the Ch.1 path (`dp_ask_grownup` → cross-cutting `ask_for_help` skill, no meter) and **distress-aware resume** (`resumeCheckin` screen when a session ended in `safetyFlag: distress`; re-entry copy is SME-draft) added 2026-07-19. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI, automated tests for Play Together. **CI is green**: `typecheck`/`lint`/`validate:content`/`test:unit`/`build` all exit 0 (see §3.14 — fixed 2026-07-19). Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx, ESLint 9 + typescript-eslint |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
-| Last updated | 2026-07-19 (Phase 0: typecheck/lint fully fixed, CI green) |
+| Last updated | 2026-07-19 (Phase 1: Ask-for-Help scored beat + distress-aware resume) |
 
 ---
 
@@ -214,7 +214,7 @@ trunorth/
 │   ├── types/index.ts         # ✅ Shared contracts
 │   ├── util/id.ts             # ✅ newId() — LAN/non-secure-context UUID fallback
 │   └── ui/                    # ✅ GameView, screens, togetherScreens, auth helpers
-├── tests/unit/                # ✅ 37 tests — engine (13) + grid (8) + checkin (6) + stageObjects (10)
+├── tests/unit/                # ✅ 43 tests — engine (13) + grid (8) + checkin (6) + stageObjects (10) + phase1 (6)
 ├── Dockerfile · docker-compose.yml
 ├── index.html · vite.config.ts · vitest.config.ts
 ├── tsconfig.json · tsconfig.server.json · tsconfig.api.json  # api.json = typecheck-only, covers api/
@@ -354,9 +354,9 @@ modules (bubbles/HUD live in `GameView` + CSS).
   `renderOnboarding` (archetype/name/avatar; default **Flicker**), `renderScenarioHub`
   (child cards use grid canvas thumbnails when the start scene binds a grid; PNG fallback),
   `renderCheckin` (pre-level check-in cards + compass result; skippable — see
-  [ui-screens-views.md](./docs/context/ui-screens-views.md)).
-  Known issue: its local `Screen` type includes `"dashboard"`, which `main.ts` rejects
-  (typecheck error).
+  [ui-screens-views.md](./docs/context/ui-screens-views.md)),
+  `renderResumeCheckin` (distress-aware re-entry card, spec §17D — calm 🫂 card with a
+  non-scored "keep going / sit here for a bit" pair; SME-draft copy).
 - `togetherScreens.ts` — **new.** `renderTogetherLobby` (host/join-by-code),
   `renderTogetherPlayerSetup` (name/color/character picker), `renderTogetherWaiting`
   (code/link + live seat status via SSE/polling) — see
@@ -397,6 +397,9 @@ Used by unit tests and the server companion route.
   heuristic; distress → 0 pts + flag), `buildCheckinResult` (0–10 starting point,
   bright/steady/gentle placement; answer text never stored), placement labels/companion
   lines. `buildJourneyReflection` appends the baseline to its summary + parent coaching.
+  Also hosts the distress-resume helpers (spec §17D): `shouldResumeInDistress(flag)`
+  predicate + `RESUME_DISTRESS` re-entry copy (**SME-draft, sign-off pending**), consumed
+  by `main.ts`'s boot branch and `renderResumeCheckin`.
 
 ### 3.10 Shared types (`src/types/index.ts`)
 ✅ Implemented. GameState, Scene (`SceneCharacter` has optional `solidSize` [w, h]
@@ -406,6 +409,10 @@ PlayMode, ProgressStore interface, AuthUser/ChildProfile, `CheckinRecord`/`Check
 (discriminated union: openDialog | finish) + `DialogRecord`/`DialogPage` + optional
 `Scene.objects`**, factories
 `createDefaultMeters` (7 skills). Defaults: companion **Flicker**, chapter `ch2`, scene `w1`.
+Skill types split (2026-07-19): **`MeterSkillId`** = the 7 metered skills (keys of
+`meters`); **`SkillId` = `MeterSkillId | "ask_for_help"`** — `ask_for_help` is a
+cross-cutting, scorable/loggable skill with **no meter** (spec §7.2/§8.4). The resolver
+skips skills that have no meter, so scoring it is a safe no-op on the meter map.
 ⬜ `GameState.companion` also carries `{ level: 1|2|3, appearanceRef }` (seeded
 `companion_dragon_base` in `config/gameState.ts`) — the field exists but nothing reads
 `appearanceRef` anywhere; there is no companion visual-leveling behavior yet, just the
@@ -495,7 +502,7 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   consequences, plus dialog files (`dlg_*`: id/chapterId/non-empty pages) and scene
   `objects[]` (unique ids, 0–99 cells, resolvable dialog/finish targets) — two-pass,
   still no Ajv schemas. **Passing** as of 2026-07-17.
-- `npm run test:unit` — **37/37 passing**. `npm run build` — **passing** (vite build;
+- `npm run test:unit` — **43/43 passing**. `npm run build` — **passing** (vite build;
   server tsc errors are swallowed by `|| true`, see the known quirk below).
 - **`npm run typecheck` — PASSING** (`tsc --noEmit && tsc -p tsconfig.api.json`), fixed
   2026-07-19. The fix uncovered a second, previously-invisible layer of errors: the
@@ -542,7 +549,7 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   playwright config**.
 
 ### 3.15 Tests (`tests/`)
-🟨 Partial — **37 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
+🟨 Partial — **43 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
 bands/meters/repair, safety filters, Little Dragon golden-path presence, ch3 absence,
 counselor insights + journey reflection, SVG cast rendering, world collision wall slide +
 bounds) + `tests/unit/grid.test.ts` (8 — grid cell vector, painting/world lookup,
@@ -553,7 +560,11 @@ Flicker-solid path block on w6's own `gridMapId` vs clear in w7) +
 feeling-word scoring, distress flag, placement bands, labels/lines, reflection baseline)
 + `tests/unit/stageObjects.test.ts` (10 — cell→world parity, object placement/sprites,
 object/dialog content integrity incl. ch2 w7-checkmark completion,
-advanceScene/completeChapter, auto-advance suppression).
+advanceScene/completeChapter, auto-advance suppression)
++ `tests/unit/phase1.test.ts` (6 — Ask-for-Help beat scores `ask_for_help` as primary
+skill + logs it + fills courage/empathy meters without a `ask_for_help` meter;
+insight framing; distress-resume predicate `shouldResumeInDistress` + `RESUME_DISTRESS`
+copy).
 ⬜ integration / e2e / red-team folders. ⬜ No tests yet for Play Together (§3.16).
 
 ### 3.16 Play Together invites (`server/routes/together.ts`, `src/together/`, `src/ui/togetherScreens.ts`)
@@ -600,13 +611,13 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 | TileMap / WASD architecture | — | ✅ free-roam WASD + 100×100 grid levels; all scenes bind `gridMapId` |
 | Automated tests for Play Together (server route / invite store / UI) | (unassigned) | ⬜ |
 | Level 1 art for the 4 new ch2 grid biomes (forest/meadow/cave/mountain path) | Ermoni + Gabby | ⬜ still reuses existing zone PNGs |
-| Ask-for-Help decision point — spec treats a scored beat on the Ch.1 path as non-negotiable (safety on-ramp); no `ask_for_help` skill exists anywhere in code/content | (unassigned) | ⬜ |
+| Ask-for-Help decision point — spec treats a scored beat on the Ch.1 path as non-negotiable (safety on-ramp) | (unassigned) | ✅ fixed 2026-07-19 (`dp_ask_grownup` now scores the new `ask_for_help` cross-cutting skill) |
 | Typed input barely used — only 1 of 8 decision points (`dp_leftout_bench`, ch1) sets `inputMode: "both"`; all of ch2 is choice-only | (unassigned) | ⬜ |
 | No audio/SFX beyond the voice toggle (`src/audio/speech.ts`) — no chimes, ambient bed, or event-mapped sound | (unassigned) | ⬜ |
 | Reward "juice" (companion reaction + particle flight on a strong choice) — `onMeterJuice` hook exists (§3.2) but only re-renders; no visual effect | (unassigned) | ⬜ |
 | Companion visual leveling — `companion.appearanceRef`/`level` field exists (§3.10) but is never read; no sprite change on level-up | (unassigned) | ⬜ |
 | Red-team adversarial input test suite (jailbreak/distress/off-topic battery) | (unassigned) | ⬜ |
-| Distress-aware resume state (companion opens differently after a session ending in `safetyFlag: distress`) | (unassigned) | ⬜ |
+| Distress-aware resume state (companion opens differently after a session ending in `safetyFlag: distress`) | (unassigned) | 🟨 built 2026-07-19 (`resumeCheckin` screen, wired + tested); **re-entry copy is SME-draft, needs SME sign-off before shipping to a real child** |
 | Ch.1/Ch.2 age-band targeting vs. spec structure — code defaults ch2 to age-band 5-7, spec's structure is ch1=5–7/ch2=8–10; needs a deliberate team call, not a code fix | Madhu | 🟡 open question |
 
 ---
@@ -615,6 +626,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 
 | Date | Change |
 |---|---|
+| 2026-07-19 | **Phase 1: added the spec-mandated scored Ask-for-Help beat + a distress-aware resume.** (a) **Ask-for-Help (spec §7.2):** the existing `dp_ask_grownup` (Scene e3) was already authored as an ask-for-help beat in all its copy — only the skill tag was wrong. Split the skill type into `MeterSkillId` (the 7 metered skills) + `SkillId = MeterSkillId \| "ask_for_help"` (`src/types/index.ts`), retagged `dp_ask_grownup.selSkills` to `["ask_for_help", "courage", "empathy"]` (ask_for_help primary → logged as the event skill), aligned its 3 insight `skillFocus` values, and cast the resolver's meter lookup to `MeterSkillId` (the existing `if (meter)` guard already makes scoring a meterless skill a safe no-op). Reused the existing Ch.1 grown-up scene rather than inventing the spec's phantom "W2b". (b) **Distress-aware resume (spec §17D/§9.6):** new `renderResumeCheckin` screen (`src/ui/screens.ts`) shown at boot only when the saved state's `flags.lastSafetyFlag === "distress"` (`shouldResumeInDistress` predicate + `RESUME_DISTRESS` copy in `src/counselor/checkin.ts`; new `resumeCheckin` AppScreen + boot branch in `main.ts`). Calm 🫂 card, a "keep going / just sit here for a bit" pair (neither scored), clears the flag on acknowledge so it fires once per episode (distress event stays in the log for the parent record). **Re-entry copy is a clearly-marked SME DRAFT — must be SME-signed-off before shipping to a real child.** Verified end-to-end in-browser: distress-ended save routes to the screen, both paths work, flag clears, no re-fire, no console errors. Tests 37→43 (`tests/unit/phase1.test.ts`); typecheck/lint/validate/build all still green. |
 | 2026-07-19 | **Phase 0: fixed all `npm run typecheck`/`npm run lint` errors — CI is green.** Matched the existing `as unknown as Scene` cast pattern for w4/w6/e1/e2/e3 in `src/content/index.ts`; dropped the dead `"dashboard"` value from `src/ui/screens.ts`'s local `Screen` type. Fixing those two unmasked a second layer that had never run before (the typecheck script's `&&` always short-circuited past the server/api pass): fixed `tsconfig.api.json`'s `rootDir` (was inheriting `"server"` while also including `api/`), retyped `server/index.ts`'s `authMiddleware` context via Hono's own `Context<{ Variables }>` instead of a fragile `Parameters<Parameters<...>>` extraction, and added the `with { type: "json" }` import attribute `server/routes/companion.ts` needs under NodeNext module resolution. Added `eslint.config.js` (ESLint v9 flat config) + the `typescript-eslint` dev dependency, which had never been installed; removed the one real violation found (an unused `GameEvent` import in `src/counselor/insights.ts`). `npm run lint` is not yet wired into CI. 37/37 tests still passing; `validate:content` and `build` unaffected. |
 | 2026-07-18 | Split Little Dragon hub into **3 phases** (Forest/Meadow, Valley/Cave, Mountain/Festival) on top of main. |
 | 2026-07-13 | Rebased this ledger onto real `trunorth/` tree (removed phantom `TruNorthProject/` claims). |

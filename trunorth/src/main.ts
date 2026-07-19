@@ -23,6 +23,7 @@ import {
   renderOnboarding,
   renderScenarioHub,
   renderCheckin,
+  renderResumeCheckin,
 } from "./ui/screens.js";
 import {
   renderTogetherLobby,
@@ -42,11 +43,13 @@ import {
 import { getToken } from "./ui/auth.js";
 import { speakLine, stopSpeaking } from "./audio/speech.js";
 import { buildJourneyReflection } from "./counselor/insights.js";
+import { shouldResumeInDistress } from "./counselor/checkin.js";
 import { SCENARIOS } from "./content/scenarios.js";
 
 type AppScreen =
   | "landing"
   | "trust"
+  | "resumeCheckin"
   | "onboarding"
   | "hub"
   | "checkin"
@@ -444,6 +447,18 @@ function render(): void {
       });
       break;
 
+    case "resumeCheckin":
+      renderResumeCheckin(app, gameState.profile.companionName, () => {
+        // Acknowledge the distress re-entry: clear the transient flag so the
+        // prompt doesn't re-fire next boot (the distress event stays in the
+        // event log for the parent record, §11.5), persist, then continue to
+        // the normal landing flow.
+        gameState.flags.lastSafetyFlag = null;
+        void new LocalProgressStore().save(gameState);
+        navigate("landing");
+      });
+      break;
+
     case "onboarding":
       renderOnboarding(app, (data) => {
         gameState.profile.companionName = data.companionName;
@@ -550,18 +565,25 @@ function render(): void {
 // Restore saved profile if present
 void (async () => {
   const saved = await new LocalProgressStore().load();
+  let endedInDistress = false;
   if (saved) {
     gameState = saved;
     gameState.flags.demoMode = demoMode;
     if (!gameState.flags.playMode) {
       gameState.flags.playMode = "solo";
     }
+    endedInDistress = shouldResumeInDistress(gameState.flags.lastSafetyFlag);
   }
 
   const invite = parseInviteFromUrl();
   if (invite && appConfig.features.togetherMode) {
     gameState.flags.playMode = "together";
     currentScreen = "togetherLobby";
+  } else if (endedInDistress) {
+    // Distress-aware resume (spec §17D): a session that ended with
+    // safetyFlag: distress re-enters through the calm, SME-draft check-in
+    // rather than the standard welcome-back. An active invite takes priority.
+    currentScreen = "resumeCheckin";
   }
 
   render();
