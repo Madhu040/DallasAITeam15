@@ -147,10 +147,10 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
 | Level 1 script | `docs/scripts/Updated-Script-6-8anxiety .docx` → **The Little Dragon Who Wouldn't Stop Guarding** (integrated 2026-07-18, supersedes the original Singing Bridge script) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 37 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI, automated tests for Play Together. **Known broken:** `npm run typecheck` fails (6 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
-| Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 37 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI, automated tests for Play Together. **CI is green**: `typecheck`/`lint`/`validate:content`/`test:unit`/`build` all exit 0 (see §3.14 — fixed 2026-07-19). Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
+| Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx, ESLint 9 + typescript-eslint |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
-| Last updated | 2026-07-18 (Level 1 rebased onto the Little Dragon script + Play Together invites shipped) |
+| Last updated | 2026-07-19 (Phase 0: typecheck/lint fully fixed, CI green) |
 
 ---
 
@@ -490,29 +490,43 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
 > 🔧 **Ermoni & Gabby** — Level 1 art + Supabase delivery (offline fallback required).
 
 ### 3.14 Build & tooling
-🟨 Partial.
+🟨 Partial (CI green as of 2026-07-19; a few known-deferred quirks remain).
 - `scripts/validate-content.ts` — walks chapter JSON for id/chapterId/emotionalArc/
   consequences, plus dialog files (`dlg_*`: id/chapterId/non-empty pages) and scene
   `objects[]` (unique ids, 0–99 cells, resolvable dialog/finish targets) — two-pass,
   still no Ajv schemas. **Passing** as of 2026-07-17.
 - `npm run test:unit` — **37/37 passing**. `npm run build` — **passing** (vite build;
-  server tsc errors are swallowed by `|| true`).
-- **`npm run typecheck` — FAILING (6 errors), which makes CI red:**
-  5 × TS2352 in `src/content/index.ts` (scene JSON `position: number[]` doesn't satisfy
-  `[number, number]` for the `as Scene` casts; was 9 before the ch2 narrative rewrite
-  changed which scenes' character arrays mix `solidSize`-bearing and plain shapes) and
-  1 × TS2345 in `src/main.ts` (`screens.ts` `Screen` includes `"dashboard"`, not in
-  `AppScreen`).
-  Script is now `tsc --noEmit && tsc -p tsconfig.api.json` — the second pass covers both
-  `server/` and the new `api/` (see below) via **`tsconfig.api.json`** (`noEmit: true`,
-  extends `tsconfig.server.json`); a separate config was needed because adding `api/` to
-  `tsconfig.server.json` itself trips `TS6059` (`api/[[...route]].ts` sits outside its
-  `rootDir: "server"`) whenever something actually emits — `noEmit: true` sidesteps that,
-  and `tsconfig.server.json` (used by the Docker build's `--noEmit false` pass) is
-  untouched.
-- `npm run lint` — broken: no `eslint.config.js` (flat config) for ESLint v9; the
-  `api/` directory it targets now exists (2026-07-17) but the missing config file is the
-  actual blocker.
+  server tsc errors are swallowed by `|| true`, see the known quirk below).
+- **`npm run typecheck` — PASSING** (`tsc --noEmit && tsc -p tsconfig.api.json`), fixed
+  2026-07-19. The fix uncovered a second, previously-invisible layer of errors: the
+  `&&` meant `tsc -p tsconfig.api.json` (the server/api pass) had **never once run to
+  completion** in this repo's history — it was always short-circuited by the first
+  command's failures. What got fixed, in order:
+  1. 5 × TS2352 in `src/content/index.ts` (scene JSON `position: number[]` doesn't
+     satisfy `[number, number]` for the `as Scene` casts on w4/w6/e1/e2/e3) — matched
+     the `as unknown as Scene` pattern the file already used for `w7`.
+  2. 1 × TS2345 in `src/ui/screens.ts` (local `Screen` type included `"dashboard"`,
+     which was never actually passed to `onAuth()` anywhere) — removed as dead type
+     surface.
+  3. *(newly surfaced)* `tsconfig.api.json` had `noEmit: true` but still inherited
+     `rootDir: "server"` from `tsconfig.server.json` while also including `api/` in its
+     file list, tripping `TS6059` — fixed by setting `"rootDir": "."` in
+     `tsconfig.api.json`.
+  4. *(newly surfaced)* `server/index.ts`'s `authMiddleware` derived its context type via
+     a fragile `Parameters<Parameters<typeof app.use>[1]>[0]` extraction that resolved to
+     an untyped context (`c.set("user", ...)` failed) — retyped directly as Hono's own
+     `Context<{ Variables: Variables }>`.
+  5. *(newly surfaced)* `server/routes/companion.ts` imported
+     `companion-fallbacks.json` without the import attribute Node's ESM/NodeNext module
+     resolution requires — added `with { type: "json" }` (a real runtime-correctness
+     fix, not just a type-checker workaround).
+- **`npm run lint` — PASSING**, fixed 2026-07-19. Added `eslint.config.js` (flat config
+  for ESLint v9) + the `typescript-eslint` dev dependency (previously missing
+  entirely — bare `eslint` alone can't parse `.ts` syntax). The one real violation it
+  surfaced (an unused `GameEvent` import in `src/counselor/insights.ts`) was removed.
+  ⬜ **Not wired into CI** — `.github/workflows/ci.yml` doesn't run `npm run lint` at
+  all, so a future lint regression won't fail the pipeline even though the script now
+  works.
 - **Known quirk (left as-is on purpose):** the server pass of `npm run build`
   (`tsc -p tsconfig.server.json --noEmit false`) emits stray `.js` files **into `src/`**
   for client files the server imports (`src/types/index.js`, `src/safety/filters.js`,
@@ -572,7 +586,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 
 | Gap | Owner hint | Status |
 |---|---|---|
-| Fix `npm run typecheck` (6 errors) → CI green | Daniel | ⬜ **CI currently red** |
+| Fix `npm run typecheck` → CI green | Daniel | ✅ fixed 2026-07-19 |
 | Level 1 / zone production art + Supabase | Ermoni + Gabby | ⬜ |
 | Hosted deploy (client + Hono API) | Jose | 🟨 Vercel Node Function adapter (`api/[[...route]].ts`) added 2026-07-17; actual Vercel project/env vars/deploy still pending |
 | Wire client to server remote-progress endpoints | (unassigned) | ⬜ server side done |
@@ -581,7 +595,8 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 | PR/spec shepherding | Madhu | ongoing |
 | E2E golden path W1→W7 | (unassigned) | ⬜ |
 | JSON Schema validate-content | (unassigned) | ⬜ |
-| `npm run lint` fix (drops phantom `api/` dir) | (unassigned) | ⬜ |
+| `npm run lint` fix | (unassigned) | ✅ fixed 2026-07-19 (`eslint.config.js` added) |
+| Wire `npm run lint` into `.github/workflows/ci.yml` (it works now but CI doesn't run it) | (unassigned) | ⬜ |
 | TileMap / WASD architecture | — | ✅ free-roam WASD + 100×100 grid levels; all scenes bind `gridMapId` |
 | Automated tests for Play Together (server route / invite store / UI) | (unassigned) | ⬜ |
 | Level 1 art for the 4 new ch2 grid biomes (forest/meadow/cave/mountain path) | Ermoni + Gabby | ⬜ still reuses existing zone PNGs |
@@ -600,6 +615,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 
 | Date | Change |
 |---|---|
+| 2026-07-19 | **Phase 0: fixed all `npm run typecheck`/`npm run lint` errors — CI is green.** Matched the existing `as unknown as Scene` cast pattern for w4/w6/e1/e2/e3 in `src/content/index.ts`; dropped the dead `"dashboard"` value from `src/ui/screens.ts`'s local `Screen` type. Fixing those two unmasked a second layer that had never run before (the typecheck script's `&&` always short-circuited past the server/api pass): fixed `tsconfig.api.json`'s `rootDir` (was inheriting `"server"` while also including `api/`), retyped `server/index.ts`'s `authMiddleware` context via Hono's own `Context<{ Variables }>` instead of a fragile `Parameters<Parameters<...>>` extraction, and added the `with { type: "json" }` import attribute `server/routes/companion.ts` needs under NodeNext module resolution. Added `eslint.config.js` (ESLint v9 flat config) + the `typescript-eslint` dev dependency, which had never been installed; removed the one real violation found (an unused `GameEvent` import in `src/counselor/insights.ts`). `npm run lint` is not yet wired into CI. 37/37 tests still passing; `validate:content` and `build` unaffected. |
 | 2026-07-18 | Split Little Dragon hub into **3 phases** (Forest/Meadow, Valley/Cave, Mountain/Festival) on top of main. |
 | 2026-07-13 | Rebased this ledger onto real `trunorth/` tree (removed phantom `TruNorthProject/` claims). |
 | 2026-07-13 | Integrated Level 1 **The Singing Bridge** (W1–W6, Flicker, Wize, Courage Feather). |
