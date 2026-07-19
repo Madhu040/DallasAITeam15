@@ -585,6 +585,14 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 | TileMap / WASD architecture | — | ✅ free-roam WASD + 100×100 grid levels; all scenes bind `gridMapId` |
 | Automated tests for Play Together (server route / invite store / UI) | (unassigned) | ⬜ |
 | Level 1 art for the 4 new ch2 grid biomes (forest/meadow/cave/mountain path) | Ermoni + Gabby | ⬜ still reuses existing zone PNGs |
+| Ask-for-Help decision point — spec treats a scored beat on the Ch.1 path as non-negotiable (safety on-ramp); no `ask_for_help` skill exists anywhere in code/content | (unassigned) | ⬜ |
+| Typed input barely used — only 1 of 8 decision points (`dp_leftout_bench`, ch1) sets `inputMode: "both"`; all of ch2 is choice-only | (unassigned) | ⬜ |
+| No audio/SFX beyond the voice toggle (`src/audio/speech.ts`) — no chimes, ambient bed, or event-mapped sound | (unassigned) | ⬜ |
+| Reward "juice" (companion reaction + particle flight on a strong choice) — `onMeterJuice` hook exists (§3.2) but only re-renders; no visual effect | (unassigned) | ⬜ |
+| Companion visual leveling — `companion.appearanceRef`/`level` field exists (§3.10) but is never read; no sprite change on level-up | (unassigned) | ⬜ |
+| Red-team adversarial input test suite (jailbreak/distress/off-topic battery) | (unassigned) | ⬜ |
+| Distress-aware resume state (companion opens differently after a session ending in `safetyFlag: distress`) | (unassigned) | ⬜ |
+| Ch.1/Ch.2 age-band targeting vs. spec structure — code defaults ch2 to age-band 5-7, spec's structure is ch1=5–7/ch2=8–10; needs a deliberate team call, not a code fix | Madhu | 🟡 open question |
 
 ---
 
