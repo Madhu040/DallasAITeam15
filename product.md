@@ -199,6 +199,7 @@ trunorth/
 │   └── main.ts                # listen entry (port 3001)
 ├── src/
 │   ├── main.ts                # ✅ Boot, screens, startScenario, engine + world + Play Together wiring
+│   ├── audio/speech.ts        # ✅ On-device companion voice toggle (SpeechSynthesis)
 │   ├── companion/CompanionClient.ts   # ✅ Live + Demo clients
 │   ├── config/                # ✅ app.ts (incl. LAN-aware resolveApiUrl), content.ts, gameState.ts (env-driven)
 │   ├── content/               # ✅ SCENES/DPs/DIALOGS registry, scenarios, zones, gridLevels, stageObjects
@@ -261,6 +262,15 @@ a `?invite=CODE` URL) routes through new `togetherLobby` → `togetherSetup` →
 badge list — see [play-together-invites.md](./docs/context/play-together-invites.md).
 Registers `/sw.js` in prod builds — **file doesn't exist**, so registration silently no-ops.
 
+### 3.1a Companion voice (`src/audio/speech.ts`)
+✅ Implemented. On-device only (browser `SpeechSynthesis`, no audio/text leaves the
+device — companion lines are already safety-filtered before they're spoken). `speakLine`/
+`stopSpeaking`, `isSpeechSupported`/`isVoiceEnabled`/`setVoiceEnabled` (persisted in
+localStorage, default on when `VITE_FEATURE_VOICE_OUTPUT` is set). Wired into `main.ts`
+(speaks each companion line) and a voice on/off toggle button in `GameView.ts`. Covers
+part of the youngest-band voice-over need; no music/SFX/ambient audio exist anywhere in
+the repo.
+
 ### 3.2 Scene engine (`src/engine/SceneEngine.ts`, `DecisionResolver.ts`)
 ✅ Implemented — **click/trigger DOM scenes** (not tile-walking). Lifecycle detail:
 [engine-runtime.md](./docs/context/engine-runtime.md).
@@ -275,6 +285,11 @@ Registers `/sw.js` in prod builds — **file doesn't exist**, so registration si
 - `DecisionResolver` — `resolveChoice` (option → band), `applyConsequence` (meter
   fill/level-ups, brownie points, 200-entry event log, repairAction, next scene).
   Also exports `canUsePlayfulExternalization` (unused by callers).
+- 🟨 `SceneEngine`'s `callbacks.onMeterJuice(skill)` fires on a strong-band choice, but
+  its only listener (`main.ts`) is a plain `renderGame()` re-render — there is no
+  particle/companion-reaction effect yet (CSS has a `meterPop` fill animation, nothing
+  more). The hook exists and should be *extended*, not recreated, when reward "juice" is
+  built.
 
 ### 3.3 World movement (`src/engine/WorldRuntime.ts`, `Collision.ts`, `src/input/InputController.ts`)
 ✅ Implemented (DOM stage free-roam, not a tile grid) — see
@@ -391,6 +406,10 @@ PlayMode, ProgressStore interface, AuthUser/ChildProfile, `CheckinRecord`/`Check
 (discriminated union: openDialog | finish) + `DialogRecord`/`DialogPage` + optional
 `Scene.objects`**, factories
 `createDefaultMeters` (7 skills). Defaults: companion **Flicker**, chapter `ch2`, scene `w1`.
+⬜ `GameState.companion` also carries `{ level: 1|2|3, appearanceRef }` (seeded
+`companion_dragon_base` in `config/gameState.ts`) — the field exists but nothing reads
+`appearanceRef` anywhere; there is no companion visual-leveling behavior yet, just the
+inert data shape.
 
 ### 3.11 Server API (`server/`)
 ✅ Implemented locally (not yet hosted) — full endpoint walkthrough:
