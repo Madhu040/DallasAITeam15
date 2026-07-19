@@ -201,6 +201,7 @@ export class SceneEngine {
         name: this.state.profile.companionName,
         archetype: this.state.profile.companionArchetype,
       },
+      ...(dp.typedRubricRef ? { typedRubricRef: dp.typedRubricRef } : {}),
       ...(together ? { playMode: "together" as const } : {}),
       ...(together && parentReflection ? { parentReflection } : {}),
     };

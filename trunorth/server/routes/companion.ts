@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import fallbacks from "../../content/fallbacks/companion-fallbacks.json" with { type: "json" };
 import { filterInput, filterOutput } from "../../src/safety/filters.js";
 import { insightForStep } from "../../src/counselor/insights.js";
+import { scoreTypedResponse } from "../../src/counselor/typedScoring.js";
 import { serverConfig } from "../config.js";
 import type {
   CompanionRequest,
@@ -160,27 +161,15 @@ function enrichWithLocalInsight(parsed: CompanionResponse, req: CompanionRequest
 }
 
 function scoreLocally(req: CompanionRequest, mode: "normal" | "timeout" = "normal"): CompanionResponse {
-  const text = (req.childInput ?? "").toLowerCase();
-  let band: ScoreBand = "partial";
-  if (
-    text.includes("scared") || text.includes("together") || text.includes("okay") ||
-    text.includes("feel") || text.includes("breath") || text.includes("invite") ||
-    text.includes("room for") || text.includes("check in") || text.includes("rematch")
-  ) {
-    band = "strong";
-  } else if (
-    text.includes("just") || text.includes("hurry") || text.includes("already") ||
-    text.includes("dramatic") || text.includes("pretend") || text.includes("don't tell") ||
-    text.includes("ruined")
-  ) {
-    band = "poor";
-  }
+  const score = scoreTypedResponse(req.childInput ?? "", req.typedRubricRef);
+  const band: ScoreBand = score.band;
 
   const insight = insightForStep(req.decisionPointId, band);
   return {
     scoreBand: band,
     skill: (insight.skillFocus === "general" ? "empathy" : insight.skillFocus) as SkillId,
-    confidence: mode === "timeout" ? 1 : 0.88,
+    matchedCriterion: mode === "timeout" ? undefined : score.matchedCriterion,
+    confidence: mode === "timeout" ? 1 : score.confidence,
     companionLine: mode === "timeout"
       ? getFallback(req.decisionPointId, "timeout")
       : insight.forChild.slice(0, 120),

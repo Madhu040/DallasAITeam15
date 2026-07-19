@@ -3,6 +3,7 @@
   "prompt": "Flicker says: \"What if we get lost?\" Use a Question Feather. Tap a curiosity question — or type your own.",
   "inputMode": "both",
   "themeSensitivity": "standard",
+  "typedRubricRef": "curiosity",
   "selSkills": [
     "worry_brave",
     "calm"

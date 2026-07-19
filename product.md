@@ -147,10 +147,10 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
 | Level 1 script | `docs/scripts/Updated-Script-6-8anxiety .docx` → **The Little Dragon Who Wouldn't Stop Guarding** (integrated 2026-07-18, supersedes the original Singing Bridge script) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 50 unit tests + content validate. **Scored Ask-for-Help beat** on the Ch.1 path (`dp_ask_grownup` → cross-cutting `ask_for_help` skill, no meter) and **distress-aware resume** (`resumeCheckin` screen when a session ended in `safetyFlag: distress`; re-entry copy is SME-draft) added 2026-07-19. **Phase 2 (widened interaction curve, 2026-07-19):** Ch.1 grew from 2 → **5 decision points** (new scenes e2a/e2b/e2c: reassure a shy friend → share/take turns → repair an accident, meeting spec §6.3's 4–6/chapter floor), and **2 of ch2's 6 DPs (`dp_quest_start`, `dp_investigate`) are now `inputMode: "both"`** so typed replies land in the Little Dragon level (typed DPs 1 → 3 across the game). **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI, automated tests for Play Together. **CI is green**: `typecheck`/`lint`/`validate:content`/`test:unit`/`build` all exit 0 (see §3.14 — fixed 2026-07-19). Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 57 unit tests + content validate. **Scored Ask-for-Help beat** on the Ch.1 path (`dp_ask_grownup` → cross-cutting `ask_for_help` skill, no meter) and **distress-aware resume** (`resumeCheckin` screen when a session ended in `safetyFlag: distress`; re-entry copy is SME-draft) added 2026-07-19. **Phase 2 (widened interaction curve, 2026-07-19):** Ch.1 grew from 2 → **5 decision points** (new scenes e2a/e2b/e2c: reassure a shy friend → share/take turns → repair an accident, meeting spec §6.3's 4–6/chapter floor), and **2 of ch2's 6 DPs (`dp_quest_start`, `dp_investigate`) are now `inputMode: "both"`** so typed replies land in the Little Dragon level (typed DPs 1 → 3 across the game). **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI, automated tests for Play Together. **CI is green**: `typecheck`/`lint`/`validate:content`/`test:unit`/`build` all exit 0 (see §3.14 — fixed 2026-07-19). Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx, ESLint 9 + typescript-eslint |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
-| Last updated | 2026-07-19 (Phase 2: widened interaction curve — ch1 2→5 DPs, 2 ch2 DPs typed-enabled) |
+| Last updated | 2026-07-19 (Phase 3: rubric-based typed scoring + lint wired into CI) |
 
 ---
 
@@ -203,7 +203,7 @@ trunorth/
 │   ├── companion/CompanionClient.ts   # ✅ Live + Demo clients
 │   ├── config/                # ✅ app.ts (incl. LAN-aware resolveApiUrl), content.ts, gameState.ts (env-driven)
 │   ├── content/               # ✅ SCENES/DPs/DIALOGS registry, scenarios, zones, gridLevels, stageObjects
-│   ├── counselor/             # ✅ insights + coPlay discuss prompts + pre-level checkin
+│   ├── counselor/             # ✅ insights + coPlay discuss prompts + pre-level checkin + typedScoring
 │   ├── engine/                # ✅ SceneEngine, DecisionResolver, WorldRuntime, Collision, GridMap
 │   ├── input/InputController.ts # ✅ WASD/arrows + interact keys
 │   ├── render/                # ✅ characters.ts (SVG cast), gridBackground.ts (grid canvas)
@@ -214,7 +214,7 @@ trunorth/
 │   ├── types/index.ts         # ✅ Shared contracts
 │   ├── util/id.ts             # ✅ newId() — LAN/non-secure-context UUID fallback
 │   └── ui/                    # ✅ GameView, screens, togetherScreens, auth helpers
-├── tests/unit/                # ✅ 50 tests — engine (13) + grid (8) + checkin (6) + stageObjects (10) + phase1 (6) + phase2 (7)
+├── tests/unit/                # ✅ 57 tests — engine (13) + grid (8) + checkin (6) + stageObjects (10) + phase1 (6) + phase2 (7) + phase3 (7)
 ├── Dockerfile · docker-compose.yml
 ├── index.html · vite.config.ts · vitest.config.ts
 ├── tsconfig.json · tsconfig.server.json · tsconfig.api.json  # api.json = typecheck-only, covers api/
@@ -369,8 +369,9 @@ modules (bubbles/HUD live in `GameView` + CSS).
 ### 3.6 AI companion client (`src/companion/CompanionClient.ts`)
 ✅ Implemented — see [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md).
 - `LiveCompanionClient` — POST `{API}/api/companion` with optional bearer token.
-- `DemoCompanionClient` — offline bundle lookup `{scene}:{dp}:{band}` + keyword band
-  inference for typed lines; always attaches counselor insight tips.
+- `DemoCompanionClient` — offline bundle lookup `{scene}:{dp}:{band}` where band comes from
+  the shared **rubric scorer** (`scoreTypedResponse`, §3.9) using `req.typedRubricRef`; surfaces
+  `matchedCriterion`; always attaches counselor insight tips.
 
 ### 3.7 Safety (`src/safety/filters.ts`)
 ✅ Implemented. `filterInput` (jailbreak/distress/PII/profanity/length),
@@ -391,6 +392,12 @@ Used by unit tests and the server companion route.
   `buildJourneyReflection(state)` (summary, strengths, growth edges, per-step insights,
   parent coaching), `childFacingLine`.
 - `coPlay.ts` — `discussPrompt(dpId)` Together-Mode conversation starters (all 13 DPs).
+- `typedScoring.ts` — **shared offline rubric scorer** (Phase 2/3). `scoreTypedResponse(text,
+  rubricId?)` → `{ band, matchedCriterion, confidence }`. A per-DP `TYPED_RUBRICS` entry
+  (selected by `DecisionPoint.typedRubricRef`: `inclusion`/`brave_start`/`curiosity`) layers
+  decision-specific strong/poor phrases on a GENERIC base (the exact union of the two flat
+  keyword lists it replaced, so choice-mode option labels score unchanged). Strong wins over
+  poor. Single source of truth for both `scoreLocally` (server) and `DemoCompanionClient`.
 - `checkin.ts` — pre-level check-in: `CHECKIN_QUESTIONS` bank (6 open-ended questions,
   tappable 0–2-pt options + own-words path), `questionsForChapter` (3 per chapter,
   deterministic rotation), `scoreTypedCheckinAnswer` (sanitize + `filterInput` + feeling-word
@@ -413,6 +420,10 @@ Skill types split (2026-07-19): **`MeterSkillId`** = the 7 metered skills (keys 
 `meters`); **`SkillId` = `MeterSkillId | "ask_for_help"`** — `ask_for_help` is a
 cross-cutting, scorable/loggable skill with **no meter** (spec §7.2/§8.4). The resolver
 skips skills that have no meter, so scoring it is a safe no-op on the meter map.
+`DecisionPoint.typedRubricRef` (previously dormant) is now populated on the 3 typed DPs and
+mirrored onto `CompanionRequest.typedRubricRef` by `SceneEngine.buildCompanionRequest`, so the
+offline rubric scorer (§3.9) selects the right rubric without importing the content registry
+into the server/API bundle (Phase 3, 2026-07-19).
 ⬜ `GameState.companion` also carries `{ level: 1|2|3, appearanceRef }` (seeded
 `companion_dragon_base` in `config/gameState.ts`) — the field exists but nothing reads
 `appearanceRef` anywhere; there is no companion visual-leveling behavior yet, just the
@@ -441,7 +452,8 @@ inert data shape.
   plus any `localhost`/`127.0.0.1`/LAN-IP (`192.168.x`/`10.x`/`172.16–31.x`) origin, so a
   phone on `http://192.168.x.x:5173` can reach the API for Play Together.
 - `routes/companion.ts` — `POST /api/companion`: input filter → Anthropic (if key) or
-  local heuristic score → confidence floor → output filter → fallbacks library;
+  local **rubric score** (`scoreTypedResponse` via `req.typedRubricRef`, §3.9) → confidence
+  floor → output filter → fallbacks library;
   `POST /api/reflect`: event list → counselor insights (no client caller yet).
 - `routes/together.ts` — **new.** Play Together invite rooms: `POST /api/together/rooms`
   (create, returns a 4-letter code), `GET /api/together/rooms/:code`, `POST
@@ -477,7 +489,8 @@ star-legend scroll (w1) and the ✅ Level Complete finish (w7). Authoring guide:
   (no longer a chapter-complete decision — `CHAPTER_COMPLETE_DECISION` is ch1-only).
   **`dp_quest_start` and `dp_investigate` are `inputMode: "both"`** (Phase 2, 2026-07-19) —
   they render tap options *and* a text box; a typed reply is scored via the companion pipeline
-  (demo/local keyword heuristic or LLM) then routed by band. Both were chosen because every band
+  (offline: the rubric scorer in `src/counselor/typedScoring.ts` keyed by `typedRubricRef`;
+  online: the LLM) then routed by band. Both were chosen because every band
   advances forward (no typed-partial dead-end) and neither is a multi-tap mini-game (`dp_breathe`
   ×5 / `dp_crossing` ×4 stay choice-only so the tap-count mechanic is preserved).
   **Superseded 2026-07-18:** the original Singing Bridge script (Flicker/Wize, river
@@ -544,9 +557,9 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   for ESLint v9) + the `typescript-eslint` dev dependency (previously missing
   entirely — bare `eslint` alone can't parse `.ts` syntax). The one real violation it
   surfaced (an unused `GameEvent` import in `src/counselor/insights.ts`) was removed.
-  ⬜ **Not wired into CI** — `.github/workflows/ci.yml` doesn't run `npm run lint` at
-  all, so a future lint regression won't fail the pipeline even though the script now
-  works.
+  ✅ **Now wired into CI** — `.github/workflows/ci.yml` runs `npm run lint` (between
+  `typecheck` and `validate:content`), so a lint regression fails the pipeline (Phase 3,
+  2026-07-19).
 - **Known quirk (left as-is on purpose):** the server pass of `npm run build`
   (`tsc -p tsconfig.server.json --noEmit false`) emits stray `.js` files **into `src/`**
   for client files the server imports (`src/types/index.js`, `src/safety/filters.js`,
@@ -556,13 +569,13 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   delete `src/**/*.js` strays. **Never commit them.** This whole build path is interim
   and will be replaced when the proper hosted API/backend build lands (Jose's deploy
   task) — don't invest in fixing it.
-- CI (`.github/workflows/ci.yml`): typecheck → validate:content → test:unit → build.
+- CI (`.github/workflows/ci.yml`): typecheck → **lint** → validate:content → test:unit → build.
 - ⬜ `build-asset-manifest`, `red-team-suite`, `audit-bundle-size` — not in tree.
 - ⬜ Playwright e2e — `test:e2e` script + devDependency exist; **no `tests/e2e` folder or
   playwright config**.
 
 ### 3.15 Tests (`tests/`)
-🟨 Partial — **50 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
+🟨 Partial — **57 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
 bands/meters/repair, safety filters, Little Dragon golden-path presence, ch3 absence,
 counselor insights + journey reflection, SVG cast rendering, world collision wall slide +
 bounds) + `tests/unit/grid.test.ts` (8 — grid cell vector, painting/world lookup,
@@ -581,7 +594,10 @@ copy)
 + `tests/unit/phase2.test.ts` (7 — `dp_quest_start`/`dp_investigate` promoted to `"both"` yet
 keep tap options; every band on `dp_quest_start` advances w1→w2; ch1 meets the 4–6 DP floor;
 e1→e2→e2a→e2b→e2c→e3 chain; each new ch1 DP has 3-band options + forward/repair routing +
-insight + co-play coverage).
+insight + co-play coverage)
++ `tests/unit/phase3.test.ts` (7 — rubric scorer: generic base preserved, inclusion/curiosity/
+brave_start decision-specific bands, strong-wins-over-poor, unknown-rubric fallback,
+`matchedCriterion` surfaced, every typed DP wired to a registered `typedRubricRef`).
 ⬜ integration / e2e / red-team folders. ⬜ No tests yet for Play Together (§3.16).
 
 ### 3.16 Play Together invites (`server/routes/together.ts`, `src/together/`, `src/ui/togetherScreens.ts`)
@@ -624,12 +640,13 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 | E2E golden path W1→W7 | (unassigned) | ⬜ |
 | JSON Schema validate-content | (unassigned) | ⬜ |
 | `npm run lint` fix | (unassigned) | ✅ fixed 2026-07-19 (`eslint.config.js` added) |
-| Wire `npm run lint` into `.github/workflows/ci.yml` (it works now but CI doesn't run it) | (unassigned) | ⬜ |
+| Wire `npm run lint` into `.github/workflows/ci.yml` (it works now but CI doesn't run it) | (unassigned) | ✅ fixed 2026-07-19 (Phase 3) |
 | TileMap / WASD architecture | — | ✅ free-roam WASD + 100×100 grid levels; all scenes bind `gridMapId` |
 | Automated tests for Play Together (server route / invite store / UI) | (unassigned) | ⬜ |
 | Level 1 art for the 4 new ch2 grid biomes (forest/meadow/cave/mountain path) | Ermoni + Gabby | ⬜ still reuses existing zone PNGs |
 | Ask-for-Help decision point — spec treats a scored beat on the Ch.1 path as non-negotiable (safety on-ramp) | (unassigned) | ✅ fixed 2026-07-19 (`dp_ask_grownup` now scores the new `ask_for_help` cross-cutting skill) |
-| Typed input barely used — was only 1 of 8 DPs (`dp_leftout_bench`) | (unassigned) | 🟨 improved 2026-07-19 (Phase 2): 3 of 11 registered DPs now `"both"` (`dp_leftout_bench` + ch2 `dp_quest_start`/`dp_investigate`). Could widen further, and typed scoring still leans on the keyword heuristic when no LLM key is set |
+| Typed input barely used — was only 1 of 8 DPs (`dp_leftout_bench`) | (unassigned) | 🟨 improved 2026-07-19 (Phase 2 + Phase 3): 3 of 11 registered DPs now `"both"`, and offline typed scoring is now **rubric-based** (`typedScoring.ts`, per-DP `typedRubricRef`) instead of a flat keyword list. Could widen to more DPs; the rubric is still substring-matching (no stemming/negation handling) when no LLM key is set |
+| Demo/offline typed input isn't safety-filtered — `DemoCompanionClient` scores typed text but (unlike the server `/api/companion`) never calls `filterInput`, so distress/PII in a typed answer isn't caught in pure demo mode | (unassigned) | ⬜ noticed 2026-07-19 (Phase 3); server path is filtered |
 | No audio/SFX beyond the voice toggle (`src/audio/speech.ts`) — no chimes, ambient bed, or event-mapped sound | (unassigned) | ⬜ |
 | Reward "juice" (companion reaction + particle flight on a strong choice) — `onMeterJuice` hook exists (§3.2) but only re-renders; no visual effect | (unassigned) | ⬜ |
 | Companion visual leveling — `companion.appearanceRef`/`level` field exists (§3.10) but is never read; no sprite change on level-up | (unassigned) | ⬜ |
@@ -643,6 +660,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 
 | Date | Change |
 |---|---|
+| 2026-07-19 | **Phase 3: robust rubric-based typed scoring + lint in CI.** The offline (no-LLM) scoring of free-typed answers was two duplicated flat keyword lists (`scoreLocally` in the server, `inferBandFromInput` in `DemoCompanionClient`) that ignored the dormant `DecisionPoint.typedRubricRef` field. Replaced both with **one shared scorer** `src/counselor/typedScoring.ts` (`scoreTypedResponse(text, rubricId?)` → `{ band, matchedCriterion, confidence }`): per-DP `TYPED_RUBRICS` (`inclusion`/`brave_start`/`curiosity`) layer decision-specific strong/poor phrases on a GENERIC base that is the **exact union** of the two old lists, so choice-mode option labels score identically while free-typed answers get real discrimination. Activated `typedRubricRef` on the 3 typed DPs and plumbed it through `CompanionRequest.typedRubricRef` (set in `SceneEngine.buildCompanionRequest`) so both the server and demo scorer pick the rubric **without** importing the content registry into the API bundle; also surfaced the previously-unused `matchedCriterion`. Wired `npm run lint` into `.github/workflows/ci.yml` (between typecheck and validate) and gitignored `trunorth/.claude/` (local preview launch config). **Verified in-browser (`?demo=1`)** on `dp_leftout_bench`: the same scene scored a typed "…ignore them and keep playing" as **poor** (→ repair loop, poor insight) and "…come play with us… join our game" as **strong** (→ advance, strong insight) — both scored *partial* under the old heuristic, so the rubric genuinely improves discrimination. Tests 50→57 (`tests/unit/phase3.test.ts`, 7); typecheck/lint/validate:content/build all green; no console errors. Noted a follow-up gap: demo-mode typed input still isn't run through `filterInput` (server path is). |
 | 2026-07-19 | **Phase 2: widened the interaction curve (spec §2.4/§4 click→typing model, §6.3 DP floor).** (a) **Typed input in the main level:** promoted ch2 `dp_quest_start` (w1) and `dp_investigate` (w2) from `inputMode: "choice"` to `"both"` — they now render tap options *and* a text box; a typed reply is scored through the companion pipeline (demo/local keyword heuristic or LLM) and routed by band. Chosen deliberately: every band on both advances the story forward (no typed-partial dead-end), and neither is a multi-tap mini-game, so `dp_breathe`/`dp_crossing`'s tap-count mechanic is untouched. Typed DPs across the game: 1 → 3. (b) **Ch.1 Everbright Meadow 2 → 5 DPs** (meets spec §6.3's 4–6/chapter floor): 3 new grid-backed scenes `e2a`/`e2b`/`e2c` inserted between e2 and e3 (`e2.nextSceneId` e3→e2a), each with one new DP following the established one-DP-per-scene + advance-on-resolve pattern — `dp_reassure_shy` (reassure a shy friend; empathy/calm), `dp_share_flower` (share the last flower / take turns; friendship_repair/empathy), `dp_repair_oops` (apologize + fix after knocking over a crown; friendship_repair/courage). Each: strong/partial → next scene, poor → same-scene repair loop; option labels are keyword-aligned so demo-mode band inference matches `selScore`. Full supporting coverage added: `insights.ts` (3 DPs × 3 bands), `coPlay.ts` (3 discuss prompts), `companion-fallbacks.json` (3 DPs × 5 lines), `showcase.bundle.json` (13 new entries: strong/partial/poor for the 3 ch1 DPs + typed partial/poor for the 2 promoted ch2 DPs). Registered all in `src/content/index.ts`. Updated `stageObjects.test.ts` (e2 `advanceScene` now → e2a, reflecting the new chain). New `tests/unit/phase2.test.ts` (7). **Verified end-to-end in-browser (`?demo=1`):** full ch1 play-through e1→e2→e2a→e2b→e2c→e3→celebration with all 5 DPs incl. a poor→repair loop on `dp_share_flower`; and ch2 `dp_quest_start` rendering as "both" with a typed reply scored strong → w1→w2. Tests 43→50; typecheck/lint/validate:content/build all still green; no console errors. New-DP copy is draft pending SME review (consistent with §3.12). |
 | 2026-07-19 | **Phase 1: added the spec-mandated scored Ask-for-Help beat + a distress-aware resume.** (a) **Ask-for-Help (spec §7.2):** the existing `dp_ask_grownup` (Scene e3) was already authored as an ask-for-help beat in all its copy — only the skill tag was wrong. Split the skill type into `MeterSkillId` (the 7 metered skills) + `SkillId = MeterSkillId \| "ask_for_help"` (`src/types/index.ts`), retagged `dp_ask_grownup.selSkills` to `["ask_for_help", "courage", "empathy"]` (ask_for_help primary → logged as the event skill), aligned its 3 insight `skillFocus` values, and cast the resolver's meter lookup to `MeterSkillId` (the existing `if (meter)` guard already makes scoring a meterless skill a safe no-op). Reused the existing Ch.1 grown-up scene rather than inventing the spec's phantom "W2b". (b) **Distress-aware resume (spec §17D/§9.6):** new `renderResumeCheckin` screen (`src/ui/screens.ts`) shown at boot only when the saved state's `flags.lastSafetyFlag === "distress"` (`shouldResumeInDistress` predicate + `RESUME_DISTRESS` copy in `src/counselor/checkin.ts`; new `resumeCheckin` AppScreen + boot branch in `main.ts`). Calm 🫂 card, a "keep going / just sit here for a bit" pair (neither scored), clears the flag on acknowledge so it fires once per episode (distress event stays in the log for the parent record). **Re-entry copy is a clearly-marked SME DRAFT — must be SME-signed-off before shipping to a real child.** Verified end-to-end in-browser: distress-ended save routes to the screen, both paths work, flag clears, no re-fire, no console errors. Tests 37→43 (`tests/unit/phase1.test.ts`); typecheck/lint/validate/build all still green. |
 | 2026-07-19 | **Phase 0: fixed all `npm run typecheck`/`npm run lint` errors — CI is green.** Matched the existing `as unknown as Scene` cast pattern for w4/w6/e1/e2/e3 in `src/content/index.ts`; dropped the dead `"dashboard"` value from `src/ui/screens.ts`'s local `Screen` type. Fixing those two unmasked a second layer that had never run before (the typecheck script's `&&` always short-circuited past the server/api pass): fixed `tsconfig.api.json`'s `rootDir` (was inheriting `"server"` while also including `api/`), retyped `server/index.ts`'s `authMiddleware` context via Hono's own `Context<{ Variables }>` instead of a fragile `Parameters<Parameters<...>>` extraction, and added the `with { type: "json" }` import attribute `server/routes/companion.ts` needs under NodeNext module resolution. Added `eslint.config.js` (ESLint v9 flat config) + the `typescript-eslint` dev dependency, which had never been installed; removed the one real violation found (an unused `GameEvent` import in `src/counselor/insights.ts`). `npm run lint` is not yet wired into CI. 37/37 tests still passing; `validate:content` and `build` unaffected. |

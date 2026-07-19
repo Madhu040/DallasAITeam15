@@ -238,6 +238,8 @@ export interface CompanionRequest {
   companion: { name: string; archetype: string };
   playMode?: PlayMode;
   parentReflection?: string;
+  /** DecisionPoint.typedRubricRef — selects the offline typed-scoring rubric. */
+  typedRubricRef?: string;
 }
 
 export interface CompanionResponse {
