@@ -8,6 +8,7 @@ import { zoneFromBackground, zoneForChapter } from "../content/zones.js";
 import { isGridDebug, resolveGridLevel } from "../content/gridLevels.js";
 import { visibleSparks } from "../content/sparks.js";
 import { renderGridBackground } from "../render/gridBackground.js";
+import { backgroundImageUrl, characterImageUrl, objectImageUrl } from "../content/assetManifest.js";
 import { celebrationFor } from "../config/content.js";
 import { isSpeechSupported, isVoiceEnabled, setVoiceEnabled, speakLine, stopSpeaking } from "../audio/speech.js";
 import { COLOR_TUNES, type TogetherPlayer } from "../together/inviteStore.js";
@@ -192,7 +193,22 @@ export function renderGameView(
     world.className = "world-layer";
 
     if (gridLevel) {
-      renderGridBackground(world, gridLevel, isGridDebug());
+      const debug = isGridDebug();
+      renderGridBackground(world, gridLevel, debug);
+      // Real art overlays the canvas grid (which stays underneath as the walk-map and,
+      // in ?gridDebug=1, the visible cell tint). If the PNG 404s, drop it and the canvas
+      // shows through — the offline demo never breaks on a missing background.
+      const artUrl = debug ? null : backgroundImageUrl(gridLevel.id);
+      if (artUrl) {
+        const art = document.createElement("img");
+        art.className = "grid-art";
+        art.src = artUrl;
+        art.alt = "";
+        art.setAttribute("aria-hidden", "true");
+        art.draggable = false;
+        art.onerror = () => art.remove();
+        world.appendChild(art);
+      }
     } else {
       const bg = document.createElement("div");
       const legacyClass = scene.background.includes("treehouse")
@@ -226,7 +242,7 @@ export function renderGameView(
       sprite.className = `char-fullbody ${ch.id}${
         ch.expression?.includes("glow") || ch.expression?.includes("excited") ? " glow" : ""
       }`;
-      sprite.innerHTML = renderFullBodyCharacter({
+      const svg = renderFullBodyCharacter({
         id: ch.id,
         assetRef: ch.assetRef,
         expression: ch.expression,
@@ -234,6 +250,22 @@ export function renderGameView(
         companionArchetype: state.profile.companionArchetype,
         size: ch.id === "worry_cloud" ? 120 : 110,
       });
+      // Use the AI PNG when the manifest has one; if it fails to load, restore the SVG so
+      // the character never vanishes (spec §10.3 fallback).
+      const charUrl = characterImageUrl(ch.id, ch.assetRef, state.profile.companionArchetype);
+      if (charUrl) {
+        const img = document.createElement("img");
+        img.className = "sprite-png";
+        img.src = charUrl;
+        img.alt = "";
+        img.draggable = false;
+        img.onerror = () => {
+          sprite.innerHTML = svg;
+        };
+        sprite.appendChild(img);
+      } else {
+        sprite.innerHTML = svg;
+      }
       el.appendChild(sprite);
 
       const label = document.createElement("div");
@@ -299,10 +331,28 @@ export function renderGameView(
       el.style.top = `${(pos.y / 1080) * 100}%`;
       el.style.zIndex = String(10 + Math.floor(pos.y / 20));
       el.setAttribute("aria-label", obj.label ?? obj.hint ?? "Stage object");
+      // Off the explore phase the object is a plain <div> (not a button), so an aria-label
+      // needs an explicit role to be permitted (WCAG aria-prohibited-attr). It is a labelled
+      // piece of scenery → role="img". Buttons carry their own role.
+      if (!exploring) el.setAttribute("role", "img");
 
       const sprite = document.createElement("span");
       sprite.className = "stage-object-sprite";
-      sprite.textContent = objectSprite(obj.assetRef);
+      const emoji = objectSprite(obj.assetRef);
+      const objUrl = objectImageUrl(obj.assetRef);
+      if (objUrl) {
+        const img = document.createElement("img");
+        img.className = "sprite-png object";
+        img.src = objUrl;
+        img.alt = "";
+        img.draggable = false;
+        img.onerror = () => {
+          sprite.textContent = emoji;
+        };
+        sprite.appendChild(img);
+      } else {
+        sprite.textContent = emoji;
+      }
       el.appendChild(sprite);
 
       if (obj.label) {
