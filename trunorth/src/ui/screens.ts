@@ -173,7 +173,7 @@ export function renderOnboarding(
     card.innerHTML = "";
 
     if (step === 0) {
-      card.innerHTML = `<h1>Meet ${defaults.companionName}!</h1><p>Every child in Everbright has a Guardian Dragon. Choose yours for The Singing Bridge.</p>`;
+      card.innerHTML = `<h1>Meet ${defaults.companionName}!</h1><p>Every child in Everbright has a Guardian Dragon. Choose yours for Nova's Star Crystal quest.</p>`;
       const archetypes = [
         { id: "companion_dragon", emoji: "🐉", name: `Dragon (${defaults.companionName})` },
         { id: "companion_fox", emoji: "🦊", name: "Fox" },

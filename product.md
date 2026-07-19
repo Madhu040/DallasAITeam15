@@ -22,15 +22,15 @@ entry is updated in the same change.
 ### Ermoni — Backend (Supabase, first iteration: level images) 🔧
 
 - [ ] Get Supabase connected to the app and storing the **level / zone images** (start with
-  Level 1 The Singing Bridge / Everbright), so the app can pull the right images per
+  Level 1 / Everbright), so the app can pull the right images per
   level when needed — **without breaking** the fully-offline demo path (`?demo=1` +
   `public/assets/zones/`). Design the visuals together with Gabby, based on
-  [`docs/scripts/Scene, script, players.docx`](./docs/scripts/Scene,%20script,%20players.docx) (Vandy).
+  [`docs/scripts/Updated-Script-6-8anxiety .docx`](./docs/scripts/Updated-Script-6-8anxiety%20.docx) (current script).
 
 ### Gabby — Backend (Supabase level images, with Ermoni) 🔧
 
-- [ ] Design the SVG / asset frames for Level 1 (bridge, Flicker, Wize, Shimmer Crystal)
-  from Vandy’s Singing Bridge script, and work with Ermoni to store them in Supabase
+- [ ] Design the SVG / asset frames for Level 1 (Flicker, Wize, Nova, Star Crystal)
+  from the current 5–7 anxiety script, and work with Ermoni to store them in Supabase
   and wire pull-per-level in the app (keep local placeholders as offline fallback).
 
 ### Daniel — Frontend (Level 1 content + gameplay UX)
@@ -40,12 +40,29 @@ entry is updated in the same change.
   insights/fallbacks/demo bundle) — done 2026-07-13.
 - [x] ~~Ship world movement + environment interact~~ (WASD/arrows, collision, E/Space,
   companion follow, sparks) — done 2026-07-14.
+- [x] ~~Rebase Level 1 onto the new 5–7 anxiety script, **The Little Dragon Who Wouldn't
+  Stop Guarding** (Nova/Flicker/Star Crystals), and ship cross-device **Play Together**
+  invites + mobile/LAN play~~ — branch `feat/singing-bridge-level-1` (PR #7) diverged
+  from main before the w7 finish/Wize-Flicker-fix/stage-objects/z-layering work landed,
+  so it was manually reconciled onto a fresh branch off main rather than merged: new
+  narrative content (dp_\*.json, w1–w7 scenes, zones/achievements/celebration,
+  coPlay/insights/fallbacks/demo bundle) replaces the old Singing Bridge text 1:1 on the
+  same DP ids; **4 new grid maps** (`forest-of-questions`, `meadow-of-curiosity`,
+  `cave-of-purpose`, `mountain-festival`) replace the single `singing-bridge` grid so
+  the explorable-movement feature keeps working with the new per-scene biomes; the w7
+  walk-to-finish mechanic, Wize/Flicker character-role split, dialogue z-layering fix,
+  and speech/voice toggle from main are all preserved unchanged. Play Together (new
+  `server/routes/together.ts`, `src/together/inviteStore.ts`, `src/ui/togetherScreens.ts`,
+  `src/util/id.ts`) is additive on top — see
+  [play-together-invites.md](./docs/context/play-together-invites.md). Done 2026-07-18.
 - [ ] Next: polish Level 1 play feel — expression changes along Flicker’s arc, richer
   investigation hotspots, and optional TileMap rooms if the team adopts grid levels.
-  Also: fix the 11 open `npm run typecheck` errors (see §3.14) so CI goes green.
+  Also: fix the remaining `npm run typecheck` errors (see §3.14) so CI goes green.
+  Also: no automated tests yet for Play Together (server route / invite store / UI).
 - **Files owned:** `trunorth/content/chapters/ch2/*`, `trunorth/src/engine/*`,
   `trunorth/src/input/InputController.ts`, `trunorth/src/ui/GameView.ts`,
-  `trunorth/src/render/characters.ts`, `trunorth/src/content/{index,scenarios,zones}.ts`.
+  `trunorth/src/render/characters.ts`, `trunorth/src/content/{index,scenarios,zones}.ts`,
+  `trunorth/src/together/*`, `trunorth/src/ui/togetherScreens.ts`.
 
 ### Jose — Frontend (deployment) 🔧
 
@@ -57,7 +74,9 @@ entry is updated in the same change.
 ### Vandy — Product management (research & game vision)
 
 - [x] ~~Deliver Level 1 script~~ — [`docs/scripts/Scene, script, players.docx`](./docs/scripts/Scene,%20script,%20players.docx)
-  (The Singing Bridge: Flicker, Wize, Courage Feather) — done; content integrated.
+  (The Singing Bridge: Flicker, Wize, Courage Feather) — done; superseded 2026-07-18 by
+  [`docs/scripts/Updated-Script-6-8anxiety .docx`](./docs/scripts/Updated-Script-6-8anxiety%20.docx)
+  (The Little Dragon Who Wouldn't Stop Guarding), now the integrated Level 1 content.
 - [ ] Research how existing SEL products — especially **GoZen!** — teach hard emotional
   skills to kids, and turn findings into vision for Levels 2+ (still feed Ermoni/Gabby
   for art, and Daniel for scene scripting).
@@ -66,8 +85,9 @@ entry is updated in the same change.
 
 - [ ] Research (alongside Vandy) how programs like **GoZen!** teach emotional skills
   through simple formats, and translate findings into **test criteria for Level 1**:
-  what “good” looks like when playing The Singing Bridge on this basic 2D DOM game
-  (attention, clarity of choices, emotional beat landing, Courage Feather payoff).
+  what “good” looks like when playing The Little Dragon Who Wouldn't Stop Guarding on
+  this basic 2D DOM game (attention, clarity of choices, emotional beat landing, Star
+  Crystal payoff).
 
 ### Madhu — Product management (PR support & spec alignment)
 
@@ -126,11 +146,11 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Product | TruNorth — choice-driven social-emotional learning (SEL) narrative for ages 5–15 |
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
-| Level 1 script | `docs/scripts/Scene, script, players.docx` → **The Singing Bridge** (integrated) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Singing Bridge golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the bridge until the final walk-across finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId`, hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect routes, SQLite**; Docker; 36 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI. **Known broken:** `npm run typecheck` fails (9 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
+| Level 1 script | `docs/scripts/Updated-Script-6-8anxiety .docx` → **The Little Dragon Who Wouldn't Stop Guarding** (integrated 2026-07-18, supersedes the original Singing Bridge script) |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 37 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI, automated tests for Play Together. **Known broken:** `npm run typecheck` fails (6 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
-| Last updated | 2026-07-18 (ch2 role fix: Wize = companion, Flicker blocks the bridge; new w7 walk-to-checkmark finish) |
+| Last updated | 2026-07-18 (Level 1 rebased onto the Little Dragon script + Play Together invites shipped) |
 
 ---
 
@@ -145,7 +165,7 @@ DallasAITeam15/
 ├── docs/
 │   ├── README.md              # Design intent overview
 │   ├── specs/                 # Technical specifications
-│   ├── scripts/               # Narrative scripts (Singing Bridge, …)
+│   ├── scripts/               # Narrative scripts (current: Little Dragon 5–7 anxiety script; superseded: Singing Bridge)
 │   ├── kickoff/               # Team slides
 │   └── context/               # Deep-dive context files (Section 4)
 └── trunorth/                  # Application (configurable via .env)
@@ -157,7 +177,7 @@ DallasAITeam15/
 trunorth/
 ├── content/
 │   ├── chapters/ch1/          # ✅ Everbright Meadow — e1–e3 + 2 DPs + 1 dialog + 3 stage objects
-│   ├── chapters/ch2/          # ✅ Singing Bridge — w1–w7 + 6 DPs + 1 dialog + 2 stage objects
+│   ├── chapters/ch2/          # ✅ The Little Dragon Who Wouldn't Stop Guarding — w1–w7 + 6 DPs + 1 dialog + 2 stage objects
 │   ├── demo/showcase.bundle.json     # ✅ 10 canned companion lines (demo mode)
 │   └── fallbacks/companion-fallbacks.json  # ✅ band/timeout/safety lines, all 10 DPs
 ├── data/                      # SQLite runtime files (git-ignored)
@@ -172,14 +192,15 @@ trunorth/
 ├── server/                    # ✅ Hono API (dev: tsx watch) 🔧 Jose (deploy)
 │   ├── auth/jwt.ts            # HS256 sign/verify (jose)
 │   ├── config.ts              # ✅ .env loader + serverConfig
-│   ├── db/migrate.ts          # SQLite schema (parents, children, progress, audit)
+│   ├── db/migrate.ts          # SQLite schema (parents, children, progress, audit, together_rooms)
 │   ├── routes/companion.ts    # POST /api/companion + /api/reflect
-│   ├── index.ts               # health, auth, children, progress routes + CORS
+│   ├── routes/together.ts     # ✅ Play Together invite rooms (create/join/get/close/stream)
+│   ├── index.ts               # health, auth, children, progress routes + CORS (LAN-aware origin fn)
 │   └── main.ts                # listen entry (port 3001)
 ├── src/
-│   ├── main.ts                # ✅ Boot, screens, startScenario, engine + world wiring
+│   ├── main.ts                # ✅ Boot, screens, startScenario, engine + world + Play Together wiring
 │   ├── companion/CompanionClient.ts   # ✅ Live + Demo clients
-│   ├── config/                # ✅ app.ts, content.ts, gameState.ts (env-driven)
+│   ├── config/                # ✅ app.ts (incl. LAN-aware resolveApiUrl), content.ts, gameState.ts (env-driven)
 │   ├── content/               # ✅ SCENES/DPs/DIALOGS registry, scenarios, zones, gridLevels, stageObjects
 │   ├── counselor/             # ✅ insights + coPlay discuss prompts + pre-level checkin
 │   ├── engine/                # ✅ SceneEngine, DecisionResolver, WorldRuntime, Collision, GridMap
@@ -187,10 +208,12 @@ trunorth/
 │   ├── render/                # ✅ characters.ts (SVG cast), gridBackground.ts (grid canvas)
 │   ├── safety/filters.ts      # ✅ input/output filters
 │   ├── store/ProgressStore.ts # ✅ Local + Demo stores
-│   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones; stage container-scaled (--px)
+│   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones; stage container-scaled (--px); Play Together flow styles
+│   ├── together/inviteStore.ts # ✅ Play Together client: createRoom/joinRoom/watchRoom, COLOR_TUNES/PLAYER_CHARACTERS
 │   ├── types/index.ts         # ✅ Shared contracts
-│   └── ui/                    # ✅ GameView, screens, auth helpers
-├── tests/unit/                # ✅ 36 tests — engine (13) + grid (7) + checkin (6) + stageObjects (10)
+│   ├── util/id.ts             # ✅ newId() — LAN/non-secure-context UUID fallback
+│   └── ui/                    # ✅ GameView, screens, togetherScreens, auth helpers
+├── tests/unit/                # ✅ 37 tests — engine (13) + grid (8) + checkin (6) + stageObjects (10)
 ├── Dockerfile · docker-compose.yml
 ├── index.html · vite.config.ts · vitest.config.ts
 ├── tsconfig.json · tsconfig.server.json · tsconfig.api.json  # api.json = typecheck-only, covers api/
@@ -213,10 +236,13 @@ adapter added 2026-07-17.)
 
 ### 3.0 Configuration (`src/config/`, `server/config.ts`, `.env.example`)
 ✅ Implemented. Runtime tunables via `.env` / `VITE_*`:
-- `src/config/app.ts` — `appConfig` (apiUrl, feature flags incl. `worldMovement`, gameplay
-  defaults Flicker/ch2/w1, timing, world-movement tunables), `isDemoMode()`.
-- `src/config/content.ts` — `contentConfig`: zone metadata (`ZoneConfig[]`), achievement
-  checklist, celebration copy. Note: the "bridge" zone and celebration reuse `forest.png`.
+- `src/config/app.ts` — `appConfig` (apiUrl via `resolveApiUrl()` getter — prefers the
+  same-origin proxy off localhost so LAN/phone play reaches the API, feature flags incl.
+  `worldMovement`/`togetherMode`, gameplay defaults Flicker/ch2/w1/age-band 5-7, timing,
+  world-movement tunables), `isDemoMode()`.
+- `src/config/content.ts` — `contentConfig`: zone metadata (`ZoneConfig[]` — `forest`
+  repurposed for ch2's new narrative, `meadow` for ch1, `mountain` unused/decorative),
+  achievement checklist, celebration copy (Star Crystal / Sky Festival, `mountain.png`).
 - `src/config/gameState.ts` — `createInitialGameState(demoMode)` from `appConfig.defaults`.
 - `server/config.ts` — dependency-free `.env` loader + `serverConfig`
   (port/CORS/JWT/db path/companion model+floor+timeout).
@@ -229,8 +255,11 @@ celebration → parent gate → journey reflection. The `checkin` screen (betwee
 select and `startScenario`) stores its `CheckinRecord` in `progress.checkins[chapterId]`
 and raises `flags.lastSafetyFlag` on a flagged typed answer. Attaches/detaches `worldRuntime` per screen; `beginEncounter`
 freezes movement on trigger interact; collect pickups award crystals + persist. Together
-Mode co-play step machine. Registers `/sw.js` in prod builds — **file doesn't exist**, so
-registration silently no-ops.
+Mode co-play step machine. **Play Together invites:** landing's "Play Together" button (or
+a `?invite=CODE` URL) routes through new `togetherLobby` → `togetherSetup` →
+`togetherWaiting` screens before `hub`; `togetherPlayers` state feeds `renderGameView`'s
+badge list — see [play-together-invites.md](./docs/context/play-together-invites.md).
+Registers `/sw.js` in prod builds — **file doesn't exist**, so registration silently no-ops.
 
 ### 3.2 Scene engine (`src/engine/SceneEngine.ts`, `DecisionResolver.ts`)
 ✅ Implemented — **click/trigger DOM scenes** (not tile-walking). Lifecycle detail:
@@ -262,11 +291,13 @@ registration silently no-ops.
   hotspots remain as fallback.
 - **Grid levels** (`GridMap.ts`, `src/content/gridLevels.ts`,
   `src/render/gridBackground.ts`) — parameterized 100×100 cell grid (flat vector:
-  coordinate + color + walkable per cell), painted-level builders (2 levels:
-  `everbright-meadow` ← ch1, `singing-bridge` ← ch2), canvas background + hub
-  thumbnails (`createGridThumbnail`), center-point collision in `WorldRuntime`.
-  **Every scene JSON sets `gridMapId`** — grids are the levels now; URL `?grid=<id>`
-  (+`&gridDebug=1`) still overrides for testing. See
+  coordinate + color + walkable per cell), painted-level builders (6 registered:
+  `everbright-meadow` ← ch1; `forest-of-questions`/`meadow-of-curiosity`/
+  `cave-of-purpose`/`mountain-festival` ← ch2 w1–w7; `singing-bridge` — orphaned since
+  the ch2 narrative swap, no scene binds it, kept as a reference build), canvas
+  background + hub thumbnails (`createGridThumbnail`), center-point collision in
+  `WorldRuntime`. **Every scene JSON sets `gridMapId`** — grids are the levels now; URL
+  `?grid=<id>` (+`&gridDebug=1`) still overrides for testing. See
   [world-grid-levels.md](./docs/context/world-grid-levels.md).
 ⬜ Not in repo: `SceneGraph`, `EmotionalResidue` modules.
 
@@ -299,8 +330,11 @@ modules (bubbles/HUD live in `GameView` + CSS).
   **everything on the stage scales with viewport size** — the stage is a CSS size
   container exposing `--px` = 1 design px, characters set `--char-size` and their SVGs
   fill it, text uses `clamp()` legibility floors),
-  `renderCelebration` (Courage Feather), `renderJourneyReflection`, `renderParentGate`
+  `renderCelebration` (Star Crystal), `renderJourneyReflection`, `renderParentGate`
   (4-digit PIN, SHA-256 hash in localStorage, 3-fail lockout), `renderTrustScreen`.
+  `renderGameView`'s last param, `togetherPlayers: TogetherPlayer[]`, renders a small
+  badge row (name/role/accent color) next to the "Playing Together" pill — see
+  [play-together-invites.md](./docs/context/play-together-invites.md).
 - `screens.ts` — `renderLanding`, `renderAuthForm` (parent login/register),
   `renderOnboarding` (archetype/name/avatar; default **Flicker**), `renderScenarioHub`
   (child cards use grid canvas thumbnails when the start scene binds a grid; PNG fallback),
@@ -308,9 +342,14 @@ modules (bubbles/HUD live in `GameView` + CSS).
   [ui-screens-views.md](./docs/context/ui-screens-views.md)).
   Known issue: its local `Screen` type includes `"dashboard"`, which `main.ts` rejects
   (typecheck error).
+- `togetherScreens.ts` — **new.** `renderTogetherLobby` (host/join-by-code),
+  `renderTogetherPlayerSetup` (name/color/character picker), `renderTogetherWaiting`
+  (code/link + live seat status via SSE/polling) — see
+  [play-together-invites.md](./docs/context/play-together-invites.md).
 - `auth.ts` — session token helpers (`getToken`/`setSession`/`clearSession`),
   `apiLogin`/`apiRegister`, `hashPin`/`verifyPin` (WebCrypto SHA-256).
-- Together Mode discuss prompts: `counselor/coPlay.ts`.
+- Together Mode discuss prompts (same-browser co-play, distinct from Play Together
+  invites): `counselor/coPlay.ts`.
 
 ### 3.6 AI companion client (`src/companion/CompanionClient.ts`)
 ✅ Implemented — see [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md).
@@ -372,12 +411,20 @@ PlayMode, ProgressStore interface, AuthUser/ChildProfile, `CheckinRecord`/`Check
 - `index.ts` — `GET /api/health`; **parent auth** `register`/`login`/`me` (bcrypt + JWT);
   **child profiles** `GET/POST /api/children`; **remote progress** `GET/PUT
   /api/progress/:childId` (parent-owned, upsert; no client caller yet); audit-log writes;
-  CORS from config.
+  CORS is now a dynamic origin function (was a static list) — allows `serverConfig.corsOrigins`
+  plus any `localhost`/`127.0.0.1`/LAN-IP (`192.168.x`/`10.x`/`172.16–31.x`) origin, so a
+  phone on `http://192.168.x.x:5173` can reach the API for Play Together.
 - `routes/companion.ts` — `POST /api/companion`: input filter → Anthropic (if key) or
   local heuristic score → confidence floor → output filter → fallbacks library;
   `POST /api/reflect`: event list → counselor insights (no client caller yet).
+- `routes/together.ts` — **new.** Play Together invite rooms: `POST /api/together/rooms`
+  (create, returns a 4-letter code), `GET /api/together/rooms/:code`, `POST
+  /api/together/rooms/:code/join`, `POST /api/together/rooms/:code/close`, `GET
+  /api/together/rooms/:code/stream` (SSE). No auth — guest-friendly, 2-hour TTL. See
+  [play-together-invites.md](./docs/context/play-together-invites.md).
 - `auth/jwt.ts` — `signToken`/`verifyToken` (jose HS256, 7-day expiry).
-- `db/migrate.ts` — SQLite schema: parents, child_profiles, progress, audit_logs (WAL).
+- `db/migrate.ts` — SQLite schema: parents, child_profiles, progress, audit_logs,
+  `together_rooms` (WAL).
 - ⬜ No Vercel `api/` tree in this repo.
 
 ### 3.12 Content (`content/`)
@@ -387,16 +434,24 @@ Scenes may declare **stage objects** (`objects[]`: grid-cell interactables → d
 finish line) and **dialogs** (`dlg_*.json`, registered in `DIALOGS`): ch1 has a welcome
 signpost (e1), a North Gate finish/advance (e2 — replaces its auto-advance timer), and a
 Celebration Arch finish/complete (e3, alternate to `dp_ask_grownup`); ch2 has Wize's
-bridge-legend scroll (w1) and the ✅ Level Complete finish (w7). Authoring guide:
+star-legend scroll (w1) and the ✅ Level Complete finish (w7). Authoring guide:
 [world-stage-objects.md](./docs/context/world-stage-objects.md).
-- **Ch.2 The Singing Bridge (golden path, grid `singing-bridge`):** Wize the owl is the
-  follower companion; Flicker the dragon stands at the bridge with a widened `solidSize`
-  solid, physically blocking the only river crossing through w1–w6.
-  w1 quest → w2 investigate → w3 fact/story → w4 breathe (5 taps) → w5 choose →
-  w6 crossing (4 taps) → w7 Flicker steps aside, player walks the bridge to the ✅
-  finish/complete checkmark → Courage Feather celebration. DPs: `dp_quest_start`,
+- **Ch.2 The Little Dragon Who Wouldn't Stop Guarding (golden path, grids
+  `forest-of-questions`/`meadow-of-curiosity`/`cave-of-purpose`/`mountain-festival`,
+  ages 5–7):** explorer Nova collects Star Crystals for the Sky Festival with Flicker, an
+  overprotective Guardian Dragon. Wize the owl is the follower companion (assetRef
+  `char_wize` on the `companion` id); Flicker stands in the path with a widened
+  `solidSize` solid, physically blocking the way through w1–w6.
+  w1 quest start (Forest) → w2 curious questions (Forest of Questions) → w3 inspect a
+  worry-flower (Meadow of Curiosity) → w4 welcome Flicker beside you (Valley of Welcome,
+  5 taps) → w5 thank Flicker's purpose (Cave of Purpose) → w6 festival steps (Mountain of
+  Helpers, 4 taps) → w7 Flicker steps aside, player walks to the Sky Festival stage's ✅
+  finish/complete checkmark → Star Crystal celebration. DPs: `dp_quest_start`,
   `dp_investigate`, `dp_fact_sort`, `dp_breathe`, `dp_choose_path`, `dp_crossing`
   (no longer a chapter-complete decision — `CHAPTER_COMPLETE_DECISION` is ch1-only).
+  **Superseded 2026-07-18:** the original Singing Bridge script (Flicker/Wize, river
+  crossing, Courage Feather, grid `singing-bridge`) — see the team-board Daniel entry and
+  §6 changelog for why (a stale unrebased branch reconciled forward rather than merged).
 - **Ch.1 Everbright Meadow (grid `everbright-meadow`):** e1–e3, 2 DPs.
 - **Ch.3 Forest removed 2026-07-17** (files deleted, registry/scenario/hub entries
   dropped). Its 2 DPs remain only as library data in insights/coPlay/fallbacks.
@@ -409,8 +464,9 @@ bridge-legend scroll (w1) and the ✅ Level Complete finish (w7). Authoring guid
 ### 3.13 Assets (`public/assets/`)
 🟨 Partial. Zone PNGs (meadow/forest/cave/mountain) under `public/assets/zones/`;
 characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matching
-8-bit compass star. The Singing Bridge zone + celebration reuse `forest.png`
-(no bridge art yet). No `assets-src/` provenance pipeline.
+8-bit compass star. Ch2's zone card + celebration reuse `forest.png`/`mountain.png`
+(no dedicated forest/cave/mountain-path art for the 4 new ch2 grids yet). No
+`assets-src/` provenance pipeline.
 
 > 🔧 **Ermoni & Gabby** — Level 1 art + Supabase delivery (offline fallback required).
 
@@ -422,10 +478,12 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
   still no Ajv schemas. **Passing** as of 2026-07-17.
 - `npm run test:unit` — **37/37 passing**. `npm run build` — **passing** (vite build;
   server tsc errors are swallowed by `|| true`).
-- **`npm run typecheck` — FAILING (9 errors), which makes CI red:**
-  8 × TS2352 in `src/content/index.ts` (scene JSON `position: number[]` doesn't satisfy
-  `[number, number]` for the `as Scene` casts; was 10 before ch3 removal) and 1 × TS2345
-  in `src/main.ts` (`screens.ts` `Screen` includes `"dashboard"`, not in `AppScreen`).
+- **`npm run typecheck` — FAILING (6 errors), which makes CI red:**
+  5 × TS2352 in `src/content/index.ts` (scene JSON `position: number[]` doesn't satisfy
+  `[number, number]` for the `as Scene` casts; was 9 before the ch2 narrative rewrite
+  changed which scenes' character arrays mix `solidSize`-bearing and plain shapes) and
+  1 × TS2345 in `src/main.ts` (`screens.ts` `Screen` includes `"dashboard"`, not in
+  `AppScreen`).
   Script is now `tsc --noEmit && tsc -p tsconfig.api.json` — the second pass covers both
   `server/` and the new `api/` (see below) via **`tsconfig.api.json`** (`noEmit: true`,
   extends `tsconfig.server.json`); a separate config was needed because adding `api/` to
@@ -452,17 +510,27 @@ characters are code-drawn 8-bit pixel SVG (see §3.4); `favicon.svg` is a matchi
 
 ### 3.15 Tests (`tests/`)
 🟨 Partial — **37 tests, all passing**: `tests/unit/engine.test.ts` (13 — DecisionResolver
-bands/meters/repair, safety filters, Singing Bridge golden-path presence, ch3 absence,
+bands/meters/repair, safety filters, Little Dragon golden-path presence, ch3 absence,
 counselor insights + journey reflection, SVG cast rendering, world collision wall slide +
 bounds) + `tests/unit/grid.test.ts` (8 — grid cell vector, painting/world lookup,
 center-point slide, level registry, `?grid=` resolution, scenario/scene→grid routing,
-bridge-only river crossing, Flicker-solid bridge block w6 vs clear w7) +
+legacy `singing-bridge` river crossing (grid still registered though orphaned),
+Flicker-solid path block on w6's own `gridMapId` vs clear in w7) +
 `tests/unit/checkin.test.ts` (6 — question rotation, typed
 feeling-word scoring, distress flag, placement bands, labels/lines, reflection baseline)
 + `tests/unit/stageObjects.test.ts` (10 — cell→world parity, object placement/sprites,
 object/dialog content integrity incl. ch2 w7-checkmark completion,
 advanceScene/completeChapter, auto-advance suppression).
-⬜ integration / e2e / red-team folders.
+⬜ integration / e2e / red-team folders. ⬜ No tests yet for Play Together (§3.16).
+
+### 3.16 Play Together invites (`server/routes/together.ts`, `src/together/`, `src/ui/togetherScreens.ts`)
+✅ Implemented (no auth, 2-hour room TTL, no automated tests yet). Cross-device
+alternative to the same-browser "Together Mode" toggle: a parent and child join the same
+playthrough from different devices via a shareable 4-letter code or `?invite=CODE` link,
+backed by SQLite rooms + SSE live updates, with a localStorage fallback when the API is
+unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
+`resolveApiUrl()` same-origin preference, `viewport-fit=cover`). Full detail:
+[play-together-invites.md](./docs/context/play-together-invites.md).
 
 ---
 
@@ -477,6 +545,7 @@ advanceScene/completeChapter, auto-advance suppression).
 | [ui-screens-views.md](./docs/context/ui-screens-views.md) | `src/ui/GameView.ts`, `src/ui/screens.ts`, `src/ui/auth.ts` | Every render function: game view, overlays, onboarding, hub, parent gate, auth |
 | [server-api.md](./docs/context/server-api.md) | `server/*` (index, main, config, auth, db, routes) | All HTTP endpoints, SQLite schema, JWT, companion pipeline steps |
 | [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md) | `server/routes/companion.ts`, `src/companion/*`, `src/safety/*`, fallbacks | Live vs demo companion paths, filters, fallback coverage |
+| [play-together-invites.md](./docs/context/play-together-invites.md) | `server/routes/together.ts`, `src/together/inviteStore.ts`, `src/ui/togetherScreens.ts`, `src/util/id.ts`, `main.ts`/`GameView.ts` wiring | Cross-device Play Together invite rooms: server routes, client store, UI screens, mobile/LAN support |
 
 ---
 
@@ -484,7 +553,7 @@ advanceScene/completeChapter, auto-advance suppression).
 
 | Gap | Owner hint | Status |
 |---|---|---|
-| Fix `npm run typecheck` (11 errors) → CI green | Daniel | ⬜ **CI currently red** |
+| Fix `npm run typecheck` (6 errors) → CI green | Daniel | ⬜ **CI currently red** |
 | Level 1 / zone production art + Supabase | Ermoni + Gabby | ⬜ |
 | Hosted deploy (client + Hono API) | Jose | 🟨 Vercel Node Function adapter (`api/[[...route]].ts`) added 2026-07-17; actual Vercel project/env vars/deploy still pending |
 | Wire client to server remote-progress endpoints | (unassigned) | ⬜ server side done |
@@ -495,6 +564,8 @@ advanceScene/completeChapter, auto-advance suppression).
 | JSON Schema validate-content | (unassigned) | ⬜ |
 | `npm run lint` fix (drops phantom `api/` dir) | (unassigned) | ⬜ |
 | TileMap / WASD architecture | — | ✅ free-roam WASD + 100×100 grid levels; all scenes bind `gridMapId` |
+| Automated tests for Play Together (server route / invite store / UI) | (unassigned) | ⬜ |
+| Level 1 art for the 4 new ch2 grid biomes (forest/meadow/cave/mountain path) | Ermoni + Gabby | ⬜ still reuses existing zone PNGs |
 
 ---
 
@@ -519,3 +590,5 @@ advanceScene/completeChapter, auto-advance suppression).
 | 2026-07-17 | Added **declarative stage objects** (groundwork for the anxiety level & infinite stage authoring): `Scene.objects[]` — grid-cell-placed interactables with a `StageObjectInteraction` union (`openDialog` → new multi-page `renderDialogOverlay` with speaker/portrait, fed by `dlg_*.json` + `DIALOGS` registry; `finish` → new public `SceneEngine.advanceScene`/`completeChapter`, with `advance`\|`complete` per object). WorldRuntime proximity now targets triggers → objects → NPC fallback (`onObjectInteract`); objects render as emoji sprites with click fallback; narration auto-advance is skipped when a finish/advance object exists. Demo content: ch1 signpost/North Gate/Celebration Arch, ch2 w1 Wize scroll (ch2 finale untouched). validate-content now checks dialogs + objects; tests 26→36. Verified in-browser (dialog paging/freeze, gate advance, arch celebration, no auto-advance). New context file `world-stage-objects.md`. |
 | 2026-07-18 | Removed Flicker's detached orange wing pixels (`O: #ff9e00`) from `dragonSvg` in `src/render/characters.ts` — the floating triangles read as a stray orange mouse cursor next to the companion in-game; body/belly widened one column to fill the gap. Art-only, no export changes. |
 | 2026-07-18 | **Fixed the Wize/Flicker role swap in Level 1 + walk-to-finish ending.** Ch2 scenes now cast **Wize the owl as the follower companion** (assetRef `char_wize` on the `companion` id; GameView labels/pill say "Wize" whenever the scene's companion assetRef is wize) and **Flicker the dragon as a stationary NPC blocking the Singing Bridge** (new `flicker` id → dragon sprite mapping in `characters.ts`; new optional `SceneCharacter.solidSize` [w,h] lets his solid span the whole 154px plank corridor, 190×80 at the south entrance in w1–w6). Chapter completion is no longer decision-driven: `dp_crossing` strong now advances to **new scene w7**, where Flicker stands aside and a ✅ "Level Complete" `finish/complete` stage object sits on the north bank — the player physically crosses the bridge and presses E to end the level (ch2 removed from `CHAPTER_COMPLETE_DECISION`; `GOLDEN_PATH`/`CHAPTER_FINALE` updated; new `finish_check` sprite). Script text unchanged. Tests 36→37 (bridge-block collision test; ch2 finale guard rewritten for w7); verified end-to-end in headless Chromium (blocked at bridge in w1, full W1→W7 play-through, checkmark → Courage Feather celebration). |
+| 2026-07-18 | **Rebased Level 1 onto the new 5–7 anxiety script ("The Little Dragon Who Wouldn't Stop Guarding") + shipped cross-device Play Together invites, reconciling a stale unrebased branch instead of merging it.** Daniel's `feat/singing-bridge-level-1` (PR #7) had branched off main on 2026-07-14, before the w7 finish, Wize/Flicker role fix, dialogue z-layering fix, stage objects, and SEL coach panel landed — so its own independent Level 1 rewrite collided with all of that on the same files (`GitHub: CONFLICTING`). Resolution was a fresh branch off main with the PR's changes manually re-applied rather than a git merge: **content** — all `content/chapters/ch2/dp_*.json` + `w1–w6.scene.json` replaced 1:1 on the same DP ids with the new narrative (explorer Nova, Flicker, Star Crystals, Sky Festival), `config/content.ts` zones/achievements/celebration, `content/scenarios.ts` ch2 metadata, `counselor/{coPlay,insights}.ts`, `content/{demo/showcase.bundle,fallbacks/companion-fallbacks}.json`, `src/ui/screens.ts` onboarding line, `src/engine/SceneEngine.ts` multi-tap/repair companion lines — all updated to match; **preserved unchanged** — the w7 walk-to-finish stage-object mechanic (new `w7.scene.json` + `dlg_star_legend.json` replacing `dlg_bridge_legend.json`; `dp_crossing` strong band now targets w7), the Wize/Flicker character-role split (reapplied to every new scene), the dialogue z-layering fix, speech/voice toggle, and declarative stage objects; **new** — 4 grid maps (`forest-of-questions`, `meadow-of-curiosity`, `cave-of-purpose`, `mountain-festival` in `gridLevels.ts`) so the explorable-grid feature keeps working per-biome instead of the single `singing-bridge` grid (now orphaned but left registered). **Play Together** (additive, not part of the conflict): new `server/routes/together.ts` (SQLite `together_rooms`, create/join/get/close/SSE-stream), `src/together/inviteStore.ts`, `src/ui/togetherScreens.ts`, `src/util/id.ts`; wired into `main.ts` (new `togetherLobby`/`togetherSetup`/`togetherWaiting` screens, `?invite=CODE` bootstrap) and `GameView.ts` (player badges); LAN/mobile support (`vite.config.ts` `host:true`, `config/app.ts` `resolveApiUrl()`, `index.html` `viewport-fit=cover`, dynamic CORS origin in `server/index.ts`). New context file `play-together-invites.md`. ch1/ch3 and Daniel's role-fix/z-layering work are untouched. Tests: `tests/unit/grid.test.ts`'s bridge-block test rewritten to read `w6`'s own `gridMapId` and relative offsets instead of hardcoded Singing-Bridge pixel positions; 37/37 passing, `validate:content` passing, typecheck 9→6 known errors (narrower `as Scene` JSON-cast mismatch, unrelated to this change). No automated tests yet for Play Together. |
+| 2026-07-18 | Fixed a second stray-orange-pixel regression in `dragonSvg` (`src/render/characters.ts`): the "worried" expression's 4 floating worry-sparks were 3× `GOLD` (`#ffd60a`) + 1× a different hardcoded orange (`#ff6b35`), isolated in empty space near the sprite — same "reads as a leftover cursor" bug as the 07-17 wing-pixel fix, just a different pixel. Went unnoticed before because Flicker was rarely "worried"; the new Little Dragon script keeps Flicker worried through nearly every ch2 scene, making it obvious. Changed the odd spark to `GOLD` to match the other three. Art-only, no export changes; 37/37 tests still passing. |

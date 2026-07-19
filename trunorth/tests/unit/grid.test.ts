@@ -84,24 +84,26 @@ describe("grid levels", () => {
     expect(level.map.cellAt(80, 48)?.walkable).toBe(false);
   });
 
-  it("lets Flicker's widened solid seal the bridge entrance until w7", () => {
-    const level = getGridLevel("singing-bridge")!;
-    const flicker = getScene("w6")!.characters.find((c) => c.id === "flicker")!;
+  it("lets Flicker's widened solid seal the path until w7", () => {
+    const w6 = getScene("w6")!;
+    const level = getGridLevel(w6.gridMapId!)!;
+    const flicker = w6.characters.find((c) => c.id === "flicker")!;
     const [w, h] = flicker.solidSize!;
     const box = characterFeetBox(flicker.position[0], flicker.position[1], w, h);
 
-    // Every approach across the plank corridor is blocked by the solid…
-    for (const x of [890, 960, 1030]) {
+    // Every approach across Flicker's own footprint is blocked by the solid…
+    for (const dx of [-60, 0, 60]) {
+      const x = flicker.position[0] + dx;
       const start = { x, y: box.y + box.h + 6 };
       const moved = moveWithGridCollision(start, { x: 0, y: -12 }, level.map, [box]);
       expect(moved.y, `blocked at x=${x}`).toBe(start.y);
     }
 
-    // …and in w7 Flicker stands aside, so the same walk crosses freely.
+    // …and in w7 Flicker stands aside (no widened solidSize), so the same walk crosses freely.
     const w7Flicker = getScene("w7")!.characters.find((c) => c.id === "flicker")!;
     expect(w7Flicker.solidSize).toBeUndefined();
     const clearBox = characterFeetBox(w7Flicker.position[0], w7Flicker.position[1]);
-    const start = { x: 960, y: box.y + box.h + 6 };
+    const start = { x: flicker.position[0] + 60, y: box.y + box.h + 6 };
     const moved = moveWithGridCollision(start, { x: 0, y: -12 }, level.map, [clearBox]);
     expect(moved.y).toBe(start.y - 12);
   });
