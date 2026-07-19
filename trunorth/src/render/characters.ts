@@ -1,4 +1,4 @@
-/** Full-body illustrated characters (SVG) — TruNorth concept art style */
+/** Full-body 8-bit pixel-art characters (SVG) — TruNorth retro sprite style */
 
 export type CharacterId =
   | "avatar"
@@ -35,6 +35,7 @@ const FLICKER_BELLY = "#ffba08";
 const WIZE_BROWN = "#6b4226";
 const WIZE_CREAM = "#f5e6d3";
 const WIZE_GOLD = "#d4a373";
+const INK = "#2d2d2d";
 
 function expressionOffset(expr?: string): string {
   if (expr?.includes("worried") || expr?.includes("sad")) return "worried";
@@ -91,6 +92,7 @@ export function renderFullBodyCharacter(opts: {
 function resolveCharacterKey(id: string, assetRef?: string, archetype?: string): CharacterId {
   if (id === "worry_cloud" || assetRef?.includes("worry")) return "worry_cloud";
   if (id === "wize" || assetRef?.includes("wize")) return "wize";
+  if (id === "flicker" || assetRef?.includes("flicker")) return "companion_dragon";
   if (id === "companion" || assetRef?.includes("companion")) {
     if (archetype === "companion_dragon") return "companion_dragon";
     return archetype === "companion_sprite" ? "companion_sprite" : "companion_fox";
@@ -107,146 +109,312 @@ function resolveCharacterKey(id: string, assetRef?: string, archetype?: string):
   return "avatar";
 }
 
-function face(expr: string, cx: number, cy: number): string {
-  const browY = expr === "worried" ? cy - 6 : cy - 4;
-  const mouth =
-    expr === "happy" || expr === "glow"
-      ? `<path d="M${cx - 6} ${cy + 8} Q${cx} ${cy + 14} ${cx + 6} ${cy + 8}" fill="none" stroke="#3d3d3d" stroke-width="2" stroke-linecap="round"/>`
-      : expr === "worried" || expr === "sad"
-        ? `<path d="M${cx - 6} ${cy + 12} Q${cx} ${cy + 6} ${cx + 6} ${cy + 12}" fill="none" stroke="#3d3d3d" stroke-width="2" stroke-linecap="round"/>`
-        : `<line x1="${cx - 5}" y1="${cy + 10}" x2="${cx + 5}" y2="${cy + 10}" stroke="#3d3d3d" stroke-width="2" stroke-linecap="round"/>`;
-  return `
-    <circle cx="${cx - 6}" cy="${cy}" r="2.5" fill="#2d2d2d"/>
-    <circle cx="${cx + 6}" cy="${cy}" r="2.5" fill="#2d2d2d"/>
-    <path d="M${cx - 10} ${browY} Q${cx - 6} ${browY - (expr === "worried" ? 3 : 0)} ${cx - 2} ${browY}" fill="none" stroke="#2d2d2d" stroke-width="1.5"/>
-    <path d="M${cx + 2} ${browY} Q${cx + 6} ${browY - (expr === "worried" ? 3 : 0)} ${cx + 10} ${browY}" fill="none" stroke="#2d2d2d" stroke-width="1.5"/>
-    ${mouth}
-  `;
+// --- pixel-grid helpers -----------------------------------------------------
+
+const EMPTY_ROW = "....................";
+
+function pad(n: number): string[] {
+  return Array.from({ length: n }, () => EMPTY_ROW);
 }
+
+/** Convert an ASCII pixel map into merged-run <rect> pixels. */
+function gridRects(rows: string[], palette: Record<string, string>): string {
+  let out = "";
+  rows.forEach((row, y) => {
+    let x = 0;
+    while (x < row.length) {
+      const c = row[x];
+      let run = 1;
+      while (x + run < row.length && row[x + run] === c) run += 1;
+      const fill = palette[c];
+      if (c !== "." && fill) {
+        out += `<rect x="${x}" y="${y}" width="${run}" height="1" fill="${fill}"/>`;
+      }
+      x += run;
+    }
+  });
+  return out;
+}
+
+function sprite(rows: string[], palette: Record<string, string>, size: number, extra = "", before = ""): string {
+  const h = rows.length;
+  const w = rows[0].length;
+  const height = (size * h) / w;
+  return `<svg viewBox="0 0 ${w} ${h}" width="${size}" height="${height}" shape-rendering="crispEdges" aria-hidden="true">${before}${gridRects(rows, palette)}${extra}</svg>`;
+}
+
+function rect(x: number, y: number, w: number, fill: string, opacity?: number): string {
+  return `<rect x="${x}" y="${y}" width="${w}" height="1" fill="${fill}"${opacity !== undefined ? ` opacity="${opacity}"` : ""}/>`;
+}
+
+/** 2×2 pixel eyes with a sparkle, brows when worried, and a per-mood pixel mouth. */
+function pixelFace(expr: string, cx: number, eyeY: number, mouthY: number, opts: { brows?: boolean } = {}): string {
+  let out =
+    rect(cx - 4, eyeY, 2, INK) +
+    rect(cx - 4, eyeY + 1, 2, INK) +
+    rect(cx + 2, eyeY, 2, INK) +
+    rect(cx + 2, eyeY + 1, 2, INK) +
+    rect(cx - 3, eyeY, 1, "#ffffff", 0.85) +
+    rect(cx + 3, eyeY, 1, "#ffffff", 0.85);
+  if (expr === "worried" && opts.brows !== false) {
+    out += rect(cx - 5, eyeY - 3, 1, INK) + rect(cx - 4, eyeY - 2, 2, INK);
+    out += rect(cx + 4, eyeY - 3, 1, INK) + rect(cx + 2, eyeY - 2, 2, INK);
+  }
+  if (expr === "happy") {
+    out += rect(cx - 3, mouthY, 1, INK) + rect(cx - 2, mouthY + 1, 4, INK) + rect(cx + 2, mouthY, 1, INK);
+  } else if (expr === "worried") {
+    out += rect(cx - 3, mouthY + 1, 1, INK) + rect(cx - 2, mouthY, 4, INK) + rect(cx + 2, mouthY + 1, 1, INK);
+  } else if (expr === "calm") {
+    out += rect(cx - 2, mouthY, 1, INK) + rect(cx - 1, mouthY + 1, 2, INK) + rect(cx + 1, mouthY, 1, INK);
+  } else {
+    out += rect(cx - 2, mouthY, 4, INK);
+  }
+  return out;
+}
+
+/** Classic plus-shaped sparkle stars for happy moments. */
+function pixelSparkles(points: Array<[number, number]>, fill = GOLD): string {
+  let out = "";
+  for (const [x, y] of points) {
+    out += rect(x, y, 1, fill) + rect(x - 1, y, 1, fill, 0.7) + rect(x + 1, y, 1, fill, 0.7);
+    out += `<rect x="${x}" y="${y - 1}" width="1" height="1" fill="${fill}" opacity="0.7"/>`;
+    out += `<rect x="${x}" y="${y + 1}" width="1" height="1" fill="${fill}" opacity="0.7"/>`;
+  }
+  return out;
+}
+
+// --- cast -------------------------------------------------------------------
 
 /** Protagonist — purple hoodie, star backpack, curly puff hair */
 function avatarSvg(expr: string, size: number, skin: string): string {
-  const glow = expr === "happy" ? `<circle cx="50" cy="50" r="48" fill="${GOLD}" opacity="0.3"/>` : "";
-  return `<svg viewBox="0 0 100 160" width="${size}" height="${size * 1.6}" aria-hidden="true">
-    ${glow}
-    <rect x="32" y="118" width="12" height="32" rx="6" fill="#3d5a80"/>
-    <rect x="56" y="118" width="12" height="32" rx="6" fill="#3d5a80"/>
-    <ellipse cx="38" cy="152" rx="10" ry="5" fill="${PURPLE_DARK}"/>
-    <ellipse cx="62" cy="152" rx="10" ry="5" fill="${PURPLE_DARK}"/>
-    <rect x="28" y="70" width="44" height="52" rx="14" fill="${PURPLE}"/>
-    <rect x="34" y="78" width="32" height="18" rx="6" fill="${PURPLE_DARK}" opacity="0.5"/>
-    <rect x="68" y="72" width="18" height="44" rx="8" fill="${PURPLE_DARK}"/>
-    <circle cx="77" cy="88" r="7" fill="${GOLD}"/>
-    <text x="77" y="91" text-anchor="middle" font-size="8" fill="${PURPLE_DARK}">★</text>
-    <rect x="12" y="74" width="16" height="36" rx="8" fill="${skin}"/>
-    <rect x="72" y="74" width="16" height="36" rx="8" fill="${skin}"/>
-    <circle cx="50" cy="42" r="26" fill="${skin}"/>
-    <ellipse cx="50" cy="18" rx="22" ry="16" fill="#2d2d2d"/>
-    <circle cx="50" cy="14" r="10" fill="#2d2d2d"/>
-    <rect x="38" y="8" width="24" height="6" rx="3" fill="${PURPLE}"/>
-    ${face(expr, 50, 44)}
-  </svg>`;
+  const P: Record<string, string> = { H: INK, P: PURPLE, D: PURPLE_DARK, S: skin, G: GOLD, B: "#3d5a80" };
+  const rows = [
+    "......HHHHHHHH......",
+    ".....HHHHHHHHHH.....",
+    "....HHHHHHHHHHHH....",
+    "...HHHHHHHHHHHHHH...",
+    "...HHHHHHHHHHHHHH...",
+    "...HPPPPPPPPPPPPH...",
+    "...HSSSSSSSSSSSSH...",
+    "....SSSSSSSSSSSS....",
+    "....SSSSSSSSSSSS....",
+    "....SSSSSSSSSSSS....",
+    "....SSSSSSSSSSSS....",
+    "....SSSSSSSSSSSS....",
+    ".....SSSSSSSSSS.....",
+    ".......SSSSSS.......",
+    ".....PPPPPPPPPP.....",
+    "....PPPPPPPPPPPPDD..",
+    "..SSPPPPPPPPPPPPDDD.",
+    "..SSPPPPPPPPPPPPDDD.",
+    "..SSPPDDDDDDDDPPDGD.",
+    "..SSPPDDDDDDDDPPDGD.",
+    "..SSPPPPPPPPPPPPDDD.",
+    "..SSPPPPPPPPPPPPDDD.",
+    "....PPPPPPPPPPPPDD..",
+    ".....PPPPPPPPPP.....",
+    ".....BBB....BBB.....",
+    ".....BBB....BBB.....",
+    ".....BBB....BBB.....",
+    ".....BBB....BBB.....",
+    ".....BBB....BBB.....",
+    ".....BBB....BBB.....",
+    "....DDDD....DDDD....",
+    "....DDDD....DDDD....",
+  ];
+  const sparkles = expr === "happy" ? pixelSparkles([[1, 3], [18, 5], [2, 11]]) : "";
+  return sprite(rows, P, size, pixelFace(expr, 10, 9, 12) + sparkles);
 }
 
 /** Flicker — little red Guardian Dragon with gold belly and sparks */
 function dragonSvg(expr: string, size: number): string {
-  const glow = expr === "happy" ? `<circle cx="50" cy="70" r="46" fill="${GOLD}" opacity="0.35"/>` : "";
+  const P: Record<string, string> = { R: FLICKER_RED, K: FLICKER_DARK, Y: FLICKER_BELLY };
+  const rows = [
+    ...pad(8),
+    "...KK..........KK...",
+    "....KKK......KKK....",
+    ".....KKK....KKK.....",
+    ".....RRRRRRRRRR.....",
+    "....RRRRRRRRRRRR....",
+    "....RRRRRRRRRRRR....",
+    "....RRRRRRRRRRRR....",
+    "....RRRRRRRRRRRR....",
+    "....RRRYYYYYYRRR....",
+    "....RRRYYYYYYRRR....",
+    ".....RRRRRRRRRR.....",
+    "......RRRRRRRR......",
+    ".....RRRRRRRRRR.....",
+    ".....RRYYYYYYRR.....",
+    ".....RRYYYYYYRR.....",
+    ".....RRYYYYYYRR.....",
+    ".....RRYYYYYYRR.....",
+    ".....RRYYYYYYRR.....",
+    ".....RRYYYYYYRR.....",
+    ".....RRRYYYYRRR.....",
+    ".....RRRRRRRRRR.....",
+    "......RRRRRRRR......",
+    "......KKK..KKK......",
+    "......KKK..KKK......",
+  ];
   const sparks =
     expr === "worried"
-      ? `<circle cx="18" cy="70" r="3" fill="${GOLD}"/><circle cx="82" cy="66" r="2.5" fill="${GOLD}"/><circle cx="22" cy="90" r="2" fill="#ff6b35"/>`
+      ? rect(2, 14, 1, GOLD) + rect(17, 12, 1, GOLD) + rect(1, 20, 1, "#ff6b35") + rect(18, 18, 1, GOLD)
       : "";
-  return `<svg viewBox="0 0 100 160" width="${size}" height="${size * 1.6}" aria-hidden="true">
-    ${glow}
-    <path d="M8 95 Q4 70 20 60 Q30 80 18 105 Z" fill="#ff9e00" opacity="0.9"/>
-    <path d="M92 95 Q96 70 80 60 Q70 80 82 105 Z" fill="#ff9e00" opacity="0.9"/>
-    <ellipse cx="50" cy="110" rx="22" ry="28" fill="${FLICKER_RED}"/>
-    <ellipse cx="50" cy="118" rx="14" ry="16" fill="${FLICKER_BELLY}"/>
-    <circle cx="50" cy="48" r="24" fill="${FLICKER_RED}"/>
-    <polygon points="34,32 30,8 44,24" fill="${FLICKER_DARK}"/>
-    <polygon points="66,32 70,8 56,24" fill="${FLICKER_DARK}"/>
-    <ellipse cx="50" cy="58" rx="10" ry="8" fill="${FLICKER_BELLY}"/>
-    ${face(expr, 50, 46)}
-    <circle cx="42" cy="100" r="3" fill="${FLICKER_BELLY}"/>
-    <circle cx="50" cy="104" r="3" fill="${FLICKER_BELLY}"/>
-    <circle cx="58" cy="100" r="3" fill="${FLICKER_BELLY}"/>
-    ${sparks}
-  </svg>`;
+  const sparkles = expr === "happy" ? pixelSparkles([[2, 5], [17, 3], [1, 13], [18, 11]]) : "";
+  return sprite(rows, P, size, pixelFace(expr, 10, 13, 17, { brows: false }) + sparks + sparkles);
 }
 
 /** Wize — gentle mentor owl who glides down from the oak */
 function wizeSvg(expr: string, size: number): string {
-  return `<svg viewBox="0 0 100 160" width="${size}" height="${size * 1.6}" aria-hidden="true">
-    <ellipse cx="50" cy="145" rx="22" ry="6" fill="#3d2914" opacity="0.25"/>
-    <path d="M18 70 Q8 50 22 42 Q32 62 24 78 Z" fill="${WIZE_GOLD}" opacity="0.85"/>
-    <path d="M82 70 Q92 50 78 42 Q68 62 76 78 Z" fill="${WIZE_GOLD}" opacity="0.85"/>
-    <ellipse cx="50" cy="105" rx="26" ry="32" fill="${WIZE_BROWN}"/>
-    <ellipse cx="50" cy="112" rx="16" ry="18" fill="${WIZE_CREAM}"/>
-    <circle cx="50" cy="48" r="26" fill="${WIZE_BROWN}"/>
-    <circle cx="38" cy="46" r="10" fill="${WIZE_CREAM}"/>
-    <circle cx="62" cy="46" r="10" fill="${WIZE_CREAM}"/>
-    <circle cx="38" cy="46" r="4" fill="#2d2d2d"/>
-    <circle cx="62" cy="46" r="4" fill="#2d2d2d"/>
-    <polygon points="50,54 44,62 56,62" fill="#e09f3e"/>
-    <path d="M28 28 Q38 12 50 22 Q62 12 72 28" fill="none" stroke="${WIZE_GOLD}" stroke-width="3"/>
-    ${expr === "happy" || expr === "calm" ? `<path d="M40 68 Q50 74 60 68" fill="none" stroke="#3d3d3d" stroke-width="2" stroke-linecap="round"/>` : ""}
-  </svg>`;
+  const P: Record<string, string> = { W: WIZE_BROWN, C: WIZE_CREAM, G: WIZE_GOLD, K: INK, O: "#e09f3e" };
+  const rows = [
+    ...pad(11),
+    "....WW........WW....",
+    "....WWW......WWW....",
+    "....WWWWWWWWWWWW....",
+    "...WWWWWWWWWWWWWW...",
+    "...WGGGGGWWGGGGGW...",
+    "...WCCCCCWWCCCCCW...",
+    "...WCCKCCWWCCKCCW...",
+    "...WCCKCCWWCCKCCW...",
+    "...WCCCCCWWCCCCCW...",
+    "...WWWWWWOOWWWWWW...",
+    "....WWWWWWWWWWWW....",
+    "...WWWWWWWWWWWWWW...",
+    "..GWWWCCCCCCCCWWWG..",
+    "..GGWWCCCCCCCCWWGG..",
+    "..GGWWCCCCCCCCWWGG..",
+    "..GGWWCCCCCCCCWWGG..",
+    "..GWWWCCCCCCCCWWWG..",
+    "...WWWWCCCCCCWWWW...",
+    "....WWWWWWWWWWWW....",
+    "......OO....OO......",
+    "......OO....OO......",
+  ];
+  const smile =
+    expr === "happy" || expr === "calm"
+      ? rect(7, 21, 1, INK) + rect(8, 22, 4, INK) + rect(12, 21, 1, INK)
+      : "";
+  return sprite(rows, P, size, smile);
 }
 
 function bearSvg(expr: string, size: number): string {
-  return `<svg viewBox="0 0 100 160" width="${size}" height="${size * 1.6}" aria-hidden="true">
-    <ellipse cx="50" cy="130" rx="24" ry="8" fill="#5c4033" opacity="0.3"/>
-    <rect x="34" y="118" width="12" height="28" rx="6" fill="#6b4423"/>
-    <rect x="54" y="118" width="12" height="28" rx="6" fill="#6b4423"/>
-    <ellipse cx="50" cy="92" rx="30" ry="36" fill="#8b5e3c"/>
-    <ellipse cx="50" cy="100" rx="18" ry="20" fill="#c49a6c"/>
-    <circle cx="28" cy="38" r="12" fill="#8b5e3c"/>
-    <circle cx="72" cy="38" r="12" fill="#8b5e3c"/>
-    <circle cx="50" cy="44" r="28" fill="#8b5e3c"/>
-    <ellipse cx="50" cy="56" rx="14" ry="12" fill="#c49a6c"/>
-    <circle cx="50" cy="52" r="5" fill="#5c4033"/>
-    ${face(expr, 50, 42)}
-  </svg>`;
+  const P: Record<string, string> = { M: "#8b5e3c", L: "#c49a6c", K: "#5c4033", N: "#6b4423", D: "#5c4033" };
+  const rows = [
+    ...pad(10),
+    "...MMM........MMM...",
+    "...MMM........MMM...",
+    "....MMMMMMMMMMMM....",
+    "...MMMMMMMMMMMMMM...",
+    "...MMMMMMMMMMMMMM...",
+    "...MMMMMMMMMMMMMM...",
+    "...MMMMLLLLLLMMMM...",
+    "...MMMMLLKKLLMMMM...",
+    "...MMMMLLLLLLMMMM...",
+    "....MMMMMMMMMMMM....",
+    "...MMMMMMMMMMMMMM...",
+    "..MMMMLLLLLLLLMMMM..",
+    "..MMMMLLLLLLLLMMMM..",
+    "..MMMMLLLLLLLLMMMM..",
+    "..MMMMLLLLLLLLMMMM..",
+    "..MMMMLLLLLLLLMMMM..",
+    "..MMMMLLLLLLLLMMMM..",
+    "..MMMMLLLLLLLLMMMM..",
+    "...MMMMMMMMMMMMMM...",
+    "....NNNN....NNNN....",
+    "....NNNN....NNNN....",
+    "...DDDDD....DDDDD...",
+  ];
+  return sprite(rows, P, size, pixelFace(expr, 10, 14, 18));
 }
 
 function helperFoxSvg(expr: string, size: number): string {
-  return `<svg viewBox="0 0 100 160" width="${size}" height="${size * 1.6}" aria-hidden="true">
-    <rect x="34" y="118" width="10" height="28" rx="5" fill="#c45c26"/>
-    <rect x="56" y="118" width="10" height="28" rx="5" fill="#c45c26"/>
-    <rect x="30" y="78" width="40" height="44" rx="12" fill="#2d6a4f"/>
-    <ellipse cx="50" cy="95" rx="18" ry="22" fill="#e76f51"/>
-    <ellipse cx="50" cy="42" rx="26" ry="24" fill="#e76f51"/>
-    <polygon points="28,28 22,4 42,20" fill="#e76f51"/>
-    <polygon points="72,28 78,4 58,20" fill="#e76f51"/>
-    <ellipse cx="50" cy="52" rx="12" ry="10" fill="#faf8f5"/>
-    ${face(expr, 50, 42)}
-  </svg>`;
+  const P: Record<string, string> = { F: "#e76f51", C: "#faf8f5", G: "#2d6a4f", D: "#c45c26" };
+  const rows = [
+    ...pad(11),
+    "....F..........F....",
+    "....FF........FF....",
+    "....FFF......FFF....",
+    "....FFFF....FFFF....",
+    "....FFFFFFFFFFFF....",
+    "...FFFFFFFFFFFFFF...",
+    "...FFFFFFFFFFFFFF...",
+    "...FFFFFFFFFFFFFF...",
+    "...FFFFCCCCCCFFFF...",
+    "...FFFFCCCCCCFFFF...",
+    "....FFFFFFFFFFFF....",
+    ".....GGGGGGGGGG.....",
+    "....GGGGGGGGGGGG.FF.",
+    "...FFGGGGGGGGGGFFFF.",
+    "...FFGGGGGGGGGGFFFF.",
+    "...FFGGGGGGGGGGFFCC.",
+    "....GGGGGGGGGGGG....",
+    ".....GGGGGGGGGG.....",
+    ".....DDD....DDD.....",
+    ".....DDD....DDD.....",
+    "....DDDD....DDDD....",
+  ];
+  return sprite(rows, P, size, pixelFace(expr, 10, 16, 19));
 }
 
 function rabbitSvg(expr: string, size: number): string {
-  return `<svg viewBox="0 0 100 160" width="${size}" height="${size * 1.6}" aria-hidden="true">
-    <rect x="34" y="118" width="10" height="28" rx="5" fill="#6c757d"/>
-    <rect x="56" y="118" width="10" height="28" rx="5" fill="#6c757d"/>
-    <rect x="30" y="78" width="40" height="44" rx="12" fill="#f4a6c8"/>
-    <ellipse cx="50" cy="95" rx="20" ry="24" fill="#dee2e6"/>
-    <ellipse cx="50" cy="48" rx="22" ry="20" fill="#dee2e6"/>
-    <ellipse cx="38" cy="12" rx="6" ry="22" fill="#dee2e6"/>
-    <ellipse cx="62" cy="12" rx="6" ry="22" fill="#dee2e6"/>
-    <ellipse cx="38" cy="14" rx="3" ry="14" fill="#f4a6c8"/>
-    <ellipse cx="62" cy="14" rx="3" ry="14" fill="#f4a6c8"/>
-    ${face(expr, 50, 50)}
-  </svg>`;
+  const P: Record<string, string> = { E: "#dee2e6", P: "#f4a6c8", D: "#6c757d" };
+  const rows = [
+    ...pad(11),
+    "......EE....EE......",
+    "......EE....EE......",
+    "......EP....PE......",
+    "......EP....PE......",
+    "......EP....PE......",
+    "......EE....EE......",
+    ".....EEEEEEEEEE.....",
+    "....EEEEEEEEEEEE....",
+    "....EEEEEEEEEEEE....",
+    "....EEEEEEEEEEEE....",
+    "....EEEEEEEEEEEE....",
+    ".....EEEEEEEEEE.....",
+    ".....PPPPPPPPPP.....",
+    "....PPPPPPPPPPPP....",
+    "...EEPPPPPPPPPPEE...",
+    "...EEPPPPPPPPPPEE...",
+    "....PPPPPPPPPPPP....",
+    ".....PPPPPPPPPP.....",
+    ".....DDD....DDD.....",
+    ".....DDD....DDD.....",
+    "....EEEE....EEEE....",
+  ];
+  return sprite(rows, P, size, pixelFace(expr, 10, 19, 22));
 }
 
 function deerSvg(expr: string, size: number): string {
-  return `<svg viewBox="0 0 100 160" width="${size}" height="${size * 1.6}" aria-hidden="true">
-    <rect x="36" y="118" width="8" height="30" rx="4" fill="#a68a64"/>
-    <rect x="56" y="118" width="8" height="30" rx="4" fill="#a68a64"/>
-    <ellipse cx="50" cy="92" rx="22" ry="30" fill="#c9a66b"/>
-    <ellipse cx="50" cy="48" rx="20" ry="18" fill="#c9a66b"/>
-    <path d="M36 20 L30 0 M36 20 L42 0 M64 20 L58 0 M64 20 L70 0" stroke="#8b6914" stroke-width="3" stroke-linecap="round"/>
-    <ellipse cx="50" cy="56" rx="10" ry="8" fill="#f5e6d3"/>
-    ${face(expr, 50, 46)}
-  </svg>`;
+  const P: Record<string, string> = { T: "#c9a66b", A: "#8b6914", C: "#f5e6d3", D: "#a68a64" };
+  const rows = [
+    ...pad(9),
+    "....A..A....A..A....",
+    "....A..A....A..A....",
+    ".....AAA....AAA.....",
+    "......A......A......",
+    "......A......A......",
+    ".....TTTTTTTTTT.....",
+    "....TTTTTTTTTTTT....",
+    "....TTTTTTTTTTTT....",
+    "....TTTTTTTTTTTT....",
+    "....TTTCCCCCCTTT....",
+    "....TTTCCCCCCTTT....",
+    ".....TTTTTTTTTT.....",
+    ".....TTTTTTTTTT.....",
+    "....TTTTTTTTTTTT....",
+    "....TTCCCCCCCCTT....",
+    "....TTCCCCCCCCTT....",
+    "....TTCCCCCCCCTT....",
+    "....TTCCCCCCCCTT....",
+    "....TTTTTTTTTTTT....",
+    ".....DD......DD.....",
+    ".....DD......DD.....",
+    ".....DD......DD.....",
+    "....DDD......DDD....",
+  ];
+  return sprite(rows, P, size, pixelFace(expr, 10, 16, 19));
 }
 
 function foxSvg(expr: string, size: number): string {
@@ -261,28 +429,61 @@ function robinSvg(expr: string, size: number): string {
   return helperFoxSvg(expr, size);
 }
 
-function kidSvg(expr: string, size: number, shirt: string, pants: string): string {
-  return avatarSvg(expr, size, "#c68642");
-}
-
 function grownupSvg(expr: string, size: number): string {
-  return `<svg viewBox="0 0 100 170" width="${size}" height="${size * 1.7}" aria-hidden="true">
-    <rect x="34" y="120" width="12" height="36" rx="6" fill="#264653"/>
-    <rect x="54" y="120" width="12" height="36" rx="6" fill="#264653"/>
-    <rect x="28" y="70" width="44" height="56" rx="10" fill="#2a9d8f"/>
-    <rect x="10" y="74" width="16" height="40" rx="8" fill="#c68642"/>
-    <rect x="74" y="74" width="16" height="40" rx="8" fill="#c68642"/>
-    <circle cx="50" cy="40" r="26" fill="#c68642"/>
-    <path d="M24 36 Q24 12 50 10 Q76 12 76 36" fill="#5c3317"/>
-    ${face(expr, 50, 42)}
-  </svg>`;
+  const P: Record<string, string> = { H: "#5c3317", S: "#c68642", T: "#2a9d8f", N: "#264653", K: "#1a1a2e" };
+  const rows = [
+    ...pad(6),
+    ".....HHHHHHHHHH.....",
+    "....HHHHHHHHHHHH....",
+    "...HHHHHHHHHHHHHH...",
+    "...HHSSSSSSSSSSHH...",
+    "...HSSSSSSSSSSSSH...",
+    "...HSSSSSSSSSSSSH...",
+    "....SSSSSSSSSSSS....",
+    "....SSSSSSSSSSSS....",
+    "....SSSSSSSSSSSS....",
+    ".....SSSSSSSSSS.....",
+    ".......SSSSSS.......",
+    ".....TTTTTTTTTT.....",
+    "...TTTTTTTTTTTTTT...",
+    "..SSTTTTTTTTTTTTSS..",
+    "..SSTTTTTTTTTTTTSS..",
+    "..SSTTTTTTTTTTTTSS..",
+    "..SSTTTTTTTTTTTTSS..",
+    "...TTTTTTTTTTTTTT...",
+    "...TTTTTTTTTTTTTT...",
+    "....TTTTTTTTTTTT....",
+    ".....NNN....NNN.....",
+    ".....NNN....NNN.....",
+    ".....NNN....NNN.....",
+    ".....NNN....NNN.....",
+    ".....NNN....NNN.....",
+    ".....NNN....NNN.....",
+    "....KKKK....KKKK....",
+    "....KKKK....KKKK....",
+  ];
+  return sprite(rows, P, size, pixelFace(expr, 10, 11, 14));
 }
 
 function cloudSvg(expr: string, size: number): string {
+  const P: Record<string, string> = { A: "#9d4edd", B: "#c77dff" };
+  const rows = [
+    "........................",
+    "........................",
+    "..........BBBB..........",
+    "......BBBBBBBBBB........",
+    "....AABBBBBBBBBBBB......",
+    "..AAAABBBBBBBBBBBBBB....",
+    "..AAAABBBBBBBBBBBBBBAA..",
+    "AAAAAABBBBBBBBBBBBAAAAAA",
+    "AAAAAAAABBBBBBBBAAAAAAAA",
+    "AAAAAAAAAAAAAAAAAAAAAAAA",
+    ".AAAAAAAAAAAAAAAAAAAAAA.",
+    "..AAAAAAAAAAAAAAAAAAAA..",
+    "...AAAAAA....AAAAAA.....",
+  ];
   const opacity = expr === "happy" ? 0.35 : 0.85;
-  return `<svg viewBox="0 0 120 70" width="${size}" height="${size * 0.55}" aria-hidden="true">
-    <ellipse cx="40" cy="40" rx="28" ry="20" fill="#9d4edd" opacity="${opacity}"/>
-    <ellipse cx="70" cy="36" rx="32" ry="24" fill="#c77dff" opacity="${opacity}"/>
-    <ellipse cx="95" cy="42" rx="20" ry="16" fill="#9d4edd" opacity="${opacity}"/>
-  </svg>`;
+  const h = rows.length;
+  const w = rows[0].length;
+  return `<svg viewBox="0 0 ${w} ${h}" width="${size}" height="${(size * h) / w}" shape-rendering="crispEdges" aria-hidden="true"><g opacity="${opacity}">${gridRects(rows, P)}</g></svg>`;
 }

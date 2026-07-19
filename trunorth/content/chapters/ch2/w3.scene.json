@@ -60,5 +60,7 @@
   ],
   "decisionPoints": [
     "dp_fact_sort"
-  ]
+  ],
+  "gridMapId": "everbright-meadow",
+  "objects": []
 }

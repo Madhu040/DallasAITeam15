@@ -50,5 +50,7 @@
   "collectibles": [],
   "decisionPoints": [
     "dp_breathe"
-  ]
+  ],
+  "gridMapId": "everbright-meadow",
+  "objects": []
 }

@@ -1,4 +1,5 @@
 import type { GameEvent, GameState, ScoreBand, SkillId } from "../types/index.js";
+import { checkinPlacementLabel } from "./checkin.js";
 
 export interface CounselorInsight {
   title: string;
@@ -319,10 +320,20 @@ export function buildJourneyReflection(state: GameState): JourneyReflection {
     );
   }
 
-  const summary =
+  const checkin = state.progress.checkins?.[state.profile.chapterId];
+  if (checkin?.placement === "gentle") {
+    parentCoaching.unshift(
+      "The pre-level check-in showed your child arrived carrying heavier feelings today. Extra warmth and slower pacing will go further than pushing for wins.",
+    );
+  }
+
+  let summary =
     strongCount >= Math.max(1, events.length - 1)
       ? `${state.profile.companionName} noticed lots of kind, brave choices. Your child’s emotional muscles got a strong workout today.`
       : `This journey had learning turns — and that’s healthy. Growth often shows up in the retries, not only the wins.`;
+  if (checkin) {
+    summary += ` Before playing, the check-in placed them at a ${checkinPlacementLabel(checkin.placement).toLowerCase()} (${checkin.startingPoint}/10 starting point).`;
+  }
 
   return {
     summary,

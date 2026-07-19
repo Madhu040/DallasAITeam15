@@ -60,5 +60,7 @@
   ],
   "decisionPoints": [
     "dp_choose_path"
-  ]
+  ],
+  "gridMapId": "singing-bridge",
+  "objects": []
 }

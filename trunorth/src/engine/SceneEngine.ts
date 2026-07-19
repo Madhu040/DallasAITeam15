@@ -60,8 +60,12 @@ export class SceneEngine {
     this.state.profile.chapterId = scene.chapterId;
     await this.store.save(this.state);
 
-    // Auto-advance narration-only scenes
-    if (!scene.decisionPoints.length && scene.nextSceneId) {
+    // Auto-advance narration-only scenes — unless a finish-advance stage object
+    // exists, in which case the player walks to it instead.
+    const hasAdvanceObject = (scene.objects ?? []).some(
+      (o) => o.interaction.kind === "finish" && o.interaction.mode === "advance",
+    );
+    if (!scene.decisionPoints.length && scene.nextSceneId && !hasAdvanceObject) {
       this.setPhase("exploring");
       this.callbacks.onSceneChange(sceneId);
       setTimeout(() => { void this.loadScene(scene.nextSceneId!); }, appConfig.timing.narrationAutoAdvanceMs);
@@ -280,6 +284,27 @@ export class SceneEngine {
 
   triggerEncounter(triggerTarget: string): void {
     this.startDecision(triggerTarget);
+  }
+
+  /** Finish-object path: jump to an explicit target scene or this scene's nextSceneId. */
+  async advanceScene(targetSceneId?: string): Promise<void> {
+    const next = targetSceneId ?? this.getCurrentScene()?.nextSceneId;
+    if (!next || !getScene(next)) {
+      this.callbacks.onError("No scene to advance to");
+      return;
+    }
+    this.setPhase("transitioning");
+    await this.loadScene(next);
+  }
+
+  /** Finish-object path: complete the whole chapter → celebration (same effect as the finale decision). */
+  async completeChapter(): Promise<void> {
+    const chapterId = this.state.profile.chapterId;
+    if (!this.state.progress.chaptersCompleted.includes(chapterId)) {
+      this.state.progress.chaptersCompleted.push(chapterId);
+    }
+    await this.store.save(this.state);
+    this.callbacks.onCelebration();
   }
 
   private setPhase(phase: ScenePhase): void {

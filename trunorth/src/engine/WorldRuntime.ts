@@ -3,9 +3,12 @@
  * environment solids, pick up collectibles, and interact with nearby triggers/NPCs.
  */
 
-import type { Scene, SceneCharacter } from "../types/index.js";
+import type { Scene, SceneCharacter, StageObject } from "../types/index.js";
 import { appConfig } from "../config/app.js";
 import { InputController, type Facing } from "../input/InputController.js";
+import { moveWithGridCollision } from "./GridMap.js";
+import { resolveGridLevel, type GridLevel } from "../content/gridLevels.js";
+import { objectWorldPos, sceneObjects } from "../content/stageObjects.js";
 import {
   WORLD_H,
   WORLD_W,
@@ -22,7 +25,13 @@ import {
 export interface WorldCallbacks {
   onInteract: (decisionTarget: string) => void;
   onCollect: (collectibleId: string) => void;
+  onObjectInteract?: (objectId: string) => void;
 }
+
+/** What the avatar is currently in range of (trigger zone or stage object). */
+export type NearInteractable =
+  | { type: "trigger"; target: string }
+  | { type: "object"; objectId: string; hint?: string };
 
 interface SolidBody {
   id: string;
@@ -30,6 +39,13 @@ interface SolidBody {
 }
 
 const SOLID_SKIP = new Set(["avatar", "companion", "worry_cloud"]);
+
+/**
+ * Character sprites anchor at the feet (translate(-50%, -100%), ~110px tall), so
+ * the visual center sits this far above the position point. Grid collision tests
+ * the avatar's center, per the level design convention.
+ */
+const AVATAR_CENTER_OFFSET_Y = 55;
 
 export class WorldRuntime {
   private input = new InputController();
@@ -46,9 +62,10 @@ export class WorldRuntime {
   private companion: Vec2 = { x: 520, y: 760 };
   private facing: Facing = "down";
   private collected = new Set<string>();
-  private nearTarget: string | null = null;
+  private nearTarget: NearInteractable | null = null;
   private solids: SolidBody[] = [];
   private walkBounds = defaultWalkBounds();
+  private grid: GridLevel | null = null;
 
   attach(
     viewport: HTMLElement,
@@ -70,8 +87,14 @@ export class WorldRuntime {
     if (sceneChanged || !this.attached) {
       this.sceneId = scene.id;
       this.collected.clear();
+      this.grid = resolveGridLevel(scene);
       this.seedFromScene(scene);
       this.rebuildSolids(scene);
+      if (this.grid) {
+        const spawn = this.grid.map.cellCenterWorld(...this.grid.spawnCell);
+        this.avatar = { x: spawn.x, y: spawn.y + AVATAR_CENTER_OFFSET_Y };
+        this.companion = { x: this.avatar.x - 100, y: this.avatar.y };
+      }
     }
 
     this.applyDomPositions();
@@ -125,7 +148,12 @@ export class WorldRuntime {
       .filter((c) => !SOLID_SKIP.has(c.id))
       .map((c) => ({
         id: c.id,
-        box: characterFeetBox(c.position[0], c.position[1], 70, 42),
+        box: characterFeetBox(
+          c.position[0],
+          c.position[1],
+          c.solidSize?.[0] ?? 70,
+          c.solidSize?.[1] ?? 42,
+        ),
       }));
 
     // Soft river/ledge band for bridge scenes — keep feet on the walkable bank.
@@ -154,7 +182,11 @@ export class WorldRuntime {
       this.checkCollectibles();
       this.updateProximity();
       if (this.input.consumeInteract() && this.nearTarget) {
-        this.callbacks?.onInteract(this.nearTarget);
+        if (this.nearTarget.type === "trigger") {
+          this.callbacks?.onInteract(this.nearTarget.target);
+        } else {
+          this.callbacks?.onObjectInteract?.(this.nearTarget.objectId);
+        }
       }
     }
 
@@ -171,6 +203,13 @@ export class WorldRuntime {
     const delta = { x: move.x * speed * dt, y: move.y * speed * dt };
     const footprint = { w: 56, h: 36 };
     const solidBoxes = this.solids.map((s) => s.box);
+
+    if (this.grid) {
+      const center = { x: this.avatar.x, y: this.avatar.y - AVATAR_CENTER_OFFSET_Y };
+      const moved = moveWithGridCollision(center, delta, this.grid.map, solidBoxes);
+      this.avatar = { x: moved.x, y: moved.y + AVATAR_CENTER_OFFSET_Y };
+      return;
+    }
 
     this.avatar = moveWithCollision(
       this.avatar,
@@ -220,9 +259,24 @@ export class WorldRuntime {
       const center = { x: x + w / 2, y: y + h / 2 };
       const feet = characterFeetBox(this.avatar.x, this.avatar.y);
       if (aabbOverlap(feet, expandAabb(zone, 24)) || distance(avatarFeet, center) <= radius) {
-        this.nearTarget = trigger.target;
+        this.nearTarget = { type: "trigger", target: trigger.target };
         return;
       }
+    }
+
+    // Stage objects: nearest one within the interact radius.
+    let nearestObj: StageObject | null = null;
+    let nearestDist = Infinity;
+    for (const obj of sceneObjects(this.scene)) {
+      const d = distance(avatarFeet, objectWorldPos(obj));
+      if (d <= radius && d < nearestDist) {
+        nearestObj = obj;
+        nearestDist = d;
+      }
+    }
+    if (nearestObj) {
+      this.nearTarget = { type: "object", objectId: nearestObj.id, hint: nearestObj.hint };
+      return;
     }
 
     // Fallback: stand near interactive NPCs (non-avatar/companion).
@@ -231,7 +285,7 @@ export class WorldRuntime {
       const d = distance(avatarFeet, { x: ch.position[0], y: ch.position[1] });
       if (d <= radius) {
         const trigger = this.scene.triggers[0];
-        if (trigger) this.nearTarget = trigger.target;
+        if (trigger) this.nearTarget = { type: "trigger", target: trigger.target };
         return;
       }
     }
@@ -291,17 +345,27 @@ export class WorldRuntime {
 
     if (this.nearTarget && !this.frozen) {
       hint.hidden = false;
-      hint.textContent = "Press E to interact";
+      hint.textContent =
+        (this.nearTarget.type === "object" && this.nearTarget.hint) || "Press E to interact";
       hint.style.left = `${(this.avatar.x / WORLD_W) * 100}%`;
       hint.style.top = `${((this.avatar.y - 160) / WORLD_H) * 100}%`;
     } else {
       hint.hidden = true;
     }
 
-    // Highlight nearby trigger zones
+    // Highlight the in-range trigger zone / stage object
+    const near = this.frozen ? null : this.nearTarget;
     for (const zone of this.viewport.querySelectorAll<HTMLElement>(".trigger-zone")) {
-      const active = !this.frozen && !!this.nearTarget;
-      zone.classList.toggle("in-range", active && zone.dataset.target === this.nearTarget);
+      zone.classList.toggle(
+        "in-range",
+        near?.type === "trigger" && zone.dataset.target === near.target,
+      );
+    }
+    for (const el of this.viewport.querySelectorAll<HTMLElement>(".stage-object")) {
+      el.classList.toggle(
+        "in-range",
+        near?.type === "object" && el.dataset.objectId === near.objectId,
+      );
     }
   }
 

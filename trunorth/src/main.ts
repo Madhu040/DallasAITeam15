@@ -14,12 +14,15 @@ import {
   renderJourneyReflection,
   type CounselorPanelData,
   type CoPlayStep,
+  type DialogViewState,
 } from "./ui/GameView.js";
+import { getDialog } from "./content/index.js";
 import {
   renderLanding,
   renderAuthForm,
   renderOnboarding,
   renderScenarioHub,
+  renderCheckin,
 } from "./ui/screens.js";
 import {
   renderTogetherLobby,
@@ -37,6 +40,7 @@ import {
   type TogetherRoom,
 } from "./together/inviteStore.js";
 import { getToken } from "./ui/auth.js";
+import { speakLine, stopSpeaking } from "./audio/speech.js";
 import { buildJourneyReflection } from "./counselor/insights.js";
 import { SCENARIOS } from "./content/scenarios.js";
 
@@ -45,6 +49,7 @@ type AppScreen =
   | "trust"
   | "onboarding"
   | "hub"
+  | "checkin"
   | "game"
   | "parentGate"
   | "celebration"
@@ -68,6 +73,9 @@ let currentPhase: ScenePhase = "loading";
 let activeScenarioTitle = "Adventure complete";
 let parentGateNext: AppScreen = "reflection";
 let coPlayStep: CoPlayStep = "discuss";
+let pendingScenario: ScenarioMeta | null = null;
+let pendingPlayMode: "solo" | "together" = "solo";
+let activeDialog: DialogViewState | null = null;
 
 /** Play Together invite session (same-origin tabs via localStorage). */
 let togetherRoom: TogetherRoom | null = null;
@@ -82,6 +90,8 @@ const app = document.getElementById("app")!;
 function navigate(screen: AppScreen): void {
   if (screen !== "game") {
     worldRuntime.detach();
+    stopSpeaking();
+    activeDialog = null;
   }
   if (screen !== "togetherWaiting") {
     stopTogetherWatch?.();
@@ -179,10 +189,45 @@ function onWorldCollect(collectibleId: string): void {
 }
 
 function bindWorld(viewport: HTMLElement, scene: Scene, exploring: boolean): void {
-  worldRuntime.attach(viewport, scene, exploring, {
+  worldRuntime.attach(viewport, scene, exploring && activeDialog === null, {
     onInteract: (target) => beginEncounter(target),
     onCollect: onWorldCollect,
+    onObjectInteract: onStageObject,
   });
+}
+
+/** Dispatch a stage-object interaction — the extension point for new kinds. */
+function onStageObject(objectId: string): void {
+  const obj = engine?.getCurrentScene()?.objects?.find((o) => o.id === objectId);
+  if (!obj) return;
+  const interaction = obj.interaction;
+  switch (interaction.kind) {
+    case "openDialog":
+      if (!getDialog(interaction.dialogId)) return;
+      activeDialog = { id: interaction.dialogId, page: 0 };
+      worldRuntime.freeze(true);
+      renderGame();
+      break;
+    case "finish":
+      if (interaction.mode === "complete") {
+        void engine?.completeChapter();
+      } else {
+        void engine?.advanceScene(interaction.targetSceneId);
+      }
+      break;
+    default: {
+      const _exhaustive: never = interaction;
+      void _exhaustive;
+    }
+  }
+}
+
+function closeDialog(): void {
+  activeDialog = null;
+  worldRuntime.freeze(false);
+  // Defer so the closing click finishes on the old DOM — otherwise the browser
+  // retargets it to whatever (e.g. a trigger zone) appears under the cursor.
+  setTimeout(renderGame, 0);
 }
 
 async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "together" = "solo"): Promise<void> {
@@ -226,6 +271,7 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
     },
     onCompanionLine: (line) => {
       companionLine = line;
+      speakLine(line);
       renderGame();
     },
     onCounselorInsight: (insight) => {
@@ -243,6 +289,7 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
   gameState = engine.getState();
   counselorPanel = null;
   companionLine = null;
+  activeDialog = null;
   await engine.loadScene(scenario.startSceneId);
   navigate("game");
 }
@@ -275,6 +322,15 @@ function renderGame(): void {
     },
     (viewport, sceneEl, exploring) => bindWorld(viewport, sceneEl, exploring),
     togetherPlayers,
+    onStageObject,
+    activeDialog,
+    () => {
+      if (activeDialog) {
+        activeDialog = { ...activeDialog, page: activeDialog.page + 1 };
+        renderGame();
+      }
+    },
+    closeDialog,
   );
 }
 
@@ -408,8 +464,16 @@ function render(): void {
         app,
         gameState.progress.chaptersCompleted,
         gameState.flags.playMode,
-        (scenario) => { void startScenario(scenario, "solo"); },
-        (scenario) => { void startScenario(scenario, "together"); },
+        (scenario) => {
+          pendingScenario = scenario;
+          pendingPlayMode = "solo";
+          navigate("checkin");
+        },
+        (scenario) => {
+          pendingScenario = scenario;
+          pendingPlayMode = "together";
+          navigate("checkin");
+        },
         () => {
           parentGateNext = "reflection";
           navigate("parentGate");
@@ -417,6 +481,33 @@ function render(): void {
         () => navigate("landing"),
       );
       break;
+
+    case "checkin": {
+      const scenario = pendingScenario;
+      if (!scenario) {
+        navigate("hub");
+        break;
+      }
+      renderCheckin(
+        app,
+        scenario,
+        gameState.profile.companionName,
+        (result) => {
+          if (result) {
+            gameState.progress.checkins = {
+              ...(gameState.progress.checkins ?? {}),
+              [scenario.id]: result,
+            };
+            if (result.safetyFlag !== "none") {
+              gameState.flags.lastSafetyFlag = result.safetyFlag;
+            }
+          }
+          void startScenario(scenario, pendingPlayMode);
+        },
+        goToHub,
+      );
+      break;
+    }
 
     case "game":
       renderGame();

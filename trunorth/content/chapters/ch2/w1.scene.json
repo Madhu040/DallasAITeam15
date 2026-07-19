@@ -52,5 +52,7 @@
   "decisionPoints": [
     "dp_quest_start"
   ],
-  "nextSceneId": "w2"
+  "nextSceneId": "w2",
+  "gridMapId": "singing-bridge",
+  "objects": []
 }

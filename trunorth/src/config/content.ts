@@ -18,7 +18,7 @@ export const contentConfig = {
       name: "Forest of Questions",
       tagline: "Anxiety gets quieter when it feels heard.",
       image: "/assets/zones/forest.png",
-      chapterIds: ["ch2", "ch3"],
+      chapterIds: ["ch2"],
     },
     {
       id: "meadow",

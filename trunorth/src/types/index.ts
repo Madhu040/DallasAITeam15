@@ -82,6 +82,8 @@ export interface SceneCharacter {
   id: string;
   position: [number, number];
   expression?: string;
+  /** Collision footprint [w, h] px override — e.g. an NPC wide enough to block the bridge. */
+  solidSize?: [number, number];
 }
 
 export interface SceneTrigger {
@@ -99,6 +101,44 @@ export interface SceneCollectible {
   gate?: string;
 }
 
+/**
+ * What happens when the player interacts with a stage object.
+ * Extensible discriminated union — add new kinds here, then handle them in the
+ * exhaustive switch in `main.ts` (`onStageObject`).
+ */
+export type StageObjectInteraction =
+  | { kind: "openDialog"; dialogId: string }
+  | { kind: "finish"; mode: "advance" | "complete"; targetSceneId?: string };
+
+/** An interactable entity placed on a stage at a grid cell. */
+export interface StageObject {
+  id: string;
+  /** Grid cell [col, row] in the 100×100 level grid; world pos = cell center. */
+  cell: [number, number];
+  /** Sprite key into `OBJECT_SPRITES` (`src/content/stageObjects.ts`). */
+  assetRef: string;
+  label?: string;
+  /** Proximity hint text; defaults to "Press E to interact". */
+  hint?: string;
+  interaction: StageObjectInteraction;
+}
+
+export interface DialogPage {
+  text: string;
+  /** Overrides the dialog-level speaker for this page. */
+  speaker?: string;
+}
+
+/** Authored dialog shown by `openDialog` objects (`content/chapters/<ch>/dlg_*.json`). */
+export interface DialogRecord {
+  id: string;
+  chapterId: string;
+  speaker?: string;
+  /** Optional portrait rendered via `renderFullBodyCharacter`. */
+  speakerAssetRef?: string;
+  pages: DialogPage[];
+}
+
 export interface Scene {
   id: string;
   chapterId: string;
@@ -111,6 +151,25 @@ export interface Scene {
   collectibles: SceneCollectible[];
   decisionPoints: string[];
   nextSceneId?: string;
+  /** Grid level id (`src/content/gridLevels.ts`) — replaces the image background. */
+  gridMapId?: string;
+  /** Interactable stage objects placed on the level grid. */
+  objects?: StageObject[];
+}
+
+export type CheckinPlacement = "bright" | "steady" | "gentle";
+
+/** Result of the pre-level check-in (`src/counselor/checkin.ts`). Answer text is never stored. */
+export interface CheckinRecord {
+  chapterId: string;
+  at: string;
+  answers: { questionId: string; points: number }[];
+  totalPoints: number;
+  maxPoints: number;
+  /** 0–10 placement point shown on the compass scale. */
+  startingPoint: number;
+  placement: CheckinPlacement;
+  safetyFlag: SafetyFlag;
 }
 
 export interface GameEvent {
@@ -140,6 +199,8 @@ export interface GameState {
     chaptersCompleted: string[];
     browniePoints: number;
     kindnessSparksFound: Record<string, string[]>;
+    /** Latest pre-level check-in per chapter id. */
+    checkins?: Record<string, CheckinRecord>;
   };
   meters: Record<SkillId, { fill: number; level: number }>;
   companion: { level: 1 | 2 | 3; appearanceRef: string };

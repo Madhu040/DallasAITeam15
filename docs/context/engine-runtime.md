@@ -9,10 +9,14 @@
 1. Landing (guest play, together, demo, parent auth)
 2. Trust screen → onboarding (companion archetype + name, avatar)
 3. Scenario hub (`SCENARIOS`)
-4. `startScenario` builds store + companion client, constructs `SceneEngine`,
+4. Pre-level check-in (`renderCheckin` + `src/counselor/checkin.ts`): 3 open-ended
+   questions (tap an option or type; typed answers safety-filtered + keyword-scored)
+   → 0–10 starting point + bright/steady/gentle placement stored in
+   `progress.checkins[chapterId]`; skippable
+5. `startScenario` builds store + companion client, constructs `SceneEngine`,
    `loadScene(startSceneId)`
-5. On chapter-complete decision with strong band → celebration → parent gate →
-   journey reflection
+6. On chapter-complete decision with strong band → celebration → parent gate →
+   journey reflection (mentions the check-in baseline when one was recorded)
 
 Demo mode: `?demo=1` or `VITE_DEMO_MODE=true` → `DemoProgressStore` +
 `DemoCompanionClient` (zero network).
@@ -22,9 +26,11 @@ Demo mode: `?demo=1` or `VITE_DEMO_MODE=true` → `DemoProgressStore` +
 `loading` → `exploring` → (`encounter`) → `decision` → `awaitingCompanion` →
 `consequence` → (`transitioning` | celebration) | repair back to `decision`.
 
-- Exploring: narration + clickable `triggers` on the scene.
+- Exploring: clickable `triggers` on the scene. (`scene.narration` is no longer
+  displayed — the bottom narration bar was removed 2026-07-18; story text is carried
+  by stage-object dialogs.)
 - Decision: choice / typed overlay from `GameView`.
-- Narration-only scenes (no DPs, has `nextSceneId`) auto-advance after ~2.2s.
+- Narration-only scenes (no DPs, has `nextSceneId`) still auto-advance after ~2.2s.
 
 ## Exploration movement
 
@@ -54,5 +60,8 @@ contextual line (e.g. Singing Bridge “go back” keeps Wize’s agency invite)
 
 ## Level 1 path (golden)
 
-`GOLDEN_PATH`: w1 → w2 → w3 → w4 → w5 → w6  
-Finale decision: `dp_crossing` → Courage Feather celebration.
+`GOLDEN_PATH`: w1 → w2 → w3 → w4 → w5 → w6 → w7  
+No finale decision for ch2: `dp_crossing` (strong) advances to w7, where Flicker steps
+aside and the player physically walks the bridge to the ✅ finish/complete stage object
+→ Courage Feather celebration. (ch1 still completes via `dp_ask_grownup` —
+`CHAPTER_COMPLETE_DECISION`.)

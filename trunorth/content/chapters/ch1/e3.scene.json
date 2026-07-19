@@ -4,6 +4,7 @@
   "order": 3,
   "movementTier": "A",
   "background": "bg_meadow",
+  "gridMapId": "everbright-meadow",
   "narration": "A trusted grown-up walks through the meadow. Asking for help is brave too.",
   "characters": [
     { "assetRef": "char_grownup", "id": "grownup", "position": [1180, 760], "expression": "calm" },
@@ -15,5 +16,15 @@
     { "id": "grownup_trigger", "bounds": [1080, 620, 200, 200], "action": "startDecision", "target": "dp_ask_grownup" }
   ],
   "collectibles": [],
+  "objects": [
+    {
+      "id": "obj_meadow_arch",
+      "cell": [42, 7],
+      "assetRef": "arch",
+      "label": "Celebration Arch",
+      "hint": "Press E to finish the adventure",
+      "interaction": { "kind": "finish", "mode": "complete" }
+    }
+  ],
   "decisionPoints": ["dp_ask_grownup"]
 }

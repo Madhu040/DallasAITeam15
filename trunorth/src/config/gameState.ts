@@ -18,7 +18,7 @@ export function createInitialGameState(demoMode = false): GameState {
     },
     progress: {
       currentSceneId: defaults.startSceneId,
-      chaptersUnlocked: ["ch1", "ch2", "ch3"],
+      chaptersUnlocked: ["ch1", "ch2"],
       chaptersCompleted: [],
       browniePoints: 0,
       kindnessSparksFound: {},

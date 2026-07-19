@@ -50,5 +50,7 @@
   "collectibles": [],
   "decisionPoints": [
     "dp_crossing"
-  ]
+  ],
+  "gridMapId": "singing-bridge",
+  "objects": []
 }
