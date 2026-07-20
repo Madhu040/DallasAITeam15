@@ -25,7 +25,10 @@ export type SfxKey =
   | "celebration";
 
 const SFX_FILES: Record<SfxKey, string> = {
-  footstep: "/audio/sfx/footstep.mp3",
+  // .wav, not .mp3 — see public/audio/README.md. The delivered clip's transient landed
+  // after FOOTSTEP_INTERVAL_S, so every retrigger cut it off before it was ever audible;
+  // re-trimmed to fit inside the window. No MP3 encoder was available to re-export it.
+  footstep: "/audio/sfx/footstep.wav",
   discovery: "/audio/sfx/discovery.mp3",
   spark_pickup: "/audio/sfx/spark-pickup.mp3",
   decision_strong: "/audio/sfx/decision-strong.mp3",
@@ -33,7 +36,9 @@ const SFX_FILES: Record<SfxKey, string> = {
   celebration: "/audio/sfx/celebration.mp3",
 };
 
-const AMBIENCE_FILE = "/audio/ambience/exploring-bed.mp3";
+// .wav — the delivered clip didn't loop cleanly (its start/end weren't near-silent, so the
+// seam clicked every ~2s); a 150ms fade in/out was applied. See public/audio/README.md.
+const AMBIENCE_FILE = "/audio/ambience/exploring-bed.wav";
 
 const ENABLED_KEY = "trunorth_sfx_enabled";
 
