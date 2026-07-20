@@ -153,3 +153,39 @@ export const MULTI_TAP_REQUIRED: Record<string, number> = {
   dp_breathe: 5,
   dp_crossing: 4,
 };
+
+/**
+ * The diegetic stepping-stone path (spec §7.7): the ordered *main* scenes of each
+ * chapter, one stone per scene. This is the in-world "where am I in the story" trail —
+ * Start ➔ Scene 1 ➔ … ➔ Chapter Complete — rendered as stones the child walks, not a
+ * HUD bar. Branch/detour scenes (ch1's e2a/e2b/e2c off the e2 decision) deliberately
+ * fold onto their parent stone via `PATH_BRANCH_PARENT` so a side-quest doesn't read as
+ * "a new stone appeared" — the child is still standing on the same beat of the journey.
+ */
+export const CHAPTER_PATHS: Record<string, string[]> = {
+  ch1: ["e1", "e2", "e3"],
+  ch2: ["w1", "w2", "w3"],
+  ch3: ["w4", "w5"],
+  ch4: ["w6", "w7"],
+};
+
+/** Detour scenes that light their parent stone rather than adding one. */
+const PATH_BRANCH_PARENT: Record<string, string> = {
+  e2a: "e2",
+  e2b: "e2",
+  e2c: "e2",
+};
+
+export function chapterPath(chapterId: string): string[] {
+  return CHAPTER_PATHS[chapterId] ?? [];
+}
+
+/**
+ * Which stone the child is standing on, as a 0-based index into `chapterPath`.
+ * Returns -1 if the scene isn't on the chapter's main path (e.g. an unmapped scene),
+ * so callers can choose to light nothing rather than guess.
+ */
+export function pathIndexForScene(chapterId: string, sceneId: string): number {
+  const stone = PATH_BRANCH_PARENT[sceneId] ?? sceneId;
+  return chapterPath(chapterId).indexOf(stone);
+}

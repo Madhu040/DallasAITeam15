@@ -49,7 +49,7 @@ structures Ch.2 as 8–10 and Ch.3 as 11–15. Tracked as an open team question,
 | Authoring format: JSON under `/content`, one dir per chapter | §6.2 | ✅ | |
 | JSON **Schema** gate in CI | §6.2 | 🟨 | `validate-content` is structural only; no Ajv schema pack |
 | `emotionalResidue` — characters remember earlier treatment | §6.1b | ⬜ | `GameState.emotionalResidue` + `ResidueLevel` shape exist, **no behavior wired** |
-| Diegetic stepping-stone progress path | §7.7 | ⬜ | Grid worlds exist; no in-world progress trail |
+| Diegetic stepping-stone progress path | §7.7 | ✅ | Shipped 2026-07-19 — `src/render/progressPath.ts`: one connected SVG trail in the `world-layer` (camera carries it with the ground), a stone per main scene (`CHAPTER_PATHS`; ch1 e2a/b/c detours fold onto the e2 stone), current stone glows + breathes, road ahead faint/dashed, not a HUD bar. Ambient life shipped alongside (`src/render/ambientLife.ts`) — light motes / dappled sun / grass-sway / bridge water glints, calm-first §17A.4. Both `aria-hidden`, freeze under reduced motion. `tests/unit/progressPath.test.ts` (4) |
 
 ## 2. SEL framework & scoring (spec §7–8)
 

@@ -8,6 +8,8 @@ import { zoneFromBackground, zoneForChapter } from "../content/zones.js";
 import { isGridDebug, resolveGridLevel } from "../content/gridLevels.js";
 import { visibleSparks } from "../content/sparks.js";
 import { renderGridBackground } from "../render/gridBackground.js";
+import { renderAmbientLife } from "../render/ambientLife.js";
+import { renderProgressPath } from "../render/progressPath.js";
 import { backgroundImageUrl, characterImageUrl, objectImageUrl } from "../content/assetManifest.js";
 import { celebrationFor } from "../config/content.js";
 import { isSpeechSupported, isVoiceEnabled, setVoiceEnabled, speakLine, stopSpeaking } from "../audio/speech.js";
@@ -240,6 +242,13 @@ export function renderGameView(
       bg.style.backgroundImage = `url(${zoneMeta.image})`;
       world.appendChild(bg);
     }
+
+    // Ambient life + the diegetic stepping-stone path (spec §7.7) go into the world layer
+    // *before* the characters, so the camera carries them with the ground and they tuck
+    // behind everyone. Both are decorative (aria-hidden, pointer-events:none) and freeze
+    // under prefers-reduced-motion.
+    renderAmbientLife(world, zoneMeta.id);
+    renderProgressPath(world, scene.chapterId, scene.id);
 
     const sign = document.createElement("div");
     sign.className = "zone-sign";

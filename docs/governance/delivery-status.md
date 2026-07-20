@@ -21,9 +21,13 @@
 > footsteps, discovery/spark chimes, strong/poor decision stings, celebration fanfare, and a
 > calm-first ambient bed all wired to real events behind a new mute toggle; **no CC0 audio
 > files sourced yet** (`public/audio/README.md` has exact names + sources) — that's the
-> owner's next art-adjacent task, same drop-in pattern as the PNGs; **(4) ambient life +
-> diegetic path (§7.7)** ← now next, (5) verify CI actually runs on GitHub + close the human
-> Phase-4 items (screen-reader pass, backup video, scope freeze).
+> owner's next art-adjacent task, same drop-in pattern as the PNGs; ✅ **(4) diegetic
+> stepping-stone path + ambient life done (§7.7)** — an in-world SVG trail (glowing "here"
+> stone + worn path, not a HUD bar; `src/render/progressPath.ts`) plus barely-there ambient
+> motion tuned to the actual overhead art (light motes / dappled sun, not sky-clouds;
+> `src/render/ambientLife.ts`), both frozen under reduced motion; **(5) verify CI actually
+> runs on GitHub** ← now next, + close the human Phase-4 items (screen-reader pass, backup
+> video, scope freeze).
 
 **Legend:** ✅ met · 🟨 partial · ⬜ not met · 🔒 blocked on a non-engineering sign-off
 
