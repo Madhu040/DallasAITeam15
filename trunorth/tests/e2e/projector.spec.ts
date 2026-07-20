@@ -23,14 +23,18 @@ import { test, expect, type Page } from "@playwright/test";
  *    is still missing is the explicit letterbox treatment — the leftover space is page
  *    background, not styled `.letterbox-bar` per Consolidated §6.1.
  *
- * 3. **Measured gap this suite surfaced (recorded, not asserted as a failure):** the
- *    decision overlay is a FIXED-SIZE DOM panel — the choice button measures 452×64px and
- *    16px text at 1024×768, 1366×768 *and* 1920×1080 alike. It does not scale with the
- *    stage the way characters/HUD do. It sits exactly on the §17A.4 64px floor at every
- *    resolution, so it passes — but on a large venue projector the most important surface
- *    in the demo is proportionally the *smallest* it ever gets, which cuts against §13A.4
- *    "readable from 50 feet". Tracked as a gap in `product.md` §5; the floor assertions
- *    below will fail immediately if it ever shrinks further.
+ * 3. **Fixed 2026-07-20 — the decision overlay now scales with the stage.** This suite is
+ *    what caught it: the choice button measured the identical 452×64px / 16px text at
+ *    1024×768, 1366×768 *and* 1920×1080 alike, because `.choice-panel`/`.choice-btn` were
+ *    sized in fixed px while everything else on stage uses `--px`. It sat exactly on the
+ *    §17A.4 64px floor at every resolution, so nothing failed — but on a large venue
+ *    projector the single surface the audience is watching was proportionally the
+ *    *smallest* thing on screen, cutting against §13A.4 "readable from 50 feet". Now
+ *    `clamp(floor, calc(N * var(--px)), ceiling)` throughout (`global.css`), same pattern
+ *    characters/HUD already used — the floor assertions below still guard the accessibility
+ *    minimum at any size, and the "genuinely scales" test after the per-mode loop proves
+ *    the button is now measurably bigger at 1920×1080 than at 1024×768, which is the part a
+ *    floor-only check can't tell apart from a regression back to fixed px.
  */
 
 /** The resolutions Consolidated §6.1 names, plus the 4:3 case §13A.6 warns about. */
@@ -46,6 +50,14 @@ const PROJECTOR_MODES = [
  * is definitely false. The real check is a human standing at the back of the room.
  */
 const MIN_LEGIBLE_PX = 12;
+
+/**
+ * Choice-button measurements from the per-mode loop below, keyed by mode name — populated
+ * as each resolution runs, read by the "genuinely scales" test afterward. `workers: 1` +
+ * `fullyParallel: false` (playwright.config.ts) make this safe: the whole file runs
+ * sequentially in one process, so module state survives between `test()` blocks.
+ */
+const measuredChoiceButtons: Record<string, { width: number; height: number; fontPx: number }> = {};
 
 async function clickText(page: Page, pattern: RegExp, timeout = 10_000): Promise<void> {
   const target = page.getByRole("button", { name: pattern }).first();
@@ -178,8 +190,34 @@ test.describe("Projector resolutions (spec §13A.6, §13A.8, Consolidated §6.1/
           { message: `choice hit target below §17A.4's 64px floor at ${mode.name}`, timeout: 5_000 },
         )
         .toBeGreaterThanOrEqual(64);
+
+      measuredChoiceButtons[mode.name] = { width: choiceBox!.width, height: choiceBox!.height, fontPx };
     });
   }
+
+  test("the decision overlay genuinely scales with the stage, not just floors correctly", async () => {
+    // The floor assertions above (≥12px legible, ≥64px hit target) pass identically whether
+    // the button scales with the stage or is fixed-px at exactly the floor value — that
+    // ambiguity is exactly what shipped as the original defect. This is the assertion that
+    // tells the two apart: the button must be measurably *bigger* at 1920×1080 than at
+    // 1024×768, proving it actually tracks `--px` rather than sitting on a hardcoded floor.
+    const small = measuredChoiceButtons["1024×768 (4:3 projector)"];
+    const large = measuredChoiceButtons["1920×1080 (16:9 venue standard)"];
+    expect(small, "1024×768 mode did not run first").toBeDefined();
+    expect(large, "1920×1080 mode did not run first").toBeDefined();
+
+    expect(
+      large.width,
+      `choice button width ${large.width}px at 1920×1080 is not meaningfully larger than ` +
+        `${small.width}px at 1024×768 — looks fixed-px again, not scaling with --px`,
+    ).toBeGreaterThan(small.width * 1.3);
+
+    expect(
+      large.fontPx,
+      `choice text ${large.fontPx}px at 1920×1080 is not larger than ${small.fontPx}px at ` +
+        `1024×768 — text is not scaling with the stage`,
+    ).toBeGreaterThan(small.fontPx);
+  });
 
   test("initial showcase load stays inside the §13A.5 budget", async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });

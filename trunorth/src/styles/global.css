@@ -49,6 +49,21 @@
   --font-child: "Nunito", system-ui, sans-serif;
   --font-parent: "Inter", system-ui, sans-serif;
   --hit-target: 64px;
+  /*
+   * A `--px`-equivalent for DOM overlaid at the app root rather than nested inside
+   * `.game-viewport`. `--px` (below) is `cqw`-based, and `cqw` only resolves on actual
+   * DOM *descendants* of the element with `container-type: size` — but every overlay
+   * (decision, dialog, celebration, parent gate…) is mounted as a *sibling* of
+   * `.game-viewport`, appended straight to the app root by `container.appendChild(overlay)`
+   * in GameView.ts. `var(--px)` silently fails to resolve there (an invalid `calc()`
+   * drops the whole declaration), which is exactly how the original projector-scaling bug
+   * shipped invisibly. This reproduces `.game-viewport`'s own sizing formula
+   * (`min(100vw, 100vh * 16/9)`, its rendered width in px) directly in viewport units, so
+   * it's mathematically identical to `--px` at the same screen size — not an approximation
+   * — and works from anywhere in the DOM since `:root` custom properties always inherit,
+   * with no container-query scoping required.
+   */
+  --overlay-px: calc(min(100vw, 100vh * 16 / 9) / 1920);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -727,17 +742,32 @@ body {
   padding: 20px;
 }
 
+/*
+ * The decision overlay — panel, prompt, and choices — used to be sized in fixed px while
+ * everything else on stage (characters, HUD) scales with `--px`. A projector e2e audit
+ * (2026-07-19) caught it: the choice button measured the identical 452×64px / 16px text at
+ * 1024×768, 1366×768 *and* 1920×1080. It sat exactly on the §17A.4 64px/16px floors
+ * everywhere, so nothing *failed* — but on a large venue projector, the single surface the
+ * audience is actually watching was proportionally the smallest thing on screen, cutting
+ * against §13A.4 "readable from 50 feet". Every `clamp()` below has a floor pinned to the
+ * real spec minimum (never regress below it, at any screen size) and a design-reference
+ * value at `--px` matching (or, for the youngest-band text sizes, slightly exceeding —
+ * Master Spec §21/§17B.5 recommends ≥20–24px dialogue text for the Ch.1 (5–7) band, above
+ * the flat 16px floor) what shipped before, so the *reference* look at 1920×1080 is
+ * unchanged; the only new behaviour is that it now grows past that on a bigger stage,
+ * exactly the way a character or HUD meter already did.
+ */
 .choice-panel {
   background: var(--text-light);
   color: var(--text-dark);
   border-radius: 20px;
-  padding: 24px;
-  max-width: 500px;
+  padding: clamp(18px, calc(24 * var(--overlay-px)), 32px);
+  max-width: clamp(320px, calc(500 * var(--overlay-px)), 640px);
   width: 100%;
 }
 
 .choice-panel h2 {
-  font-size: 20px;
+  font-size: clamp(18px, calc(24 * var(--overlay-px)), 30px);
   margin-bottom: 16px;
   line-height: 1.4;
 }
@@ -745,14 +775,15 @@ body {
 .choice-btn {
   display: block;
   width: 100%;
-  min-height: var(--hit-target);
-  padding: 14px 20px;
+  min-height: clamp(var(--hit-target), calc(72 * var(--overlay-px)), 96px);
+  padding: clamp(12px, calc(16 * var(--overlay-px)), 22px)
+    clamp(16px, calc(22 * var(--overlay-px)), 28px);
   margin-bottom: 10px;
   border: 2px solid #ddd;
   border-radius: 14px;
   background: white;
   font-family: var(--font-child);
-  font-size: 16px;
+  font-size: clamp(16px, calc(20 * var(--overlay-px)), 26px);
   cursor: pointer;
   text-align: left;
   transition: border-color 0.2s, background 0.2s;
@@ -770,23 +801,25 @@ body {
 
 .typed-input {
   width: 100%;
-  padding: 12px;
+  padding: clamp(10px, calc(12 * var(--overlay-px)), 16px);
   border: 2px solid #ddd;
   border-radius: 10px;
   font-family: var(--font-child);
-  font-size: 16px;
+  font-size: clamp(16px, calc(18 * var(--overlay-px)), 22px);
   margin-bottom: 10px;
 }
 
 .typed-submit {
   width: 100%;
-  min-height: 48px;
+  /* Was a fixed 48px — below the §17A.4 64px floor for the Ch.1 band on its own, quite
+     apart from the projector-scaling fix above. */
+  min-height: clamp(var(--hit-target), calc(64 * var(--overlay-px)), 88px);
   background: var(--accent-deep);
   color: white;
   border: none;
   border-radius: 12px;
   font-family: var(--font-child);
-  font-size: 16px;
+  font-size: clamp(16px, calc(18 * var(--overlay-px)), 22px);
   font-weight: 700;
   cursor: pointer;
 }
@@ -1504,10 +1537,11 @@ body {
   }
 }
 
-@media (max-width: 600px) {
-  .choice-panel { padding: 16px; }
-  .choice-btn { font-size: 14px; min-height: 48px; }
-}
+/* A narrow-viewport override for .choice-panel/.choice-btn used to live here, forcing
+   14px text and a 48px hit target — both below the §17A.4 floor (16px / 64px) the base
+   rules now enforce via clamp(). Removed: the clamp()s already shrink correctly on a
+   narrow `--px` container without ever crossing the floor, so this was redundant at best
+   and a silent accessibility regression at worst. */
 
 /* —— Play Together invite flow —— */
 .together-flow .together-card {
