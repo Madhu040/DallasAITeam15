@@ -75,6 +75,69 @@
         880
       ],
       "kind": "kindness_spark"
+    },
+    {
+      "id": "crystal_e1_1",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        67,
+        157
+      ]
+    },
+    {
+      "id": "crystal_e1_2",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        355,
+        427
+      ]
+    },
+    {
+      "id": "crystal_e1_3",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        566,
+        999
+      ]
+    },
+    {
+      "id": "crystal_e1_4",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        1814,
+        373
+      ]
+    },
+    {
+      "id": "crystal_e1_5",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        797,
+        934
+      ]
+    },
+    {
+      "id": "crystal_e1_6",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        624,
+        340
+      ]
+    },
+    {
+      "id": "crystal_e1_7",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        1238,
+        297
+      ]
     }
   ],
   "objects": [

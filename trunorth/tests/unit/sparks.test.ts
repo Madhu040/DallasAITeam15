@@ -96,6 +96,51 @@ describe("Kindness Sparks — there is something to DO before the decision", () 
   });
 });
 
+/**
+ * Spec §7.1 — "brownie points scattered for immediate, low-stakes fun". Crystals make
+ * *moving through the world* rewarding, which is a different job from the §7.6 sparks.
+ * They must stay out of the spark tally: inflating the "found 4 of 6" denominator with
+ * dozens of freebies would destroy the "find what I missed" signal that drives replay.
+ */
+describe("Crystals — scattered pickups that never pollute the spark tally", () => {
+  it("scatters crystals to walk over in every scene", () => {
+    for (const scene of allScenes) {
+      const crystals = scene.collectibles.filter((c) => c.kind === "crystal");
+      expect(crystals.length, `${scene.id} should have crystals to collect`).toBeGreaterThan(0);
+    }
+  });
+
+  it("never gates a crystal — they are free fun on the way", () => {
+    for (const scene of allScenes) {
+      for (const c of scene.collectibles.filter((x) => x.kind === "crystal")) {
+        expect(c.gate, `${scene.id}/${c.id} must not be gated`).toBeUndefined();
+      }
+    }
+  });
+
+  it("excludes crystals from the chapter spark total", () => {
+    for (const chapterId of ["ch1", "ch2"]) {
+      const scenes = allScenes.filter((s) => s.chapterId === chapterId);
+      const sparkCount = scenes.reduce(
+        (n, s) => n + s.collectibles.filter((c) => c.kind === "kindness_spark").length,
+        0,
+      );
+      const allCount = scenes.reduce((n, s) => n + s.collectibles.length, 0);
+      expect(chapterSparkTotal(allScenes, chapterId)).toBe(sparkCount);
+      // Guard the point of the test: there really are crystals inflating the raw count.
+      expect(allCount).toBeGreaterThan(sparkCount);
+    }
+  });
+
+  it("does not count a collected crystal as a found spark", () => {
+    const state = stateWith();
+    const e1 = allScenes.find((s) => s.id === "e1")!;
+    const crystal = e1.collectibles.find((c) => c.kind === "crystal")!;
+    state.progress.kindnessSparksFound = { e1: [crystal.id] };
+    expect(chapterSparksFound(allScenes, "ch1", state)).toBe(0);
+  });
+});
+
 describe("Celebration copy matches the chapter the child actually played", () => {
   it("gives Chapter 1 its own copy, not Chapter 2's", () => {
     const ch1 = celebrationFor("ch1");

@@ -66,6 +66,24 @@ function resolveCameraZoom(): number {
  */
 const AVATAR_CENTER_OFFSET_Y = 55;
 
+/**
+ * Minimum feet Y, so a sprite's head is never cut off by the top of the frame.
+ *
+ * Sprites are feet-anchored and ~110–120 world px tall (`--char-size`; `--px` maps 1 world
+ * px to 1 sprite px), so a character whose feet sit less than a sprite-height from the top
+ * of the world renders with its head above `y = 0`. The camera cannot compensate: it is
+ * already clamped to the world's top edge (see `applyCamera`), and translating further
+ * would reveal empty space above the background. So the fix belongs here — keep the
+ * avatar's feet below the line. 150 leaves headroom for the tallest sprite (worry_cloud,
+ * 120) plus margin.
+ */
+export const MIN_FEET_Y = 150;
+
+/** Clamp a feet position so the sprite above it stays fully inside the frame. */
+export function keepSpriteOnScreen(p: { x: number; y: number }): { x: number; y: number } {
+  return { x: p.x, y: Math.max(MIN_FEET_Y, p.y) };
+}
+
 export class WorldRuntime {
   private input = new InputController();
   private raf = 0;
@@ -279,16 +297,12 @@ export class WorldRuntime {
     if (this.grid) {
       const center = { x: this.avatar.x, y: this.avatar.y - AVATAR_CENTER_OFFSET_Y };
       const moved = moveWithGridCollision(center, delta, this.grid.map, solidBoxes);
-      this.avatar = { x: moved.x, y: moved.y + AVATAR_CENTER_OFFSET_Y };
+      this.avatar = keepSpriteOnScreen({ x: moved.x, y: moved.y + AVATAR_CENTER_OFFSET_Y });
       return;
     }
 
-    this.avatar = moveWithCollision(
-      this.avatar,
-      delta,
-      footprint,
-      solidBoxes,
-      this.walkBounds,
+    this.avatar = keepSpriteOnScreen(
+      moveWithCollision(this.avatar, delta, footprint, solidBoxes, this.walkBounds),
     );
   }
 

@@ -76,6 +76,69 @@
       ],
       "kind": "kindness_spark",
       "gate": "dp_share_flower"
+    },
+    {
+      "id": "crystal_e2b_1",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        67,
+        157
+      ]
+    },
+    {
+      "id": "crystal_e2b_2",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        624,
+        286
+      ]
+    },
+    {
+      "id": "crystal_e2b_3",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        221,
+        470
+      ]
+    },
+    {
+      "id": "crystal_e2b_4",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        1814,
+        697
+      ]
+    },
+    {
+      "id": "crystal_e2b_5",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        1181,
+        988
+      ]
+    },
+    {
+      "id": "crystal_e2b_6",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        1354,
+        221
+      ]
+    },
+    {
+      "id": "crystal_e2b_7",
+      "assetRef": "crystal",
+      "kind": "crystal",
+      "position": [
+        1814,
+        362
+      ]
     }
   ],
   "decisionPoints": [

@@ -9,11 +9,12 @@
  * `<img>` fails to load — so the offline demo (`?demo=1`) never breaks on a missing or
  * broken file. That fallback is the whole point of routing art through one manifest.
  *
+ * Avatar art is **per skin tone**: the child picks 1 of 5 tones at onboarding
+ * (`profile.avatar.skinTone` = `tone_1…tone_5`), so a single fixed PNG would erase that
+ * choice. `AVATAR_FILES` maps each tone to its own PNG. All nine characters now render as
+ * real art; only an unmapped tone or a failed load falls back to the SVG.
+ *
  * Deliberate omissions (kept on their placeholders on purpose):
- *   • `avatar` — the protagonist sprite is redrawn per the child's chosen skin tone
- *     (`profile.avatar.skinTone`, a real 5-way onboarding choice). A single fixed PNG
- *     (`nova.png`) would erase that choice for every child, so the avatar stays on the
- *     tone-aware SVG until per-tone art (`nova-tone1…5`) exists.
  *   • `singing-bridge`, `pond` — no art generated yet.
  *
  * All other characters are tight, background-removed cutouts (verified RGBA with real
@@ -81,13 +82,32 @@ const BACKGROUND_FILES: Record<string, string> = {
   // singing-bridge intentionally absent — no art yet; falls back to the canvas grid.
 };
 
+/**
+ * Skin tone → Explorer PNG. The avatar is the one character with *per-tone* art, because
+ * the child picks one of five tones at onboarding (`profile.avatar.skinTone`) and a single
+ * fixed PNG would erase that choice for every child. An unknown tone falls through to
+ * `null` (the tone-aware SVG), as does a tone whose file fails to load.
+ */
+const AVATAR_FILES: Record<string, string> = {
+  tone_1: "characters/nova-light-fair.png",
+  tone_2: "characters/nova-light-tan.png",
+  tone_3: "characters/nova-warm-medium.png",
+  tone_4: "characters/nova-warm-medium-brown.png",
+  tone_5: "characters/nova-deep-brown.png",
+};
+
 /** Full-body character art for a scene character, or `null` to use the SVG placeholder. */
 export function characterImageUrl(
   id: string,
   assetRef?: string,
   companionArchetype?: string,
+  skinTone?: string,
 ): string | null {
   const key = resolveCharacterKey(id, assetRef, companionArchetype);
+  if (key === "avatar") {
+    const file = skinTone ? AVATAR_FILES[skinTone] : undefined;
+    return file ? assetPath(file) : null;
+  }
   const file = CHARACTER_FILES[key];
   return file ? assetPath(file) : null;
 }

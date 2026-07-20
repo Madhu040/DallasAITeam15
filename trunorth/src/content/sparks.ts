@@ -31,23 +31,39 @@ export function visibleSparks(scene: Scene, state: GameState): SceneCollectible[
   return scene.collectibles.filter((c) => !c.gate || resolvedStrongly(state, c.gate));
 }
 
+/**
+ * Kindness Sparks vs. crystals — two different jobs, deliberately kept apart.
+ *
+ * A **spark** (`kindness_spark`) is the §7.6 replay mechanic: few, often gated behind a kind
+ * action, and counted in the celebration's "you found 4 of 6" tally.
+ *
+ * A **crystal** (`crystal`) is §7.1's "brownie points scattered for immediate, low-stakes
+ * fun" — plentiful, never gated, strewn along the walking routes so moving through the world
+ * is rewarding in itself. Crystals feed the 💎 counter but are deliberately **excluded from
+ * the spark tally**, because mixing them in would inflate the denominator and destroy the
+ * "find what I missed" signal that makes a second playthrough meaningful.
+ */
+export function isKindnessSpark(c: SceneCollectible): boolean {
+  return c.kind === "kindness_spark";
+}
+
 /** Total sparks discoverable in a chapter — the denominator in "found 4 of 6". */
 export function chapterSparkTotal(scenes: Scene[], chapterId: string): number {
   return scenes
     .filter((s) => s.chapterId === chapterId)
-    .reduce((total, s) => total + s.collectibles.length, 0);
+    .reduce((total, s) => total + s.collectibles.filter(isKindnessSpark).length, 0);
 }
 
-/** How many the child actually found in this chapter. */
+/** How many sparks the child actually found in this chapter (crystals don't count). */
 export function chapterSparksFound(
   scenes: Scene[],
   chapterId: string,
   state: GameState,
 ): number {
-  const sceneIds = new Set(scenes.filter((s) => s.chapterId === chapterId).map((s) => s.id));
   let found = 0;
-  for (const [sceneId, ids] of Object.entries(state.progress.kindnessSparksFound)) {
-    if (sceneIds.has(sceneId)) found += ids.length;
+  for (const scene of scenes.filter((s) => s.chapterId === chapterId)) {
+    const collected = new Set(state.progress.kindnessSparksFound[scene.id] ?? []);
+    found += scene.collectibles.filter((c) => isKindnessSpark(c) && collected.has(c.id)).length;
   }
   return found;
 }

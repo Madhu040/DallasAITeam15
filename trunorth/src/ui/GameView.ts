@@ -279,7 +279,12 @@ export function renderGameView(
       });
       // Use the AI PNG when the manifest has one; if it fails to load, restore the SVG so
       // the character never vanishes (spec §10.3 fallback).
-      const charUrl = characterImageUrl(ch.id, ch.assetRef, state.profile.companionArchetype);
+      const charUrl = characterImageUrl(
+        ch.id,
+        ch.assetRef,
+        state.profile.companionArchetype,
+        state.profile.avatar.skinTone,
+      );
       if (charUrl) {
         const img = document.createElement("img");
         img.className = "sprite-png";
@@ -338,13 +343,22 @@ export function renderGameView(
     // "find what I missed" rather than a replay of the same lesson.
     for (const item of visibleSparks(scene, state)) {
       const alreadyFound = (state.progress.kindnessSparksFound[scene.id] ?? []).includes(item.id);
+      // Crystals (§7.1 scattered fun) read differently from Kindness Sparks (§7.6 replay
+      // mechanic) so the child can tell "a treat on my way" from "something I earned".
+      const isCrystal = item.kind === "crystal";
       const spark = document.createElement("div");
-      spark.className = alreadyFound ? "world-collectible collected" : "world-collectible";
+      spark.className = [
+        "world-collectible",
+        isCrystal ? "crystal" : "spark",
+        alreadyFound ? "collected" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
       spark.dataset.collectibleId = item.id;
       spark.style.left = `${(item.position[0] / 1920) * 100}%`;
       spark.style.top = `${(item.position[1] / 1080) * 100}%`;
-      spark.setAttribute("aria-label", "Kindness spark");
-      spark.textContent = "✨";
+      spark.setAttribute("aria-label", isCrystal ? "Crystal" : "Kindness spark");
+      spark.textContent = isCrystal ? "💎" : "✨";
       world.appendChild(spark);
     }
 
@@ -737,11 +751,27 @@ function renderDialogOverlay(
     if (dialog.speakerAssetRef) {
       const portrait = document.createElement("span");
       portrait.className = "dialog-portrait";
-      portrait.innerHTML = renderFullBodyCharacter({
+      const svg = renderFullBodyCharacter({
         id: "npc",
         assetRef: dialog.speakerAssetRef,
         size: 64,
       });
+      // Use the real AI PNG (e.g. Wize the owl) when the manifest has one, so the pop-up
+      // matches the in-world sprite; fall back to the SVG if it fails to load (spec §10.3).
+      const portraitUrl = characterImageUrl("npc", dialog.speakerAssetRef);
+      if (portraitUrl) {
+        const img = document.createElement("img");
+        img.src = portraitUrl;
+        img.alt = "";
+        img.draggable = false;
+        img.style.cssText = "width:64px;height:64px;object-fit:contain;display:block;";
+        img.onerror = () => {
+          portrait.innerHTML = svg;
+        };
+        portrait.appendChild(img);
+      } else {
+        portrait.innerHTML = svg;
+      }
       header.appendChild(portrait);
     }
     const name = document.createElement("span");
@@ -780,10 +810,10 @@ function renderDialogOverlay(
   overlay.appendChild(panel);
   container.appendChild(overlay);
   nextBtn.focus();
-  speakOverlayOnce(
-    `dialog:${dialog.id}:${pageIndex}`,
-    speaker ? `${speaker} says: ${page.text}` : page.text,
-  );
+  // Speak just the line, in the character's voice — no "Wize says:" narrator prefix, which
+  // reads as robotic instruction rather than a character talking to the child (who the
+  // speaker is is already shown by the portrait + name, and announced via the aria-label).
+  speakOverlayOnce(`dialog:${dialog.id}:${pageIndex}`, page.text);
 }
 
 /** Spoken version of a decision pop-up: the prompt, then each option in order. */

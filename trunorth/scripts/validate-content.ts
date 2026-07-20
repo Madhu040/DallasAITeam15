@@ -10,6 +10,32 @@ const chaptersDir = join(import.meta.dirname, "../content/chapters");
  */
 const OBJECT_CLEARANCE_PX = 150;
 
+/**
+ * Sprites are feet-anchored and ~110–120 world px tall, so a character placed with its feet
+ * nearer than this to the top of the world renders with its head cut off by the frame — and
+ * the camera can't compensate, being already clamped to the world's top edge. Mirrors
+ * `MIN_FEET_Y` in `WorldRuntime` (which clamps the *player*; this guards *authored* content).
+ */
+const MIN_CHARACTER_FEET_Y = 150;
+
+function checkCharacterHeadroom(
+  name: string,
+  data: { characters?: { id?: string; position?: unknown }[] },
+): void {
+  for (const ch of data.characters ?? []) {
+    const pos = ch.position;
+    if (!Array.isArray(pos) || pos.length !== 2) continue;
+    const y = pos[1] as number;
+    if (y < MIN_CHARACTER_FEET_Y) {
+      fail(
+        name,
+        `character "${ch.id}" is at y=${y}, above the ${MIN_CHARACTER_FEET_Y}px line — ` +
+          `its head would be cut off by the top of the frame`,
+      );
+    }
+  }
+}
+
 function checkObjectPlacement(
   name: string,
   data: {
@@ -159,6 +185,7 @@ for (const file of files) {
   } else {
     validateObjects(name, data);
     checkObjectPlacement(name, data);
+    checkCharacterHeadroom(name, data);
   }
   console.log(`✅ ${name}`);
 }

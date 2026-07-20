@@ -1058,6 +1058,19 @@ body {
   animation: none;
 }
 
+/* Crystals (§7.1 scattered fun) sit visually below Kindness Sparks (§7.6 earned): smaller,
+   cooler-toned, a slow bob instead of the spark's pulse — a treat on the way, not a prize. */
+.world-collectible.crystal {
+  font-size: clamp(18px, calc(34 * var(--px)), 34px) !important;
+  filter: drop-shadow(0 0 10px rgba(120, 205, 255, 0.85)) !important;
+  animation: crystal-bob 2.6s ease-in-out infinite;
+}
+
+@keyframes crystal-bob {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%      { transform: translate(-50%, -62%) scale(1.06); }
+}
+
 @keyframes spark-pulse {
   0%, 100% { transform: translate(-50%, -50%) scale(1); }
   50% { transform: translate(-50%, -58%) scale(1.12); }
