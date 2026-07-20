@@ -14,7 +14,29 @@
   "triggers": [
     { "id": "festival_trigger", "bounds": [440, 600, 520, 280], "action": "startDecision", "target": "dp_crossing" }
   ],
-  "collectibles": [],
+  "collectibles": [
+    { "id": "spark_festival", "assetRef": "collectible_spark", "position": [300, 850], "kind": "kindness_spark" },
+    { "id": "spark_crossing_kind", "assetRef": "collectible_spark", "position": [1700, 850], "kind": "kindness_spark", "gate": "dp_crossing" }
+  ],
+  "objects": [
+    {
+      "id": "obj_ready_crown",
+      "cell": [17, 88],
+      "assetRef": "flower_crown",
+      "label": "A festival crown, finished and waiting",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_ready_crown" }
+    },
+    {
+      "id": "obj_festival_bell",
+      "cell": [83, 79],
+      "assetRef": "bell",
+      "label": "The festival bell",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_festival_bell" }
+    }
+  ],
   "decisionPoints": ["dp_crossing"],
-  "nextSceneId": "w7"
+  "nextSceneId": "w7",
+  "goal": "The stage is close now, and Flicker's the loudest I've ever heard them. Let's look around before we climb."
 }

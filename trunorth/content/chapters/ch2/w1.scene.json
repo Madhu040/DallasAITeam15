@@ -15,7 +15,8 @@
     { "id": "quest_trigger", "bounds": [440, 640, 400, 220], "action": "startDecision", "target": "dp_quest_start" }
   ],
   "collectibles": [
-    { "id": "spark_start", "assetRef": "collectible_spark", "position": [280, 840], "kind": "kindness_spark" }
+    { "id": "spark_start", "assetRef": "collectible_spark", "position": [280, 840], "kind": "kindness_spark" },
+    { "id": "spark_quest_kind", "assetRef": "collectible_spark", "position": [1700, 780], "kind": "kindness_spark", "gate": "dp_quest_start" }
   ],
   "objects": [
     {
@@ -24,8 +25,25 @@
       "assetRef": "notice_scroll",
       "hint": "Press E to read",
       "interaction": { "kind": "openDialog", "dialogId": "dlg_star_legend" }
+    },
+    {
+      "id": "obj_paw_prints",
+      "cell": [20, 85],
+      "assetRef": "trail_marker",
+      "label": "Fresh tracks in the moss",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_paw_prints" }
+    },
+    {
+      "id": "obj_rustling_bush",
+      "cell": [86, 73],
+      "assetRef": "bush",
+      "label": "A bush, rustling on its own",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_rustling_bush" }
     }
   ],
   "decisionPoints": ["dp_quest_start"],
-  "nextSceneId": "w2"
+  "nextSceneId": "w2",
+  "goal": "Flicker's already worried, and we haven't even started. Let's look around before we decide anything."
 }

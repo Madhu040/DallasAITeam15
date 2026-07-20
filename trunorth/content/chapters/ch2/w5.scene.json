@@ -15,7 +15,27 @@
     { "id": "purpose_trigger", "bounds": [400, 620, 600, 260], "action": "startDecision", "target": "dp_choose_path" }
   ],
   "collectibles": [
-    { "id": "spark_cave", "assetRef": "collectible_spark", "position": [240, 780], "kind": "kindness_spark" }
+    { "id": "spark_cave", "assetRef": "collectible_spark", "position": [240, 780], "kind": "kindness_spark" },
+    { "id": "spark_choose_path_kind", "assetRef": "collectible_spark", "position": [1700, 850], "kind": "kindness_spark", "gate": "dp_choose_path" }
   ],
-  "decisionPoints": ["dp_choose_path"]
+  "objects": [
+    {
+      "id": "obj_memory_scroll",
+      "cell": [14, 88],
+      "assetRef": "notice_scroll",
+      "label": "A glowing, half-unrolled scroll",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_memory_scroll" }
+    },
+    {
+      "id": "obj_faded_memory_note",
+      "cell": [83, 79],
+      "assetRef": "note",
+      "label": "A faded note",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_faded_memory_note" }
+    }
+  ],
+  "decisionPoints": ["dp_choose_path"],
+  "goal": "These crystals are showing us something. Let's walk through and see what Flicker's been remembering."
 }

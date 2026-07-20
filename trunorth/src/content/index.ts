@@ -28,6 +28,18 @@ import dpAskGrownup from "../../content/chapters/ch1/dp_ask_grownup.json";
 
 import dlgMeadowWelcome from "../../content/chapters/ch1/dlg_meadow_welcome.json";
 import dlgStarLegend from "../../content/chapters/ch2/dlg_star_legend.json";
+import dlgPawPrints from "../../content/chapters/ch2/dlg_paw_prints.json";
+import dlgRustlingBush from "../../content/chapters/ch2/dlg_rustling_bush.json";
+import dlgWindblownHat from "../../content/chapters/ch2/dlg_windblown_hat.json";
+import dlgTornNote from "../../content/chapters/ch2/dlg_torn_note.json";
+import dlgWorryPatch from "../../content/chapters/ch2/dlg_worry_patch.json";
+import dlgGatheringBasket from "../../content/chapters/ch2/dlg_gathering_basket.json";
+import dlgWelcomeBell from "../../content/chapters/ch2/dlg_welcome_bell.json";
+import dlgPetalsOnWind from "../../content/chapters/ch2/dlg_petals_on_wind.json";
+import dlgMemoryScroll from "../../content/chapters/ch2/dlg_memory_scroll.json";
+import dlgFadedMemoryNote from "../../content/chapters/ch2/dlg_faded_memory_note.json";
+import dlgReadyCrown from "../../content/chapters/ch2/dlg_ready_crown.json";
+import dlgFestivalBell from "../../content/chapters/ch2/dlg_festival_bell.json";
 import dlgFlowerCrown from "../../content/chapters/ch1/dlg_flower_crown.json";
 import dlgLonelyBall from "../../content/chapters/ch1/dlg_lonely_ball.json";
 import dlgDeerTracks from "../../content/chapters/ch1/dlg_deer_tracks.json";
@@ -84,6 +96,18 @@ export function getDecisionPoint(id: string): DecisionPoint | undefined {
 export const DIALOGS: Record<string, DialogRecord> = {
   dlg_meadow_welcome: dlgMeadowWelcome as DialogRecord,
   dlg_star_legend: dlgStarLegend as DialogRecord,
+  dlg_paw_prints: dlgPawPrints as DialogRecord,
+  dlg_rustling_bush: dlgRustlingBush as DialogRecord,
+  dlg_windblown_hat: dlgWindblownHat as DialogRecord,
+  dlg_torn_note: dlgTornNote as DialogRecord,
+  dlg_worry_patch: dlgWorryPatch as DialogRecord,
+  dlg_gathering_basket: dlgGatheringBasket as DialogRecord,
+  dlg_welcome_bell: dlgWelcomeBell as DialogRecord,
+  dlg_petals_on_wind: dlgPetalsOnWind as DialogRecord,
+  dlg_memory_scroll: dlgMemoryScroll as DialogRecord,
+  dlg_faded_memory_note: dlgFadedMemoryNote as DialogRecord,
+  dlg_ready_crown: dlgReadyCrown as DialogRecord,
+  dlg_festival_bell: dlgFestivalBell as DialogRecord,
   dlg_flower_crown: dlgFlowerCrown as DialogRecord,
   dlg_lonely_ball: dlgLonelyBall as DialogRecord,
   dlg_deer_tracks: dlgDeerTracks as DialogRecord,

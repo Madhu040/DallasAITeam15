@@ -16,7 +16,27 @@
     { "id": "forest_questions", "bounds": [400, 600, 560, 260], "action": "startDecision", "target": "dp_investigate" }
   ],
   "collectibles": [
-    { "id": "spark_forest", "assetRef": "collectible_spark", "position": [300, 820], "kind": "kindness_spark" }
+    { "id": "spark_forest", "assetRef": "collectible_spark", "position": [300, 820], "kind": "kindness_spark" },
+    { "id": "spark_investigate_kind", "assetRef": "collectible_spark", "position": [1750, 720], "kind": "kindness_spark", "gate": "dp_investigate" }
   ],
-  "decisionPoints": ["dp_investigate"]
+  "objects": [
+    {
+      "id": "obj_windblown_hat",
+      "cell": [11, 88],
+      "assetRef": "dropped_hat",
+      "label": "A hat, blown off mid-run",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_windblown_hat" }
+    },
+    {
+      "id": "obj_torn_note",
+      "cell": [83, 79],
+      "assetRef": "note",
+      "label": "A scrap of paper in the branches",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_torn_note" }
+    }
+  ],
+  "decisionPoints": ["dp_investigate"],
+  "goal": "That worry cloud isn't going anywhere on its own. Let's see what's actually here."
 }

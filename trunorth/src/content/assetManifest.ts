@@ -16,9 +16,11 @@
  *     tone-aware SVG until per-tone art (`nova-tone1…5`) exists.
  *   • `singing-bridge`, `pond` — no art generated yet.
  *
- * All other characters are tight, background-removed cutouts (verified RGBA with
- * transparent corners, portrait bounding boxes) and are mapped below — including the deer,
- * whose earlier opaque-box export was re-cut 2026-07-19.
+ * All other characters are tight, background-removed cutouts (verified RGBA with real
+ * interior transparency, not just transparent corners — a corner-only check would have
+ * missed a solid box behind the subject) and were visually checked against their intended
+ * role. Mapped below, including the deer, whose earlier opaque-box export was re-cut
+ * 2026-07-19.
  *
  * Files live under `public/assets/{characters,backgrounds,objects}/` and are served at
  * `/assets/...`, matching the existing zone-image convention in `config/content.ts`.

@@ -15,7 +15,27 @@
     { "id": "meadow_inspect", "bounds": [360, 620, 640, 240], "action": "startDecision", "target": "dp_fact_sort" }
   ],
   "collectibles": [
-    { "id": "spark_meadow", "assetRef": "collectible_spark", "position": [1100, 800], "kind": "kindness_spark" }
+    { "id": "spark_meadow", "assetRef": "collectible_spark", "position": [1100, 800], "kind": "kindness_spark" },
+    { "id": "spark_fact_sort_kind", "assetRef": "collectible_spark", "position": [1650, 850], "kind": "kindness_spark", "gate": "dp_fact_sort" }
   ],
-  "decisionPoints": ["dp_fact_sort"]
+  "objects": [
+    {
+      "id": "obj_worry_patch",
+      "cell": [11, 85],
+      "assetRef": "flower_patch",
+      "label": "Tiny worry-flowers",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_worry_patch" }
+    },
+    {
+      "id": "obj_gathering_basket",
+      "cell": [80, 85],
+      "assetRef": "basket",
+      "label": "An empty gathering basket",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_gathering_basket" }
+    }
+  ],
+  "decisionPoints": ["dp_fact_sort"],
+  "goal": "These worry-flowers are strange up close. Let's take a proper look before Flicker convinces us to run."
 }

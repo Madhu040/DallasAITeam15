@@ -8,13 +8,18 @@
 > That is this file's only job. Point-in-time — **2026-07-19**, after §22 Phase 4 hardening
 > items 1–5 (red-team, error surface, accessibility, performance budget, projector) **and an
 > owner-directed game-feel arc** (assessment-leak fix, reward juice, Ch.1 explore loop,
-> following camera, **and the art asset manifest — real AI backgrounds/props/characters now
-> render with a live fallback** — local commits `f9d2174`/`d48e317`/`d450ee0`, unpushed).
+> following camera, the art asset manifest, **and Chapter 2 rebuilt with the same
+> explore→discover→decide loop** — local commits `f9d2174`/`d48e317`/`d450ee0`/`c93f1eb`/…,
+> unpushed; the Ch.2 work + a manifest fix are staged but not yet committed).
 > Live gap list + the **NEXT-5 roadmap** remain `product.md` §5 (see the 📍 Current-position
 > block). In short, next 5: ✅ **(1) asset manifest done** — backgrounds, props, and 8/9
-> characters live (avatar stays on the tone-aware SVG); **(2) Ch.2 explore loop** ← now next,
-> (3) sound, (4) ambient life + diegetic path (§7.7), (5) verify CI actually runs on GitHub +
-> close the human Phase-4 items (screen-reader pass, backup video, scope freeze).
+> characters live (avatar stays on the tone-aware SVG by design; `wize.png` briefly depicted
+> a human child instead of the owl the shipped narration describes, was held back, then the
+> owner regenerated it correctly and it's now mapped and live); ✅ **(2) Ch.2 explore loop
+> done** — same goal/discovery/gated-spark treatment as Ch.1; **(3) sound** ← now next, (4)
+> ambient life + diegetic path (§7.7), (5) verify CI actually runs on GitHub + close the
+> human Phase-4 items (screen-reader pass, backup video,
+> scope freeze).
 
 **Legend:** ✅ met · 🟨 partial · ⬜ not met · 🔒 blocked on a non-engineering sign-off
 
@@ -101,7 +106,7 @@ is the §22A.5 manual screen-reader pass.
 | **R02** | COPPA / privacy noncompliance | MVP local-first; EXT legal gate; consent; minimization | ✅ for MVP (local-only, no raw input stored). 🔒 EXT blocked on **ADR-006** + counsel |
 | **R03** | Runtime / platform churn | Pinned versions, ADRs, quarterly review, lockfile | ✅ Vite pinned `8.1.5`, model pinned to a dated ID, lockfile committed, ADRs now exist. ⬜ no quarterly review cadence agreed |
 | **R04** | Demo network failure | Offline demo, preloaded assets, local server, recorded video | 🟨 **Materially improved 2026-07-19** — demo mode is now *proven* offline by CI (hard-blocked-network e2e), and the Google-Fonts CDN dependency that would have degraded typography on a WiFi failure is removed (fonts self-hosted). ⬜ **recorded backup video still does not exist** — rung 4 of the fallback ladder is missing |
-| **R05** | Asset inconsistency / IP uncertainty | Style lock, provenance ledger, regeneration policy | 🟨 **Partly addressed 2026-07-19** — the **`assetRef → file` manifest now exists** (`src/content/assetManifest.ts`, spec §10.3) and real AI art (5 backgrounds, 17 props, 8/9 characters) renders behind a live placeholder fallback. ⬜ Still open under **ADR-005**: no *provenance ledger* (which tool/prompt/licence per asset), no written *style lock* or *regeneration policy* — those are the owner/counsel calls, not the wiring |
+| **R05** | Asset inconsistency / IP uncertainty | Style lock, provenance ledger, regeneration policy | 🟨 **Partly addressed 2026-07-19** — the **`assetRef → file` manifest now exists** (`src/content/assetManifest.ts`, spec §10.3) and real AI art (5 backgrounds, 17 props, 8/9 characters) renders behind a live placeholder fallback. **The manifest's role-check caught a real asset/narrative mismatch mid-session**: an early `wize.png` depicted a human child, not "Wize the owl" that shipped copy describes — held back rather than shipped silently (exactly the kind of drift R05 exists to catch), then the owner regenerated it correctly and it's now live. ⬜ Still open under **ADR-005**: no *provenance ledger* (which tool/prompt/licence per asset), no written *style lock* or *regeneration policy* — those are the owner/counsel calls, not the wiring |
 | **R06** | Branching / content explosion | Bounded bands, repair actions, schema validation, review | ✅ Three bands only, converging routing, `validate-content` in CI. 🟨 no Ajv JSON-Schema pack yet |
 | **R07** | Poor accessibility / keyboard flow | WCAG 2.2 AA, keyboard E2E, manual screen-reader pass | 🟨 **Materially improved 2026-07-19** — axe WCAG 2.2 AA audit **and** a keyboard-only E2E now run in CI, and writing them found and fixed 2 real defects (2.36:1 contrast on the primary CTA; reduced-motion not actually stopping infinite animations). ⬜ **The manual screen-reader pass has still not happened** — it is the §22A.5 deliverable and the mitigation's third leg |
 | **R08** | Performance on Chromebook / projector | Bundle budget, particle caps, viewport tests, low-end profile | 🟨 **Materially improved 2026-07-19** — the bundle budget is now **enforced in CI** (`audit:bundle`, spec §19; 1.38 MB dist / 145.8 kB JS / 44.1 kB gzip, 55% of budget) and viewport tests run at 1024×768 / 1366×768 / 1920×1080 with a 3s load-budget assertion. ⬜ Still unmeasured: the §19 **frame-rate** row (60fps, no sustained <45fps) and **particle cap** (≤12) — both need a real low-end device profile, not a build artifact |

@@ -15,6 +15,28 @@
   "triggers": [
     { "id": "welcome_trigger", "bounds": [400, 620, 520, 260], "action": "startDecision", "target": "dp_breathe" }
   ],
-  "collectibles": [],
-  "decisionPoints": ["dp_breathe"]
+  "collectibles": [
+    { "id": "spark_welcome", "assetRef": "collectible_spark", "position": [300, 850], "kind": "kindness_spark" },
+    { "id": "spark_breathe_kind", "assetRef": "collectible_spark", "position": [1700, 850], "kind": "kindness_spark", "gate": "dp_breathe" }
+  ],
+  "objects": [
+    {
+      "id": "obj_welcome_bell",
+      "cell": [14, 88],
+      "assetRef": "bell",
+      "label": "An old welcome bell",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_welcome_bell" }
+    },
+    {
+      "id": "obj_petals_on_wind",
+      "cell": [83, 82],
+      "assetRef": "petals",
+      "label": "Scattered petals",
+      "hint": "Press E to look",
+      "interaction": { "kind": "openDialog", "dialogId": "dlg_petals_on_wind" }
+    }
+  ],
+  "decisionPoints": ["dp_breathe"],
+  "goal": "Some Guardian Dragons got left on the hills. Let's see this valley before we decide what welcome looks like."
 }
