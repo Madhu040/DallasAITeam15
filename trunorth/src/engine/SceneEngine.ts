@@ -29,6 +29,8 @@ export interface EngineCallbacks {
     together?: string;
   }) => void;
   onMeterJuice: (skill: string) => void;
+  /** Fires for every resolved decision, before the strong-only onMeterJuice (spec §17B.4). */
+  onDecisionBand: (band: ScoreBand) => void;
   onCelebration: () => void;
   onError: (message: string) => void;
 }
@@ -252,6 +254,7 @@ export class SceneEngine {
     skill?: string,
   ): Promise<void> {
     this.setPhase("consequence");
+    this.callbacks.onDecisionBand(band);
     const { nextSceneId, repairAction } = this.resolver.applyConsequence(this.state, dp, band);
 
     if (band === "strong") {

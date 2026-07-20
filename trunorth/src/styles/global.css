@@ -675,6 +675,21 @@ body {
 
 .voice-toggle:hover { background: rgba(0,0,0,0.6); }
 
+.sfx-toggle {
+  position: absolute;
+  top: max(78px, calc(92 * var(--px)));
+  right: max(8px, calc(12 * var(--px)));
+  background: rgba(0,0,0,0.4);
+  border: none;
+  padding: calc(6 * var(--px)) calc(10 * var(--px));
+  border-radius: 999px;
+  font-size: clamp(12px, calc(16 * var(--px)), 16px);
+  cursor: pointer;
+  z-index: 10;
+}
+
+.sfx-toggle:hover { background: rgba(0,0,0,0.6); }
+
 .coplay-badge {
   display: inline-block;
   background: #2a9d8f;

@@ -11,6 +11,7 @@ import { renderGridBackground } from "../render/gridBackground.js";
 import { backgroundImageUrl, characterImageUrl, objectImageUrl } from "../content/assetManifest.js";
 import { celebrationFor } from "../config/content.js";
 import { isSpeechSupported, isVoiceEnabled, setVoiceEnabled, speakLine, stopSpeaking } from "../audio/speech.js";
+import { isSfxEnabled, isSfxSupported, setSfxEnabled } from "../audio/sfx.js";
 import { COLOR_TUNES, type TogetherPlayer } from "../together/inviteStore.js";
 
 export interface CounselorPanelData {
@@ -177,6 +178,23 @@ export function renderGameView(
       syncVoiceToggle();
     };
     viewport.appendChild(voiceToggle);
+  }
+
+  if (isSfxSupported()) {
+    const sfxToggle = document.createElement("button");
+    sfxToggle.className = "sfx-toggle";
+    const syncSfxToggle = () => {
+      const on = isSfxEnabled();
+      sfxToggle.textContent = on ? "🎵" : "🔕";
+      sfxToggle.setAttribute("aria-label", on ? "Turn sound effects off" : "Turn sound effects on");
+      sfxToggle.setAttribute("aria-pressed", String(on));
+    };
+    syncSfxToggle();
+    sfxToggle.onclick = () => {
+      setSfxEnabled(!isSfxEnabled());
+      syncSfxToggle();
+    };
+    viewport.appendChild(sfxToggle);
   }
 
   if (scene) {

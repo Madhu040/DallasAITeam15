@@ -26,7 +26,12 @@ export interface WorldCallbacks {
   onInteract: (decisionTarget: string) => void;
   onCollect: (collectibleId: string) => void;
   onObjectInteract?: (objectId: string) => void;
+  /** Fired on a fixed cadence while the avatar is moving (spec §17B.4 footstep cue). */
+  onFootstep?: () => void;
 }
+
+/** Footstep cue cadence while walking — a light, unhurried pace, not a spam of clicks. */
+const FOOTSTEP_INTERVAL_S = 0.32;
 
 /** What the avatar is currently in range of (trigger zone or stage object). */
 export type NearInteractable =
@@ -78,6 +83,7 @@ export class WorldRuntime {
   private readonly cameraZoom = resolveCameraZoom();
   private companion: Vec2 = { x: 520, y: 760 };
   private facing: Facing = "down";
+  private footstepTimer = 0;
   private collected = new Set<string>();
   private nearTarget: NearInteractable | null = null;
   private solids: SolidBody[] = [];
@@ -251,13 +257,24 @@ export class WorldRuntime {
 
   private stepMovement(dt: number): void {
     const move = this.input.getMoveVector();
-    if (move.x === 0 && move.y === 0) return;
+    if (move.x === 0 && move.y === 0) {
+      // Reset so the next step after standing still fires right away, not after a
+      // partially-elapsed interval left over from the last time the avatar was walking.
+      this.footstepTimer = 0;
+      return;
+    }
 
     this.facing = this.input.getFacing(this.facing);
     const speed = appConfig.world.moveSpeedPx;
     const delta = { x: move.x * speed * dt, y: move.y * speed * dt };
     const footprint = { w: 56, h: 36 };
     const solidBoxes = this.solids.map((s) => s.box);
+
+    this.footstepTimer += dt;
+    if (this.footstepTimer >= FOOTSTEP_INTERVAL_S) {
+      this.footstepTimer = 0;
+      this.callbacks?.onFootstep?.();
+    }
 
     if (this.grid) {
       const center = { x: this.avatar.x, y: this.avatar.y - AVATAR_CENTER_OFFSET_Y };

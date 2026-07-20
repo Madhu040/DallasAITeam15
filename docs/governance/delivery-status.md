@@ -8,18 +8,22 @@
 > That is this file's only job. Point-in-time — **2026-07-19**, after §22 Phase 4 hardening
 > items 1–5 (red-team, error surface, accessibility, performance budget, projector) **and an
 > owner-directed game-feel arc** (assessment-leak fix, reward juice, Ch.1 explore loop,
-> following camera, the art asset manifest, **and Chapter 2 rebuilt with the same
-> explore→discover→decide loop** — local commits `f9d2174`/`d48e317`/`d450ee0`/`c93f1eb`/…,
-> unpushed; the Ch.2 work + a manifest fix are staged but not yet committed).
+> following camera, the art asset manifest, Chapter 2 rebuilt with the same
+> explore→discover→decide loop, **and a sound engine (spec §17B.4) wired to every real game
+> event** — local commits `f9d2174`/`d48e317`/`d450ee0`/`c93f1eb`/`c0f2e5e`/…, unpushed; the
+> sound work is staged but not yet committed).
 > Live gap list + the **NEXT-5 roadmap** remain `product.md` §5 (see the 📍 Current-position
 > block). In short, next 5: ✅ **(1) asset manifest done** — backgrounds, props, and 8/9
 > characters live (avatar stays on the tone-aware SVG by design; `wize.png` briefly depicted
 > a human child instead of the owl the shipped narration describes, was held back, then the
 > owner regenerated it correctly and it's now mapped and live); ✅ **(2) Ch.2 explore loop
-> done** — same goal/discovery/gated-spark treatment as Ch.1; **(3) sound** ← now next, (4)
-> ambient life + diegetic path (§7.7), (5) verify CI actually runs on GitHub + close the
-> human Phase-4 items (screen-reader pass, backup video,
-> scope freeze).
+> done** — same goal/discovery/gated-spark treatment as Ch.1; ✅ **(3) sound engine done** —
+> footsteps, discovery/spark chimes, strong/poor decision stings, celebration fanfare, and a
+> calm-first ambient bed all wired to real events behind a new mute toggle; **no CC0 audio
+> files sourced yet** (`public/audio/README.md` has exact names + sources) — that's the
+> owner's next art-adjacent task, same drop-in pattern as the PNGs; **(4) ambient life +
+> diegetic path (§7.7)** ← now next, (5) verify CI actually runs on GitHub + close the human
+> Phase-4 items (screen-reader pass, backup video, scope freeze).
 
 **Legend:** ✅ met · 🟨 partial · ⬜ not met · 🔒 blocked on a non-engineering sign-off
 

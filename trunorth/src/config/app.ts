@@ -64,6 +64,8 @@ export const appConfig = {
     worldMovement: viteBool("VITE_FEATURE_WORLD_MOVEMENT", true),
     /** Speak companion lines aloud via on-device SpeechSynthesis */
     voiceOutput: viteBool("VITE_FEATURE_VOICE_OUTPUT", true),
+    /** Event-mapped SFX + a low-energy ambient bed (spec §17B.4) */
+    soundEffects: viteBool("VITE_FEATURE_SOUND_EFFECTS", true),
   },
   voice: {
     /** Speech rate (1 = normal). Slightly slower reads better for kids. */
@@ -72,6 +74,15 @@ export const appConfig = {
     pitch: viteNumber("VITE_VOICE_PITCH", 1.1),
     /** Exact system voice name to use, if available (empty = auto-pick). */
     preferredVoice: viteString("VITE_VOICE_NAME", ""),
+  },
+  sfx: {
+    /** One-shot event cues (footsteps, discovery, decision stings, celebration). */
+    volume: viteNumber("VITE_SFX_VOLUME", 0.7),
+    /**
+     * Ambient exploration bed. Deliberately much quieter than event cues — spec §17A.4's
+     * calm-first budget: "reward chimes spike; the bed does not."
+     */
+    ambienceVolume: viteNumber("VITE_SFX_AMBIENCE_VOLUME", 0.15),
   },
   defaults: {
     companionName: viteString("VITE_DEFAULT_COMPANION_NAME", "Flicker"),

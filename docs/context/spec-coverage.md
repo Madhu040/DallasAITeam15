@@ -117,7 +117,7 @@ structures Ch.2 as 8–10 and Ch.3 as 11–15. Tracked as an open team question,
 | Interaction lock at emotional pivots (`pivotLockMs`) | §17B.6 | 🟨 | Field exists on some DPs; freeze-on-fetch works, but no typewriter-pivot lock |
 | Uniform scaling / **16:9 letterbox** lock | §17B.7 | 🟨 | Stage scales via a `--px` size container; not a strict 16:9 letterbox with bars |
 | Progressive/typewriter text + tap-to-complete truth table | §17B.6 | ⬜ | Spec calls this the mechanism that *enforces* reflective pacing |
-| Sound design: SFX, ambient bed, event-mapped cues | §17B.4 | ⬜ | Only the on-device voice toggle exists |
+| Sound design: SFX, ambient bed, event-mapped cues | §17B.4 | 🟨 | Engine + event wiring shipped 2026-07-19 (`src/audio/sfx.ts`) — footsteps, discovery/spark chimes, strong/poor decision stings, celebration fanfare, calm-first ambient bed, mute toggle. No CC0 audio files sourced yet; every cue plays silence until `public/audio/README.md`'s filenames are filled in |
 | Three expression states for every character | §17B.3 | 🟨 | neutral/worried/happy/calm exist; not a formalized per-character 3-state pipeline |
 | Hybrid voice input `[EXT]` | §17B.8 | ⬜ | Privacy-gated in spec |
 | Accessibility: keyboard operability, contrast, color+icon, ARIA | §17, §17A.4 | 🟨 | Keyboard ✅, some ARIA labels; no formal audit (spec §22A.5 wants a proof pass) |

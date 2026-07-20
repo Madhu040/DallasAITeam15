@@ -24,6 +24,7 @@ function stubCallbacks(): EngineCallbacks {
     onCompanionLine: vi.fn(),
     onCounselorInsight: vi.fn(),
     onMeterJuice: vi.fn(),
+    onDecisionBand: vi.fn(),
     onCelebration: vi.fn(),
     onError: vi.fn(),
   };

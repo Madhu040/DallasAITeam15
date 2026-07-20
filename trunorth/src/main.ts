@@ -44,6 +44,7 @@ import {
 } from "./together/inviteStore.js";
 import { getToken } from "./ui/auth.js";
 import { speakLine, stopSpeaking } from "./audio/speech.js";
+import { playSfx, sfxForBand, startAmbience, stopAmbience } from "./audio/sfx.js";
 import { buildJourneyReflection } from "./counselor/insights.js";
 import { shouldResumeInDistress } from "./counselor/checkin.js";
 import { SCENARIOS } from "./content/scenarios.js";
@@ -98,6 +99,7 @@ function navigate(screen: AppScreen): void {
   if (screen !== "game") {
     worldRuntime.detach();
     stopSpeaking();
+    stopAmbience();
     activeDialog = null;
   }
   if (screen !== "togetherWaiting") {
@@ -192,6 +194,7 @@ function onWorldCollect(collectibleId: string): void {
   if (!found.includes(collectibleId)) {
     gameState.progress.kindnessSparksFound[sceneId] = [...found, collectibleId];
   }
+  playSfx("spark_pickup");
   void new LocalProgressStore().save(gameState);
   const counter = document.querySelector(".brownie-counter");
   if (counter) {
@@ -205,6 +208,7 @@ function bindWorld(viewport: HTMLElement, scene: Scene, exploring: boolean): voi
     onInteract: (target) => beginEncounter(target),
     onCollect: onWorldCollect,
     onObjectInteract: onStageObject,
+    onFootstep: () => playSfx("footstep"),
   });
 }
 
@@ -226,6 +230,7 @@ function recordDiscovery(objectId: string): void {
 
   discoveries[sceneId] = [...found, objectId];
   gameState.progress.browniePoints += 1;
+  playSfx("discovery");
 
   const total = discoverableCount(engine?.getCurrentScene());
   if (total > 0 && discoveries[sceneId].length === total) {
@@ -310,6 +315,13 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
       } else if (phase !== "consequence") {
         activeDecisionId = null;
       }
+      // Spec §17B.4: the ambient bed is specifically an *exploration* thing — it steps
+      // aside for decisions, dialog, and celebration rather than fighting their own cues.
+      if (phase === "exploring") {
+        startAmbience();
+      } else {
+        stopAmbience();
+      }
       renderGame();
     },
     onSceneChange: () => {
@@ -349,8 +361,17 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
         playWorldBloom(viewport);
       });
     },
+    // Spec §17B.4 — "a soft comical thud for a physical setback" / a bright cue for a
+    // strong choice. Fires for every band; sfxForBand returns null for "partial" on
+    // purpose (the consequence copy already carries that beat).
+    onDecisionBand: (band) => {
+      const key = sfxForBand(band);
+      if (key) playSfx(key);
+    },
     onCelebration: () => {
       gameState = engine?.getState() ?? gameState;
+      stopAmbience();
+      playSfx("celebration");
       navigate("celebration");
     },
     onError: (msg) => console.error(msg),
