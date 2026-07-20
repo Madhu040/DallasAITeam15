@@ -178,5 +178,9 @@
   "decisionPoints": [
     "dp_investigate"
   ],
-  "goal": "That worry cloud isn't going anywhere on its own. Let's see what's actually here."
+  "goal": "That worry cloud isn't going anywhere on its own. Come on, let's go see what's actually there.",
+  "spawnCell": [
+    90,
+    31
+  ]
 }

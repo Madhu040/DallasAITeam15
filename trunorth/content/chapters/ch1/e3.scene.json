@@ -178,5 +178,9 @@
   "decisionPoints": [
     "dp_ask_grownup"
   ],
-  "goal": "This one feels too big for just us. Let's find a grown-up who can help."
+  "goal": "This one feels too big for just us, {name}. Let's go find a grown-up who can help.",
+  "spawnCell": [
+    9,
+    31
+  ]
 }

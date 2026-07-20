@@ -184,6 +184,21 @@ export interface Scene {
   nextSceneId?: string;
   /** Grid level id (`src/content/gridLevels.ts`) — replaces the image background. */
   gridMapId?: string;
+  /**
+   * Where the child starts, as a `[col, row]` grid cell — overrides the level's own
+   * `spawnCell`.
+   *
+   * Levels are shared between scenes (all six ch1 scenes use `everbright-meadow`), but each
+   * scene puts its decision somewhere different, so a single per-level spawn left the child
+   * standing 174–372px from the answer — under a second of walking, with 71–86% of the map
+   * never visited. That is what made the game feel like a quiz with scenery. A per-scene
+   * spawn lets each scene start the child *across the level* from its own decision, so the
+   * route there is a real journey past the crystals and discoveries (§7.1).
+   *
+   * `validate-content` enforces that this cell is walkable and far enough from the scene's
+   * decision trigger for the walk to mean something.
+   */
+  spawnCell?: [number, number];
   /** Interactable stage objects placed on the level grid. */
   objects?: StageObject[];
 }

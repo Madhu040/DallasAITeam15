@@ -136,7 +136,7 @@
     "dp_repair_oops"
   ],
   "nextSceneId": "e3",
-  "goal": "Something got knocked over back here. Let's find out what happened.",
+  "goal": "Something got knocked over back here. Come on \u2014 let's find out what happened.",
   "objects": [
     {
       "id": "obj_broken_crown",
@@ -166,5 +166,9 @@
         "dialogId": "dlg_scattered_petals"
       }
     }
+  ],
+  "spawnCell": [
+    9,
+    31
   ]
 }

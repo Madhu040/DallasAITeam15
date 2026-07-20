@@ -5,10 +5,10 @@
   "speakerAssetRef": "char_wize",
   "pages": [
     {
-      "text": "The festival bell — it rings once for every explorer who steps onto the stage."
+      "text": "The festival bell \u2014 it rings once for every explorer who steps onto the stage."
     },
     {
-      "text": "Nervous or not. Flicker included. Especially Flicker."
+      "text": "Nervous or not. {companion} included. Especially {companion}."
     }
   ]
 }

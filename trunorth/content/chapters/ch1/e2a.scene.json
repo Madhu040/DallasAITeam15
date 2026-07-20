@@ -145,7 +145,7 @@
     "dp_reassure_shy"
   ],
   "nextSceneId": "e2b",
-  "goal": "Someone's hiding nearby, and they seem scared. Let's find them — gently.",
+  "goal": "Someone's hiding out here, {name}, and I think they're scared. Let's go find them \u2014 gently.",
   "objects": [
     {
       "id": "obj_hiding_bush",
@@ -175,5 +175,9 @@
         "dialogId": "dlg_dropped_hat"
       }
     }
+  ],
+  "spawnCell": [
+    9,
+    31
   ]
 }

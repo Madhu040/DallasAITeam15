@@ -11,6 +11,7 @@ import { renderGridBackground } from "../render/gridBackground.js";
 import { renderAmbientLife } from "../render/ambientLife.js";
 import { renderProgressPath } from "../render/progressPath.js";
 import { backgroundImageUrl, characterImageUrl, objectImageUrl } from "../content/assetManifest.js";
+import { personalize } from "../content/personalize.js";
 import { celebrationFor } from "../config/content.js";
 import { isSpeechSupported, isVoiceEnabled, setVoiceEnabled, speakLine, stopSpeaking } from "../audio/speech.js";
 import { isSfxEnabled, isSfxSupported, setSfxEnabled } from "../audio/sfx.js";
@@ -457,6 +458,10 @@ export function renderGameView(
       togetherMode,
       coPlayStep,
       onCoPlayReady,
+      {
+        childName: state.profile.childDisplayName,
+        companionName: state.profile.companionName,
+      },
     );
   } else if (dialogState && getDialog(dialogState.id)) {
     renderDialogOverlay(
@@ -465,6 +470,10 @@ export function renderGameView(
       dialogState.page,
       onDialogNext ?? (() => {}),
       onDialogClose ?? (() => {}),
+      {
+        childName: state.profile.childDisplayName,
+        companionName: state.profile.companionName,
+      },
     );
   } else {
     lastSpokenOverlayKey = null;
@@ -616,9 +625,13 @@ function renderDecisionOverlay(
   togetherMode = false,
   coPlayStep: CoPlayStep = "discuss",
   onCoPlayReady?: () => void,
+  names: { childName?: string; companionName?: string } = {},
 ): void {
   const dp = getDecisionPoint(decisionId);
   if (!dp) return;
+  // The prompt and choices are the most-read copy in the game, and they named the child
+  // and the companion literally. Fill in the names the child actually chose.
+  const prompt = personalize(dp.prompt, names);
 
   const overlay = document.createElement("div");
   overlay.className = "overlay";
@@ -663,7 +676,7 @@ function renderDecisionOverlay(
   }
 
   const title = document.createElement("h2");
-  title.textContent = dp.prompt;
+  title.textContent = prompt;
   panel.appendChild(title);
 
   let parentNote: HTMLTextAreaElement | null = null;
@@ -680,7 +693,7 @@ function renderDecisionOverlay(
     for (const opt of dp.options) {
       const btn = document.createElement("button");
       btn.className = "choice-btn";
-      btn.textContent = opt.label;
+      btn.textContent = personalize(opt.label, names);
       btn.onclick = () => {
         stopSpeaking();
         onChoice(decisionId, opt.id, parentNote?.value.trim() || undefined);
@@ -712,7 +725,7 @@ function renderDecisionOverlay(
 
   overlay.appendChild(panel);
   container.appendChild(overlay);
-  speakOverlayOnce(`${decisionId}:choose`, buildOverlayScript(dp));
+  speakOverlayOnce(`${decisionId}:choose`, buildOverlayScript(dp, names));
 }
 
 function renderDialogOverlay(
@@ -721,10 +734,13 @@ function renderDialogOverlay(
   pageIndex: number,
   onNext: () => void,
   onClose: () => void,
+  names: { childName?: string; companionName?: string } = {},
 ): void {
   const page = dialog.pages[Math.min(pageIndex, dialog.pages.length - 1)];
   const isLast = pageIndex >= dialog.pages.length - 1;
-  const speaker = page.speaker ?? dialog.speaker;
+  // The speaker label is authored copy too — a companion the child renamed must not be
+  // announced as "Flicker" on its own speech bubble.
+  const speaker = personalize(page.speaker ?? dialog.speaker ?? "", names) || undefined;
 
   const overlay = document.createElement("div");
   overlay.className = "overlay";
@@ -783,7 +799,8 @@ function renderDialogOverlay(
 
   const text = document.createElement("p");
   text.className = "dialog-text";
-  text.textContent = page.text;
+  const pageText = personalize(page.text, names);
+  text.textContent = pageText;
   panel.appendChild(text);
 
   const footer = document.createElement("div");
@@ -813,17 +830,20 @@ function renderDialogOverlay(
   // Speak just the line, in the character's voice — no "Wize says:" narrator prefix, which
   // reads as robotic instruction rather than a character talking to the child (who the
   // speaker is is already shown by the portrait + name, and announced via the aria-label).
-  speakOverlayOnce(`dialog:${dialog.id}:${pageIndex}`, page.text);
+  speakOverlayOnce(`dialog:${dialog.id}:${pageIndex}`, pageText);
 }
 
 /** Spoken version of a decision pop-up: the prompt, then each option in order. */
-function buildOverlayScript(dp: DecisionPoint): string {
-  const parts: string[] = [dp.prompt];
+function buildOverlayScript(
+  dp: DecisionPoint,
+  names: { childName?: string; companionName?: string } = {},
+): string {
+  const parts: string[] = [personalize(dp.prompt, names)];
   if (dp.options && dp.options.length > 0) {
     const ordinals = ["First choice", "Second choice", "Third choice", "Fourth choice"];
     parts.push("Your choices are:");
     dp.options.forEach((opt, i) => {
-      parts.push(`${ordinals[i] ?? `Choice ${i + 1}`}: ${opt.label}.`);
+      parts.push(`${ordinals[i] ?? `Choice ${i + 1}`}: ${personalize(opt.label, names)}.`);
     });
   }
   if (dp.inputMode === "typed" || dp.inputMode === "both") {

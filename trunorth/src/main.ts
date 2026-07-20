@@ -4,6 +4,7 @@ import { worldRuntime } from "./engine/WorldRuntime.js";
 import { LocalProgressStore, DemoProgressStore } from "./store/ProgressStore.js";
 import { LiveCompanionClient, DemoCompanionClient } from "./companion/CompanionClient.js";
 import { createInitialGameState } from "./config/gameState.js";
+import { personalize } from "./content/personalize.js";
 import { appConfig, isDemoMode } from "./config/app.js";
 import type { GameState, ScenePhase, ScenarioMeta, Scene, ProgressStore } from "./types/index.js";
 import {
@@ -330,8 +331,13 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
       // has a reason to move before anything else happens (Scene.goal — see types).
       const goal = engine?.getCurrentScene()?.goal;
       if (goal) {
-        companionLine = goal;
-        speakLine(goal);
+        // Fill in the child's name so the companion is talking to *them*, not narrating.
+        const line = personalize(goal, {
+          childName: gameState.profile.childDisplayName,
+          companionName: gameState.profile.companionName,
+        });
+        companionLine = line;
+        speakLine(line);
       }
       renderGame();
     },

@@ -5,7 +5,7 @@
   "movementTier": "B",
   "background": "bg_meadow",
   "gridMapId": "meadow-of-curiosity",
-  "narration": "Meadow of Curiosity. Giant worry-flowers fill the field — some tiny, some huge. Pulling them only makes more grow. Wize smiles: \"You can't get rid of worries by fighting them. Investigate instead.\"",
+  "narration": "Meadow of Curiosity. Giant worry-flowers fill the field \u2014 some tiny, some huge. Pulling them only makes more grow. Wize smiles: \"You can't get rid of worries by fighting them. Investigate instead.\"",
   "characters": [
     {
       "assetRef": "char_wize",
@@ -169,5 +169,9 @@
   "decisionPoints": [
     "dp_fact_sort"
   ],
-  "goal": "These worry-flowers are strange up close. Let's take a proper look before Flicker convinces us to run."
+  "goal": "These worry-flowers look strange up close. Let's go take a proper look, {name} \u2014 before I talk us into running.",
+  "spawnCell": [
+    90,
+    31
+  ]
 }

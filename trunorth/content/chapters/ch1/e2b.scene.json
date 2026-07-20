@@ -145,7 +145,7 @@
     "dp_share_flower"
   ],
   "nextSceneId": "e2c",
-  "goal": "Everyone's been gathering flowers. Let's find out what's left before we pick.",
+  "goal": "Everyone's been picking flowers here. Let's go see what's left before we take any.",
   "objects": [
     {
       "id": "obj_flower_patch",
@@ -175,5 +175,9 @@
         "dialogId": "dlg_empty_basket"
       }
     }
+  ],
+  "spawnCell": [
+    9,
+    31
   ]
 }

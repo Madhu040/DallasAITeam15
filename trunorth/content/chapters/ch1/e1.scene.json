@@ -200,5 +200,9 @@
   "decisionPoints": [
     "dp_leftout_bench"
   ],
-  "goal": "I heard someone sniffling over by the bench. Let's look around and figure out who it is."
+  "goal": "Hey {name} \u2014 someone's crying over by the bench. Come on, let's go see if they're okay.",
+  "spawnCell": [
+    9,
+    31
+  ]
 }

@@ -132,8 +132,11 @@ export class WorldRuntime {
       this.seedFromScene(scene);
       this.rebuildSolids(scene);
       if (this.grid) {
-        const spawn = this.grid.map.cellCenterWorld(...this.grid.spawnCell);
-        this.avatar = { x: spawn.x, y: spawn.y + AVATAR_CENTER_OFFSET_Y };
+        // A scene may start the child somewhere other than the level's default spawn, so
+        // each scene can put the decision across the map from where you begin (Scene.spawnCell).
+        const cell = scene.spawnCell ?? this.grid.spawnCell;
+        const spawn = this.grid.map.cellCenterWorld(...cell);
+        this.avatar = keepSpriteOnScreen({ x: spawn.x, y: spawn.y + AVATAR_CENTER_OFFSET_Y });
         this.companion = { x: this.avatar.x - 100, y: this.avatar.y };
       }
       // Snap the camera to the new spawn so a scene change doesn't swoop across the map.

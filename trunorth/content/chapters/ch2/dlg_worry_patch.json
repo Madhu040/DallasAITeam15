@@ -5,7 +5,7 @@
   "speakerAssetRef": "char_wize",
   "pages": [
     {
-      "text": "These flowers are small today. Yesterday one of them was as tall as Flicker."
+      "text": "These flowers are small today. Yesterday one of them was as tall as {companion}."
     },
     {
       "text": "Worry-flowers grow when you yank at them and shrink when you just look closely. Funny plants."

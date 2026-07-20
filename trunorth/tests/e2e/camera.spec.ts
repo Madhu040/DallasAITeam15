@@ -102,14 +102,21 @@ test.describe("Following camera (spec §5)", () => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await bootToMeadow(page, "zoom=2");
 
-    // Jamie's trigger sits up and slightly right of the spawn. Nudge into range, then press E,
-    // polling because the exact frame the proximity lands on varies.
+    // Since Scene.spawnCell landed, the child starts *across the meadow* from Jamie rather
+    // than beside him (§7.1: the decision has to be a journey, ~1000px, so the crystals and
+    // discoveries on the way aren't skippable). From the spawn Jamie is right and **down**,
+    // and it takes a good many steps — walking is the point of the test, so give it the
+    // distance rather than moving the decision back. Press E each lap, polling because the
+    // exact frame proximity lands on varies.
+    // Spawn is ~(182,340) and Jamie ~(1100,730): about 918px right for 390px down, so the
+    // steps are weighted ~2:1 rather than even — walking equal amounts sails past him
+    // vertically. Each lap advances less than the interact radius, so E can't skip over him.
     const decision = page.getByRole("button", { name: /want to play with us/i });
-    for (let i = 0; i < 6 && !(await decision.isVisible().catch(() => false)); i++) {
-      await walk(page, "d", 220);
-      await walk(page, "w", 240);
+    for (let i = 0; i < 18 && !(await decision.isVisible().catch(() => false)); i++) {
+      await walk(page, "d", 200);
+      await walk(page, "s", 90);
       await page.keyboard.press("e");
-      await page.waitForTimeout(250);
+      await page.waitForTimeout(120);
     }
 
     await expect(decision, "the decision was never reachable by walking with the camera on")

@@ -5,7 +5,7 @@
   "movementTier": "A",
   "background": "bg_mountain",
   "gridMapId": "mountain-festival",
-  "narration": "Flicker steps up beside Nova with a shy, proud smile — nervous and still going! Walk onto the Sky Festival stage and reach the Star Crystal.",
+  "narration": "Flicker steps up beside Nova with a shy, proud smile \u2014 nervous and still going! Walk onto the Sky Festival stage and reach the Star Crystal.",
   "characters": [
     {
       "assetRef": "char_wize",
@@ -118,5 +118,5 @@
     }
   ],
   "decisionPoints": [],
-  "goal": "One more step. Let's walk onto the stage together."
+  "goal": "One more step, {name}. Let's walk out onto that stage together."
 }

@@ -5,7 +5,7 @@
   "movementTier": "B",
   "background": "bg_forest",
   "gridMapId": "forest-of-questions",
-  "narration": "In Everbright, young explorer Nova dreams of the Sky Festival. To join, Nova must collect five Star Crystals. Flicker — a small, fuzzy Guardian Dragon — appears with worried eyes. \"Wait! What if it goes badly?\"",
+  "narration": "In Everbright, young explorer Nova dreams of the Sky Festival. To join, Nova must collect five Star Crystals. Flicker \u2014 a small, fuzzy Guardian Dragon \u2014 appears with worried eyes. \"Wait! What if it goes badly?\"",
   "characters": [
     {
       "assetRef": "char_wize",
@@ -183,5 +183,9 @@
     "dp_quest_start"
   ],
   "nextSceneId": "w2",
-  "goal": "Flicker's already worried, and we haven't even started. Let's look around before we decide anything."
+  "goal": "I'm already nervous and we haven't even started. Stay with me, {name} \u2014 let's look around before we decide anything.",
+  "spawnCell": [
+    90,
+    31
+  ]
 }
