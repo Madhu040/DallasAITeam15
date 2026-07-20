@@ -3,6 +3,7 @@ import { SCENARIOS } from "../content/scenarios.js";
 import { getScene } from "../content/index.js";
 import { getGridLevel } from "../content/gridLevels.js";
 import { createGridThumbnail } from "../render/gridBackground.js";
+import { backgroundImageUrl } from "../content/assetManifest.js";
 import { zoneForChapter } from "../content/zones.js";
 import { appConfig } from "../config/app.js";
 import {
@@ -482,7 +483,19 @@ export function renderScenarioHub(
     `;
     const gridId = getScene(scenario.startSceneId)?.gridMapId;
     const gridLevel = gridId ? getGridLevel(gridId) : null;
-    if (gridLevel) {
+    const artUrl = gridLevel ? backgroundImageUrl(gridLevel.id) : null;
+    if (gridLevel && artUrl) {
+      // The real AI background art on the card, matching what the scene renders in-game —
+      // far more inviting than the raw pixel walk-map. Falls back to the grid thumbnail if
+      // the PNG is missing/broken, same live-fallback contract as in-game (spec §10.3).
+      const art = document.createElement("img");
+      art.className = "zone-thumb";
+      art.src = artUrl;
+      art.alt = "";
+      art.draggable = false;
+      art.onerror = () => art.replaceWith(createGridThumbnail(gridLevel));
+      card.prepend(art);
+    } else if (gridLevel) {
       card.prepend(createGridThumbnail(gridLevel));
     } else {
       const zone = zoneForChapter(scenario.id);
