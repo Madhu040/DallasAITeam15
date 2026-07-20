@@ -26,26 +26,52 @@ each tone to its file — keep these names in sync with that map:
     tone_4  #6b3f1f (medium-dark brown)     nova-warm-medium-brown.png
     tone_5  #4a2c14 (deep brown)            nova-deep-brown.png
 
-**Keep the five visually identical apart from skin tone** — same outfit, same accessories.
-The first set drifted (headband colour varies purple/green/blue, and 2 of the 5 gained a
-green backpack + compass the others don't have), which reads as a different child per tone
-rather than the same child. Regenerate with a fixed seed / character reference to tighten.
+#### Canonical design — the five must be the *same child*
 
-**Nano Banana / Midjourney prompt** — run once per tone, changing only the skin phrase,
-and keep the same character/style so it's clearly the same kid (in Midjourney reuse the
-same `--seed`, or use "same character" refs):
+**Locked:** plain **purple** headband · **no backpack, no props, no badges** · purple
+long-sleeve shirt · blue trousers · brown shoes. Nothing varies between the five except
+skin tone (and hair shade following it naturally).
+
+Purple + no-backpack is canon because it's what most of the set already is, and because at
+the in-world sprite size (~110px tall) fine props like a compass badge don't read anyway —
+they just make the child look like a different person each time the tone changes.
+
+**Current set vs. canon** (`npm run test:unit` guards tone order/spread, not accessories):
+
+| file | tone | status |
+|---|---|---|
+| `nova-light-fair.png` | tone_1 | ✅ on canon — keep |
+| `nova-light-tan.png` | tone_2 | ❌ green headband **+ backpack & compass** — regenerate |
+| `nova-warm-medium.png` | tone_3 | ✅ on canon — keep |
+| `nova-warm-medium-brown.png` | tone_4 | ❌ blue headband — regenerate (and go darker, below) |
+| `nova-deep-brown.png` | tone_5 | ❌ backpack & compass — regenerate (and go darker, below) |
+
+⚠️ **Also push the deep end darker.** Measured face tones run luminance 202 → 181 → 152 →
+130 → **100**. The palette these represent goes down to `#4a2c14` (≈45), so the set is
+compressed toward light and the darkest tones are under-served — which matters, because
+representation is the entire reason there are five. Aim tone_4 near `#6b3f1f` and tone_5
+near `#4a2c14` rather than the current medium browns.
+
+**Nano Banana / Midjourney prompt** — run once per tone, changing **only** the bracketed
+skin phrase. Reuse the same `--seed` (or a character reference) so it stays one child:
 
 > A cheerful young explorer child named Nova, full body head-to-toe, standing front-facing
-> with a friendly confident smile. Purple long-sleeve shirt with a thin headband, blue
-> trousers, simple shoes. Soft painted 2D storybook cartoon style, gentle cel-shading,
-> warm lighting, rounded proportions, big friendly eyes — a children's picture-book look
-> for ages 5–7, matching a set of storybook animal characters. **Skin tone: <light fair |
-> light tan | medium brown | medium-dark brown | deep brown>.** Centered with a little
-> padding, plain flat background, clean edges for a transparent cutout. No text, no watermark.
+> with a friendly confident smile. Plain purple long-sleeve shirt, a thin plain purple
+> headband, blue trousers, simple brown shoes. **No backpack, no bag, no compass, no badges,
+> no props of any kind — empty hands.** Soft painted 2D storybook cartoon style, gentle
+> cel-shading, warm lighting, rounded proportions, big friendly eyes — a children's
+> picture-book look for ages 5–7, matching a set of storybook animal characters.
+> **Skin tone: [light fair #f5d0b0 | light tan #e0ac69 | medium brown #8d5524 |
+> medium-dark brown #6b3f1f | deep brown #4a2c14]**, with hair shade following naturally.
+> Centered with a little padding, plain flat background, clean edges for a transparent
+> cutout. No text, no watermark.
 
 Export each transparent (or on plain white, then cut out), tight-cropped like the other
-characters. To add or re-point a tone, edit `AVATAR_FILES` in `src/content/assetManifest.ts`;
-an unmapped tone (or a file that fails to load) falls back to the tone-aware SVG.
+characters. After dropping files in, run `npm run test:unit` — `tests/unit/avatarTones.test.ts`
+fails if the tones stop darkening in order, sit too close together, drift lighter at the deep
+end, or lose their alpha. To add or re-point a tone, edit `AVATAR_FILES` in
+`src/content/assetManifest.ts`; an unmapped tone (or a file that fails to load) falls back to
+the tone-aware SVG.
 
 ## backgrounds/  (16:9, opaque)
 everbright-meadow.png  forest-of-questions.png  meadow-of-curiosity.png
