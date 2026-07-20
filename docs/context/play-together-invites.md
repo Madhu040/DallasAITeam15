@@ -34,7 +34,7 @@ still separate).
   SSE stream and falls back to 1.5s polling if it errors, plus a same-tab
   `storage` event listener as a last resort.
 - If the API is unreachable (`status === 0`), `createRoom`/`joinRoom` fall back to a
-  **localStorage-only room** so the same-browser demo path still works offline.
+  **localStorage-only room** so same-browser play still works offline.
 - `COLOR_TUNES` (5 named accent/soft color pairs) and `PLAYER_CHARACTERS` (5 sprite
   choices incl. `wize`/owl, `helper_bear`) drive the player-customization UI.
 - `getSeatId()` — per-tab identity via `sessionStorage`, generated with `newId()`.

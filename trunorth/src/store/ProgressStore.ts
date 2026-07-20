@@ -31,28 +31,3 @@ export class LocalProgressStore implements ProgressStore {
     await this.save(state);
   }
 }
-
-export class DemoProgressStore implements ProgressStore {
-  private state: GameState | null = null;
-
-  constructor(initial: GameState) {
-    this.state = initial;
-  }
-
-  async load(): Promise<GameState | null> {
-    return this.state;
-  }
-
-  async save(state: GameState): Promise<void> {
-    this.state = state;
-  }
-
-  async clear(): Promise<void> {
-    this.state = null;
-  }
-
-  async appendEvent(event: GameEvent): Promise<void> {
-    if (!this.state) return;
-    this.state.eventLog.push(event);
-  }
-}

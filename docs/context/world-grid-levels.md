@@ -84,7 +84,7 @@ scenarios without a grid.
   bridge-only river crossing (legacy `singing-bridge` grid), Flicker's widened
   solid sealing the path in w6 vs clear in w7 (grid-agnostic, reads `w6`'s own
   `gridMapId`).
-- Manual: `npm run demo` → `http://localhost:4173/?demo=1&grid=mountain-festival`
+- Manual: `npm run dev` → `http://localhost:5173/?grid=mountain-festival`
   (any scenario) · `&gridDebug=1` for the walkability overlay.
 - Verified in-browser (2026-07-17): spawn seeding, river/cliff/side-wall blocking
   with edge sliding, bridge-only crossing. Note: the rAF loop pauses when the

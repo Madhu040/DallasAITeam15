@@ -23,8 +23,9 @@ entry is updated in the same change.
 
 - [ ] Get Supabase connected to the app and storing the **level / zone images** (start with
   Level 1 / Everbright), so the app can pull the right images per
-  level when needed — **without breaking** the fully-offline demo path (`?demo=1` +
-  `public/assets/zones/`). Design the visuals together with Gabby, based on
+  level when needed (keep the local placeholders under `public/assets/zones/` as an
+  offline fallback — demo mode itself was removed 2026-07-19). Design the visuals
+  together with Gabby, based on
   [`docs/scripts/Updated-Script-6-8anxiety .docx`](./docs/scripts/Updated-Script-6-8anxiety%20.docx) (current script).
 
 ### Gabby — Backend (Supabase level images, with Ermoni) 🔧
@@ -69,7 +70,7 @@ entry is updated in the same change.
 - [ ] Deploy the app so users can play and test it: stand up a hosted environment
   for the **Vite client + Hono API** (`trunorth/server/`), configure env vars from
   `trunorth/.env.example`, verify health + `/api/companion` in production, and share
-  the test URL (demo mode: `?demo=1`) with the team.
+  the test URL with the team.
 
 ### Vandy — Product management (research & game vision)
 
@@ -147,10 +148,10 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | `docs/README.md` + `docs/specs/` (intent) |
 | Level 1 script | `docs/scripts/Updated-Script-6-8anxiety .docx` → **The Little Dragon Who Wouldn't Stop Guarding** (integrated 2026-07-18, supersedes the original Singing Bridge script) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 37 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI, automated tests for Play Together. **Known broken:** `npm run typecheck` fails (6 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + live client; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 37 unit tests + content validate. **Not built:** Supabase assets, hosted deploy, client remote sync, e2e/red-team suites, JSON-Schema CI, automated tests for Play Together. **Known broken:** `npm run typecheck` fails (6 errors — see §3.14), so CI is red. Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
 | Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx |
-| Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
-| Last updated | 2026-07-18 (Level 1 rebased onto the Little Dragon script + Play Together invites shipped) |
+| Quick test | `cd trunorth && npm install && npm run dev` → http://localhost:5173 (client 5173 + API 3001) |
+| Last updated | 2026-07-19 (demo mode removed end-to-end) |
 
 ---
 
@@ -178,7 +179,6 @@ trunorth/
 ├── content/
 │   ├── chapters/ch1/          # ✅ Everbright Meadow — e1–e3 + 2 DPs + 1 dialog + 3 stage objects
 │   ├── chapters/ch2/          # ✅ The Little Dragon Who Wouldn't Stop Guarding — w1–w7 + 6 DPs + 1 dialog + 2 stage objects
-│   ├── demo/showcase.bundle.json     # ✅ 10 canned companion lines (demo mode)
 │   └── fallbacks/companion-fallbacks.json  # ✅ band/timeout/safety lines, all 10 DPs
 ├── data/                      # SQLite runtime files (git-ignored)
 ├── public/
@@ -199,7 +199,7 @@ trunorth/
 │   └── main.ts                # listen entry (port 3001)
 ├── src/
 │   ├── main.ts                # ✅ Boot, screens, startScenario, engine + world + Play Together wiring
-│   ├── companion/CompanionClient.ts   # ✅ Live + Demo clients
+│   ├── companion/CompanionClient.ts   # ✅ LiveCompanionClient
 │   ├── config/                # ✅ app.ts (incl. LAN-aware resolveApiUrl), content.ts, gameState.ts (env-driven)
 │   ├── content/               # ✅ SCENES/DPs/DIALOGS registry, scenarios, zones, gridLevels, stageObjects
 │   ├── counselor/             # ✅ insights + coPlay discuss prompts + pre-level checkin
@@ -207,7 +207,7 @@ trunorth/
 │   ├── input/InputController.ts # ✅ WASD/arrows + interact keys
 │   ├── render/                # ✅ characters.ts (SVG cast), gridBackground.ts (grid canvas)
 │   ├── safety/filters.ts      # ✅ input/output filters
-│   ├── store/ProgressStore.ts # ✅ Local + Demo stores
+│   ├── store/ProgressStore.ts # ✅ LocalProgressStore
 │   ├── styles/global.css      # ✅ Layout, HUD, overlays, zones; stage container-scaled (--px); Play Together flow styles
 │   ├── together/inviteStore.ts # ✅ Play Together client: createRoom/joinRoom/watchRoom, COLOR_TUNES/PLAYER_CHARACTERS
 │   ├── types/index.ts         # ✅ Shared contracts
@@ -239,17 +239,16 @@ adapter added 2026-07-17.)
 - `src/config/app.ts` — `appConfig` (apiUrl via `resolveApiUrl()` getter — prefers the
   same-origin proxy off localhost so LAN/phone play reaches the API, feature flags incl.
   `worldMovement`/`togetherMode`, gameplay defaults Flicker/ch2/w1/age-band 5-7, timing,
-  world-movement tunables), `isDemoMode()`.
+  world-movement tunables).
 - `src/config/content.ts` — `contentConfig`: zone metadata (`ZoneConfig[]` — `forest`
   repurposed for ch2's new narrative, `meadow` for ch1, `mountain` unused/decorative),
   achievement checklist, celebration copy (Star Crystal / Sky Festival, `mountain.png`).
-- `src/config/gameState.ts` — `createInitialGameState(demoMode)` from `appConfig.defaults`.
+- `src/config/gameState.ts` — `createInitialGameState()` from `appConfig.defaults`.
 - `server/config.ts` — dependency-free `.env` loader + `serverConfig`
   (port/CORS/JWT/db path/companion model+floor+timeout).
 
 ### 3.1 Application entry (`src/main.ts`)
-✅ Implemented. Detects demo mode (`?demo` / `VITE_DEMO_MODE`), wires
-`LocalProgressStore` vs `DemoProgressStore` and Live vs Demo companion clients, navigates
+✅ Implemented. Wires `LocalProgressStore` + `LiveCompanionClient`, navigates
 landing → trust → onboarding → hub → **check-in** → game, starts `SceneEngine`,
 celebration → parent gate → journey reflection. The `checkin` screen (between hub card
 select and `startScenario`) stores its `CheckinRecord` in `progress.checkins[chapterId]`
@@ -354,8 +353,7 @@ modules (bubbles/HUD live in `GameView` + CSS).
 ### 3.6 AI companion client (`src/companion/CompanionClient.ts`)
 ✅ Implemented — see [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md).
 - `LiveCompanionClient` — POST `{API}/api/companion` with optional bearer token.
-- `DemoCompanionClient` — offline bundle lookup `{scene}:{dp}:{band}` + keyword band
-  inference for typed lines; always attaches counselor insight tips.
+  (When the call fails, `SceneEngine` falls back to local counselor insights.)
 
 ### 3.7 Safety (`src/safety/filters.ts`)
 ✅ Implemented. `filterInput` (jailbreak/distress/PII/profanity/length),
@@ -365,7 +363,6 @@ Used by unit tests and the server companion route.
 ### 3.8 Progress store (`src/store/ProgressStore.ts`)
 ✅ Implemented (MVP).
 - `LocalProgressStore` — `trunorth_save_v1` in localStorage (load/save/clear/appendEvent).
-- `DemoProgressStore` — in-memory.
 - ⬜ Client `RemoteProgressStore` not built — note the **server** already exposes
   `GET/PUT /api/progress/:childId` (§3.11); nothing in the client calls it yet.
 
@@ -457,7 +454,6 @@ star-legend scroll (w1) and the ✅ Level Complete finish (w7). Authoring guide:
   dropped). Its 2 DPs remain only as library data in insights/coPlay/fallbacks.
 - `fallbacks/companion-fallbacks.json` — 10 DPs × strong/partial/poor/timeout/safety
   (8 registered + 2 legacy ch3).
-- `demo/showcase.bundle.json` — 10 canned responses keyed `{scene}:{dp}:{band}`.
 - ⬜ `content/schema/` Ajv pack, `content/rubrics/` — not present.
 - ⬜ Per-scene `tileMap` rooms — not used (scenes use `gridMapId` + `triggers`).
 
@@ -544,7 +540,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 | [world-stage-objects.md](./docs/context/world-stage-objects.md) | `StageObject`/`DialogRecord` types, `src/content/stageObjects.ts`, `DIALOGS`, WorldRuntime object proximity, `renderDialogOverlay`, SceneEngine finish methods, `main.ts` dispatch | Declarative stage objects: grid-cell interactables → multi-page dialogs + finish lines (advance/complete); authoring guide |
 | [ui-screens-views.md](./docs/context/ui-screens-views.md) | `src/ui/GameView.ts`, `src/ui/screens.ts`, `src/ui/auth.ts` | Every render function: game view, overlays, onboarding, hub, parent gate, auth |
 | [server-api.md](./docs/context/server-api.md) | `server/*` (index, main, config, auth, db, routes) | All HTTP endpoints, SQLite schema, JWT, companion pipeline steps |
-| [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md) | `server/routes/companion.ts`, `src/companion/*`, `src/safety/*`, fallbacks | Live vs demo companion paths, filters, fallback coverage |
+| [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md) | `server/routes/companion.ts`, `src/companion/*`, `src/safety/*`, fallbacks | Live companion path, filters, fallback coverage |
 | [play-together-invites.md](./docs/context/play-together-invites.md) | `server/routes/together.ts`, `src/together/inviteStore.ts`, `src/ui/togetherScreens.ts`, `src/util/id.ts`, `main.ts`/`GameView.ts` wiring | Cross-device Play Together invite rooms: server routes, client store, UI screens, mobile/LAN support |
 
 ---
@@ -592,4 +588,5 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 | 2026-07-18 | Removed Flicker's detached orange wing pixels (`O: #ff9e00`) from `dragonSvg` in `src/render/characters.ts` — the floating triangles read as a stray orange mouse cursor next to the companion in-game; body/belly widened one column to fill the gap. Art-only, no export changes. |
 | 2026-07-18 | **Fixed the Wize/Flicker role swap in Level 1 + walk-to-finish ending.** Ch2 scenes now cast **Wize the owl as the follower companion** (assetRef `char_wize` on the `companion` id; GameView labels/pill say "Wize" whenever the scene's companion assetRef is wize) and **Flicker the dragon as a stationary NPC blocking the Singing Bridge** (new `flicker` id → dragon sprite mapping in `characters.ts`; new optional `SceneCharacter.solidSize` [w,h] lets his solid span the whole 154px plank corridor, 190×80 at the south entrance in w1–w6). Chapter completion is no longer decision-driven: `dp_crossing` strong now advances to **new scene w7**, where Flicker stands aside and a ✅ "Level Complete" `finish/complete` stage object sits on the north bank — the player physically crosses the bridge and presses E to end the level (ch2 removed from `CHAPTER_COMPLETE_DECISION`; `GOLDEN_PATH`/`CHAPTER_FINALE` updated; new `finish_check` sprite). Script text unchanged. Tests 36→37 (bridge-block collision test; ch2 finale guard rewritten for w7); verified end-to-end in headless Chromium (blocked at bridge in w1, full W1→W7 play-through, checkmark → Courage Feather celebration). |
 | 2026-07-18 | **Rebased Level 1 onto the new 5–7 anxiety script ("The Little Dragon Who Wouldn't Stop Guarding") + shipped cross-device Play Together invites, reconciling a stale unrebased branch instead of merging it.** Daniel's `feat/singing-bridge-level-1` (PR #7) had branched off main on 2026-07-14, before the w7 finish, Wize/Flicker role fix, dialogue z-layering fix, stage objects, and SEL coach panel landed — so its own independent Level 1 rewrite collided with all of that on the same files (`GitHub: CONFLICTING`). Resolution was a fresh branch off main with the PR's changes manually re-applied rather than a git merge: **content** — all `content/chapters/ch2/dp_*.json` + `w1–w6.scene.json` replaced 1:1 on the same DP ids with the new narrative (explorer Nova, Flicker, Star Crystals, Sky Festival), `config/content.ts` zones/achievements/celebration, `content/scenarios.ts` ch2 metadata, `counselor/{coPlay,insights}.ts`, `content/{demo/showcase.bundle,fallbacks/companion-fallbacks}.json`, `src/ui/screens.ts` onboarding line, `src/engine/SceneEngine.ts` multi-tap/repair companion lines — all updated to match; **preserved unchanged** — the w7 walk-to-finish stage-object mechanic (new `w7.scene.json` + `dlg_star_legend.json` replacing `dlg_bridge_legend.json`; `dp_crossing` strong band now targets w7), the Wize/Flicker character-role split (reapplied to every new scene), the dialogue z-layering fix, speech/voice toggle, and declarative stage objects; **new** — 4 grid maps (`forest-of-questions`, `meadow-of-curiosity`, `cave-of-purpose`, `mountain-festival` in `gridLevels.ts`) so the explorable-grid feature keeps working per-biome instead of the single `singing-bridge` grid (now orphaned but left registered). **Play Together** (additive, not part of the conflict): new `server/routes/together.ts` (SQLite `together_rooms`, create/join/get/close/SSE-stream), `src/together/inviteStore.ts`, `src/ui/togetherScreens.ts`, `src/util/id.ts`; wired into `main.ts` (new `togetherLobby`/`togetherSetup`/`togetherWaiting` screens, `?invite=CODE` bootstrap) and `GameView.ts` (player badges); LAN/mobile support (`vite.config.ts` `host:true`, `config/app.ts` `resolveApiUrl()`, `index.html` `viewport-fit=cover`, dynamic CORS origin in `server/index.ts`). New context file `play-together-invites.md`. ch1/ch3 and Daniel's role-fix/z-layering work are untouched. Tests: `tests/unit/grid.test.ts`'s bridge-block test rewritten to read `w6`'s own `gridMapId` and relative offsets instead of hardcoded Singing-Bridge pixel positions; 37/37 passing, `validate:content` passing, typecheck 9→6 known errors (narrower `as Scene` JSON-cast mismatch, unrelated to this change). No automated tests yet for Play Together. |
+| 2026-07-19 | **Removed demo mode end-to-end** (user request): landing "Demo Mode (Offline)" button, `?demo=1` / `VITE_DEMO_MODE` detection (`isDemoMode`/`forceDemoMode` in `config/app.ts`), `DemoProgressStore`, `DemoCompanionClient` + `content/demo/showcase.bundle.json` (dir deleted), demo pill (`GameView.ts` + `.demo-pill` CSS), `flags.demoMode` (types + `createInitialGameState()` no longer takes an arg), `VITE_DEMO_COMPANION_DELAY_MS`, `npm run demo` script, and README/.env/comment references. Client now always uses `LocalProgressStore` + `LiveCompanionClient`; offline resilience unchanged (`SceneEngine` already falls back to local counselor insights on companion failure; `content/fallbacks/` stays, server-side). Context docs scrubbed (engine-runtime, ui-screens-views, safety-companion-pipeline, world-grid-levels, world-stage-objects, play-together-invites). 37/37 tests, validate:content passing, typecheck unchanged (6 known errors). |
 | 2026-07-18 | Fixed a second stray-orange-pixel regression in `dragonSvg` (`src/render/characters.ts`): the "worried" expression's 4 floating worry-sparks were 3× `GOLD` (`#ffd60a`) + 1× a different hardcoded orange (`#ff6b35`), isolated in empty space near the sprite — same "reads as a leftover cursor" bug as the 07-17 wing-pixel fix, just a different pixel. Went unnoticed before because Flicker was rarely "worried"; the new Little Dragon script keeps Flicker worried through nearly every ch2 scene, making it obvious. Changed the odd spark to `GOLD` to match the other three. Art-only, no export changes; 37/37 tests still passing. |

@@ -4,7 +4,7 @@
  *
  * Add a level: write a builder below and register it in LEVEL_BUILDERS.
  * Test any level in the running app with `?grid=<id>`
- * (e.g. http://localhost:5173/?demo=1&grid=singing-bridge); add `&gridDebug=1`
+ * (e.g. http://localhost:5173/?grid=singing-bridge); add `&gridDebug=1`
  * to tint blocked cells red.
  */
 

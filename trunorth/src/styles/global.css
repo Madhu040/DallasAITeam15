@@ -198,11 +198,6 @@ body {
   z-index: 10;
 }
 
-/* In demo mode the demo pill owns the top-center spot — drop the tag below it. */
-.demo-pill ~ .stage-tag {
-  top: max(32px, calc(44 * var(--px)));
-}
-
 .counselor-panel {
   position: absolute;
   right: max(12px, calc(50vw - 48vh));
@@ -497,20 +492,6 @@ body {
   font-size: clamp(11px, calc(16 * var(--px)), 16px);
   font-weight: 700;
   z-index: 10;
-}
-
-.demo-pill {
-  position: absolute;
-  top: max(8px, calc(12 * var(--px)));
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--accent-warm);
-  color: var(--text-dark);
-  padding: calc(4 * var(--px)) calc(12 * var(--px));
-  border-radius: 999px;
-  font-size: clamp(9px, calc(12 * var(--px)), 12px);
-  font-weight: 700;
-  z-index: 20;
 }
 
 .together-pill {

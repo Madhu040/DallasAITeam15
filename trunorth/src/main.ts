@@ -1,10 +1,10 @@
 import "./styles/global.css";
 import { SceneEngine } from "./engine/SceneEngine.js";
 import { worldRuntime } from "./engine/WorldRuntime.js";
-import { LocalProgressStore, DemoProgressStore } from "./store/ProgressStore.js";
-import { LiveCompanionClient, DemoCompanionClient } from "./companion/CompanionClient.js";
+import { LocalProgressStore } from "./store/ProgressStore.js";
+import { LiveCompanionClient } from "./companion/CompanionClient.js";
 import { createInitialGameState } from "./config/gameState.js";
-import { appConfig, isDemoMode } from "./config/app.js";
+import { appConfig } from "./config/app.js";
 import type { GameState, ScenePhase, ScenarioMeta, Scene } from "./types/index.js";
 import {
   renderGameView,
@@ -60,11 +60,10 @@ type AppScreen =
   | "togetherSetup"
   | "togetherWaiting";
 
-const demoMode = isDemoMode();
 const API_URL = appConfig.apiUrl;
 
 let currentScreen: AppScreen = "landing";
-let gameState: GameState = createInitialGameState(demoMode);
+let gameState: GameState = createInitialGameState();
 let engine: SceneEngine | null = null;
 let activeDecisionId: string | null = null;
 let companionLine: string | null = null;
@@ -240,19 +239,14 @@ async function startScenario(scenario: ScenarioMeta, playMode: "solo" | "togethe
   gameState.profile.chapterId = scenario.id;
   gameState.profile.ageBand = scenario.ageBand;
   gameState.progress.currentSceneId = scenario.startSceneId;
-  gameState.flags.demoMode = demoMode;
   gameState.flags.playMode = playMode;
   coPlayStep = "discuss";
 
-  const store = demoMode
-    ? new DemoProgressStore(gameState)
-    : new LocalProgressStore();
+  const store = new LocalProgressStore();
 
   await store.save(gameState);
 
-  const companion = demoMode
-    ? new DemoCompanionClient()
-    : new LiveCompanionClient(API_URL, getToken() ?? undefined);
+  const companion = new LiveCompanionClient(API_URL, getToken() ?? undefined);
 
   engine = new SceneEngine(gameState, store, companion, {
     onPhaseChange: (phase) => {
@@ -552,7 +546,6 @@ void (async () => {
   const saved = await new LocalProgressStore().load();
   if (saved) {
     gameState = saved;
-    gameState.flags.demoMode = demoMode;
     if (!gameState.flags.playMode) {
       gameState.flags.playMode = "solo";
     }

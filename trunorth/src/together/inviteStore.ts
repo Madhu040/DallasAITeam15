@@ -1,7 +1,7 @@
 /**
  * Play Together invite client.
  * Talks to `/api/together/rooms` so parent and child can join from different devices.
- * Falls back to localStorage only if the API is unreachable (same-browser demo).
+ * Falls back to localStorage only if the API is unreachable (same-browser play).
  */
 
 import { appConfig } from "../config/app.js";
@@ -165,7 +165,7 @@ export async function createRoom(
   }
 
   if (result.status === 0) {
-    // Offline / no API — local fallback so demo still works same-origin
+    // Offline / no API — local fallback so same-browser play still works
     const code = generateLocalCode();
     const room: TogetherRoom = {
       code,

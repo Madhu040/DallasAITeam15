@@ -28,7 +28,7 @@ Copy [`.env.example`](./.env.example) → `.env`. Highlights:
 |---|---|---|
 | API port, CORS, JWT, DB | `server/config.ts` | `PORT`, `CORS_ORIGINS`, `JWT_SECRET`, `DATABASE_PATH` |
 | Companion AI | `server/config.ts` | `ANTHROPIC_API_KEY`, `COMPANION_MODEL`, `CONFIDENCE_FLOOR` |
-| Client API + demo | `src/config/app.ts` | `VITE_API_URL`, `VITE_DEMO_MODE` |
+| Client API | `src/config/app.ts` | `VITE_API_URL` |
 | Gameplay defaults | `src/config/app.ts` | `VITE_DEFAULT_COMPANION_NAME`, `VITE_DEFAULT_CHAPTER_ID`, … |
 | Zones / celebration art | `src/config/content.ts` | (edit file — image paths & copy) |
 | Vite ports / proxy | `vite.config.ts` | `VITE_DEV_PORT`, `VITE_API_PROXY_TARGET` |
@@ -41,7 +41,6 @@ Client-facing variables **must** start with `VITE_` so Vite exposes them to the 
 - **Custom scene engine** — no game engine; DOM + CSS scene-graph state machine
 - **Showcase golden path** — Level 1 *The Little Dragon Who Wouldn't Stop Guarding* (W1→W7 with Nova, Flicker & Wize)
 - **AI companion** — server-side Claude proxy with 5-layer safety pipeline
-- **Demo mode** — fully offline, zero network (`?demo=1`)
 - **Parent authentication** — JWT-based parent accounts (children never log in directly)
 - **Parent gate** — PIN-protected chapter transitions
 - **Trust screen** — COPPA-aware safety boundaries
@@ -85,18 +84,7 @@ npm run dev
 
 - **Guest play:** Click "Play Now" on the landing page
 - **Play Together (cross-device):** Click "Play Together" → host as parent or child → share the code/link → partner opens `?invite=CODE` on any device → both pick name, color, character → Let's play. Requires `npm run dev` (API on :3001). For phone + laptop on the same Wi‑Fi, open the game via your LAN IP (e.g. `http://192.168.x.x:5173`) so the invite link stays reachable.
-- **Demo mode (offline):** http://localhost:5173?demo=1
 - **Parent account:** Register/login to manage child profiles and sync progress
-
-## Demo Mode (Offline Showcase)
-
-```bash
-npm run build
-npm run preview
-# Open http://localhost:4173?demo=1
-```
-
-No network requests. Canned companion responses. Preloaded assets.
 
 ## Docker Deployment
 
@@ -116,7 +104,6 @@ docker compose up --build
 |---------|-------------|
 | `npm run dev` | Start frontend + API concurrently |
 | `npm run build` | Production build |
-| `npm run demo` | Build + serve offline demo |
 | `npm run test:unit` | Run Vitest unit tests |
 | `npm run validate:content` | Validate scene/decision JSON |
 | `npm run typecheck` | TypeScript check |
@@ -128,7 +115,7 @@ docker compose up --build
 Browser Client          API Server (Hono)
 ├── Scene Engine        ├── /api/companion (AI proxy + safety)
 ├── 16:9 Renderer       ├── /api/auth/* (parent JWT auth)
-├── Demo/Live Client    ├── /api/children (child profiles)
+├── Companion Client    ├── /api/children (child profiles)
 ├── LocalProgressStore  ├── /api/progress/:childId (remote sync)
 └── Parent surfaces     └── SQLite database
 ```

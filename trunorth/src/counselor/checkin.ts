@@ -123,8 +123,8 @@ const HEAVY_WORDS = [
 ];
 
 /**
- * Score a typed (own-words) answer with the same keyword heuristic style as the
- * demo companion. Runs the safety input filter first; distress always wins.
+ * Score a typed (own-words) answer with a simple keyword heuristic.
+ * Runs the safety input filter first; distress always wins.
  */
 export function scoreTypedCheckinAnswer(raw: string): { points: number; safetyFlag: SafetyFlag } {
   const text = sanitizeChildInput(raw).toLowerCase();

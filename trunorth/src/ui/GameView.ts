@@ -57,13 +57,6 @@ export function renderGameView(
   viewport.setAttribute("role", "main");
   viewport.setAttribute("aria-label", "TruNorth game scene");
 
-  if (state.flags.demoMode) {
-    const pill = document.createElement("div");
-    pill.className = "demo-pill";
-    pill.textContent = "Demo Mode";
-    viewport.appendChild(pill);
-  }
-
   if (togetherMode) {
     const togetherPill = document.createElement("div");
     togetherPill.className = "together-pill";

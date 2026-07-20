@@ -2,7 +2,7 @@
 
 **Sources:** `trunorth/server/routes/companion.ts`, `trunorth/src/companion/CompanionClient.ts`,
 `trunorth/src/safety/filters.ts`, `trunorth/content/fallbacks/companion-fallbacks.json`,
-`trunorth/content/demo/showcase.bundle.json`, `trunorth/src/counselor/insights.ts`
+`trunorth/src/counselor/insights.ts`
 
 ## Live path (`LiveCompanionClient` → Hono)
 
@@ -13,12 +13,6 @@
 3. **Confidence floor** (default 0.55) — low confidence → fallback band/line.
 4. **Output filter** (`filterOutput`) — reject unsafe model text → substitute fallback.
 5. Attach counselor `insightForStep` child/parent tips when available.
-
-## Demo path (`DemoCompanionClient`)
-
-- Lookup key: `{sceneId}:{decisionPointId}:{band}` in `showcase.bundle.json`.
-- Band inferred from typed keywords when needed.
-- Always attaches `insightForStep` tips; no network.
 
 ## Fallback library
 

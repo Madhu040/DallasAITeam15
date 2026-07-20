@@ -93,7 +93,7 @@ fields. `gridCellToWorld(col, row)` in `GridMap.ts` converts cell → world px
   `finish`/`advance` object** — the player walks to the finish instead of being
   teleported on a timer.
 
-## Current content (demo of the framework)
+## Current content (examples of the framework)
 
 | Scene | Object | Interaction |
 |---|---|---|
@@ -129,7 +129,7 @@ player walks up to the festival-stage finish object. `dp_crossing` is no longer 
   object placement, sprite fallback, content integrity (walkable cells, registered
   dialogs, resolvable targets, ch2 finale guard), `advanceScene`/`completeChapter`
   behavior, auto-advance suppression (fake timers).
-- Verified in-browser 2026-07-17 (`npm run demo`): sign + scroll dialogs
+- Verified in-browser 2026-07-17: sign + scroll dialogs
   (pages/portrait/freeze/unfreeze/no click-through), North Gate advance e2→e3, arch
   → Level Complete celebration, e2 no longer auto-advances, ch1/ch2 decision flows
   unchanged. Note: rAF (and thus walking) pauses while the Chrome window is fully

@@ -49,15 +49,6 @@ export function renderLanding(
   togetherBtn.onclick = onPlayTogether;
   card.appendChild(togetherBtn);
 
-  const demoBtn = document.createElement("button");
-  demoBtn.className = "btn-secondary";
-  demoBtn.textContent = "Demo Mode (Offline)";
-  demoBtn.onclick = () => {
-    window.location.search = "?demo=1";
-    onPlay();
-  };
-  card.appendChild(demoBtn);
-
   const authRow = document.createElement("div");
   authRow.style.marginTop = "24px";
   authRow.innerHTML = `<p style="font-size:14px;opacity:0.6;margin-bottom:8px;">Parents</p>`;

@@ -134,7 +134,7 @@ describe("stage object content integrity", () => {
 
 describe("SceneEngine finish paths", () => {
   it("advanceScene loads the scene's nextSceneId when no target is given", async () => {
-    const state = createInitialGameState(true);
+    const state = createInitialGameState();
     state.progress.currentSceneId = "e2";
     const callbacks = stubCallbacks();
     const engine = buildEngine(state, callbacks);
@@ -146,7 +146,7 @@ describe("SceneEngine finish paths", () => {
   });
 
   it("advanceScene errors and stays put without a resolvable target", async () => {
-    const state = createInitialGameState(true);
+    const state = createInitialGameState();
     state.progress.currentSceneId = "e3"; // no nextSceneId
     const callbacks = stubCallbacks();
     const engine = buildEngine(state, callbacks);
@@ -157,7 +157,7 @@ describe("SceneEngine finish paths", () => {
   });
 
   it("completeChapter records the chapter once and fires the celebration", async () => {
-    const state = createInitialGameState(true);
+    const state = createInitialGameState();
     state.profile.chapterId = "ch1";
     const callbacks = stubCallbacks();
     const engine = buildEngine(state, callbacks);
@@ -170,7 +170,7 @@ describe("SceneEngine finish paths", () => {
 
   it("suppresses narration auto-advance when a finish/advance object exists", async () => {
     vi.useFakeTimers();
-    const state = createInitialGameState(true);
+    const state = createInitialGameState();
     const engine = buildEngine(state, stubCallbacks());
 
     // e2 is narration-only with nextSceneId, but has the North Gate finish object.

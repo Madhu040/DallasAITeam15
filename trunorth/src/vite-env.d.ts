@@ -2,7 +2,6 @@
 
 interface ImportMetaEnv {
   readonly VITE_API_URL?: string;
-  readonly VITE_DEMO_MODE?: string;
   readonly VITE_FEATURE_PARENT_AUTH?: string;
   readonly VITE_FEATURE_TOGETHER_MODE?: string;
   readonly VITE_FEATURE_SCENARIO_HUB?: string;
@@ -17,7 +16,6 @@ interface ImportMetaEnv {
   readonly VITE_DEFAULT_AGE_BAND?: string;
   readonly VITE_DEFAULT_BASELINE_STRENGTH?: string;
   readonly VITE_NARRATION_AUTO_ADVANCE_MS?: string;
-  readonly VITE_DEMO_COMPANION_DELAY_MS?: string;
   readonly VITE_PRODUCT_NAME?: string;
   readonly VITE_DEV_PORT?: string;
   readonly VITE_API_PROXY_TARGET?: string;

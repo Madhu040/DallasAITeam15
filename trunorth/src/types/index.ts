@@ -207,7 +207,6 @@ export interface GameState {
   emotionalResidue: Record<string, Record<string, ResidueLevel>>;
   parentGate: { lastPassedChapter: string | null; pinHash?: string };
   flags: {
-    demoMode: boolean;
     lastSafetyFlag: SafetyFlag | null;
     onboardingComplete: boolean;
     playMode: PlayMode;

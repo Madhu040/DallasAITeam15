@@ -6,7 +6,7 @@
 
 ## Boot / screens
 
-1. Landing (guest play, together, demo, parent auth)
+1. Landing (guest play, together, parent auth)
 2. Trust screen → onboarding (companion archetype + name, avatar)
 3. Scenario hub (`SCENARIOS`)
 4. Pre-level check-in (`renderCheckin` + `src/counselor/checkin.ts`): 3 open-ended
@@ -17,9 +17,6 @@
    `loadScene(startSceneId)`
 6. On chapter-complete decision with strong band → celebration → parent gate →
    journey reflection (mentions the check-in baseline when one was recorded)
-
-Demo mode: `?demo=1` or `VITE_DEMO_MODE=true` → `DemoProgressStore` +
-`DemoCompanionClient` (zero network).
 
 ## Scene phases
 

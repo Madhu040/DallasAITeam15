@@ -1,6 +1,6 @@
 /**
  * Client-side app config.
- * Vite injects `VITE_*` vars at build time; runtime query flags can override demo mode.
+ * Vite injects `VITE_*` vars at build time.
  *
  * Tunables for gameplay defaults (companion name, starting chapter, timing) live here
  * so content teams can change behavior without hunting through UI/engine files.
@@ -54,8 +54,6 @@ export const appConfig = {
   get apiUrl(): string {
     return resolveApiUrl();
   },
-  /** Force demo mode even without `?demo=1`. */
-  forceDemoMode: viteBool("VITE_DEMO_MODE", false),
   features: {
     parentAuth: viteBool("VITE_FEATURE_PARENT_AUTH", true),
     togetherMode: viteBool("VITE_FEATURE_TOGETHER_MODE", true),
@@ -83,7 +81,6 @@ export const appConfig = {
   },
   timing: {
     narrationAutoAdvanceMs: viteNumber("VITE_NARRATION_AUTO_ADVANCE_MS", 2200),
-    demoCompanionDelayMs: viteNumber("VITE_DEMO_COMPANION_DELAY_MS", 350),
   },
   world: {
     /** Avatar speed in scene pixels per second (1920×1080 space). */
@@ -97,8 +94,3 @@ export const appConfig = {
 };
 
 export type AppConfig = typeof appConfig;
-
-/** Resolve whether this browser session is in offline demo mode. */
-export function isDemoMode(search = typeof location !== "undefined" ? location.search : ""): boolean {
-  return appConfig.forceDemoMode || new URLSearchParams(search).has("demo");
-}

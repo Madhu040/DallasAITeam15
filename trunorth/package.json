@@ -12,7 +12,6 @@
     "dev:api": "tsx watch server/main.ts",
     "build": "tsc -p tsconfig.server.json --noEmit false 2>/dev/null || true && vite build",
     "preview": "vite preview",
-    "demo": "vite build && vite preview --port 4173",
     "lint": "eslint src server api --max-warnings 0",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.api.json",
     "validate:content": "tsx scripts/validate-content.ts",

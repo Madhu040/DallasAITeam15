@@ -9,7 +9,7 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
 
 - `renderGameView(container, state, scene, phase, companionLine, activeDecisionId, counselor, onChoice, onTyped, onTrigger, togetherMode, coPlayStep, onCoPlayReady, onWorldReady)` —
   builds the play screen each render:
-  - Viewport with demo/together pills, crystal (brownie) counter, zone stage tag,
+  - Viewport with the together pill, crystal (brownie) counter, zone stage tag,
     HUD meters (empathy ❤️ / calm 🌊 / courage ⭐ with level aria-labels).
   - Scene background from `zoneFromBackground`/`zoneForChapter` (`contentConfig.zones` image),
     plus legacy `treehouse|classroom|playground` CSS classes.
@@ -25,8 +25,7 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
     character: characters get `10 + floor(y/20)` (max ~64) < counselor panel 70 <
     speaking character (bubble host, inline z 75) = interact hint 75 < thinking pill 80
     < modal `.overlay` (decision + stage-object dialogs) 100. The companion bubble is
-    wider (`360 * --px` max), bordered, with a ::after tail. In demo mode the stage tag
-    drops below the demo pill (`.demo-pill ~ .stage-tag`); the together-pill sits below
+    wider (`360 * --px` max), bordered, with a ::after tail. The together-pill sits below
     the crystal counter; the move hint lives bottom-left (clear of the counselor panel).
   - Calls `onWorldReady(viewport, scene, exploring)` so `worldRuntime.attach` can take over movement.
   - **Responsive stage scaling:** `.game-viewport` (global.css) is a CSS size container
@@ -64,7 +63,7 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
 ## `screens.ts`
 
 - `renderLanding(container, onPlay, onPlayTogether, onAuth)` — landing card with Play,
-  Play Together, demo hint, and parent Login / Create Account buttons.
+  Play Together, and parent Login / Create Account buttons.
 - `renderAuthForm(container, mode, onSuccess, onBack)` — email+password form calling
   `apiLogin`/`apiRegister`, stores session via `setSession`.
 - `renderOnboarding(container, onComplete)` — 3 steps: companion archetype
