@@ -17,18 +17,23 @@
 > one-second walk, copy personalized via `{name}`/`{companion}` tokens fixing 75 hardcoded
 > "Flicker"/"Nova" instances, popup art now real PNGs, TTS narration cleaned up), and the
 > **decision overlay now scales with resolution on any projector** (closing the gap this very
-> file's DoD §27/§13A.6 rows first surfaced) — local commits through `273e6e6`, **40+ commits
-> ahead of `origin/main`, still entirely unpushed**.
+> file's DoD §27/§13A.6 rows first surfaced) — local commits through `a04938c`, **and now
+> pushed: `origin/main` is caught up, and CI has run for real for the first time since the
+> repo-root relocation.** Run [`29769482514`](https://github.com/Madhu040/DallasAITeam15/actions/runs/29769482514)
+> went green in 1m29s (typecheck, lint, validate:content, test:unit, build, audit:bundle, and
+> the full 19-test e2e suite) — every "in CI" claim anywhere in this file is now proven
+> against a real GitHub Actions run, not just a passing local script. (One snag along the way:
+> the first push attempt was rejected — GitHub requires the `workflow` OAuth scope for any
+> push touching `.github/workflows/*`, which the cached `gh` token lacked; re-authed and
+> re-pushed.)
 > Live gap list + the **NEXT-5 roadmap** remain `product.md` §5 (see the 📍 Current-position
-> block) — all five of the original NEXT-5 items are now ✅ done. **What's actually next:**
-> (1) **push to GitHub and confirm CI genuinely runs** — every "in CI" claim anywhere in this
-> file has been *configured* but never once verified against a real push, and 40+ commits
-> exist on a single machine with no remote copy; (2) **SME sign-off** on all child-facing
-> copy written across this entire arc (§8.6) — the actual shipping blocker, separate from any
-> engineering task; (3) the three remaining human Phase-4 items (manual screen-reader pass
-> §22A.5, recorded backup video §13A.7, scope freeze — owner call, gates Phase 5); (4) a
-> product decision on `singing-bridge` — a built, walkable grid level with zero scenes bound
-> to it and no background art; either author the scene or delete the orphaned level.
+> block) — all five of the original NEXT-5 items are now ✅ done, **including CI verification.**
+> **What's actually next:** (1) **SME sign-off** on all child-facing copy written across this
+> entire arc (§8.6) — the actual shipping blocker, separate from any engineering task;
+> (2) the three remaining human Phase-4 items (manual screen-reader pass §22A.5, recorded
+> backup video §13A.7, scope freeze — owner call, gates Phase 5); (3) a product decision on
+> `singing-bridge` — a built, walkable grid level with zero scenes bound to it and no
+> background art; either author the scene or delete the orphaned level.
 
 **Legend:** ✅ met · 🟨 partial · ⬜ not met · 🔒 blocked on a non-engineering sign-off
 
