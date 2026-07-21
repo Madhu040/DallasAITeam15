@@ -995,6 +995,19 @@ body {
 
 .error-msg { color: #e76f51; font-size: 13px; margin-top: 8px; }
 
+.children-list {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+.children-list li {
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  background: #2d3142;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
 .onboarding {
   min-height: 100vh;
   display: grid;

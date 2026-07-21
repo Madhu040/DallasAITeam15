@@ -27,6 +27,11 @@ entry is updated in the same change.
   level when needed — **without breaking** the fully-offline demo path (`?demo=1` +
   `public/assets/zones/`). Design the visuals together with Gabby, based on
   [`docs/scripts/Updated-Script-6-8anxiety .docx`](./docs/scripts/Updated-Script-6-8anxiety%20.docx) (current script).
+  **Supabase is already connected** (Jose, 2026-07-20, ADR-003 — parent auth/children):
+  reuse `src/lib/supabase.ts`'s `getSupabase()` for Storage rather than standing up a
+  second client; see [server-auth-supabase.md](./docs/context/server-auth-supabase.md)
+  for the project's URL/keys setup and the demo-mode/bundle-size guardrails that client
+  already respects.
 
 ### Gabby — Backend (Supabase level images, with Ermoni) 🔧
 
@@ -67,10 +72,22 @@ entry is updated in the same change.
 
 ### Jose — Frontend (deployment) 🔧
 
+- [x] ~~Migrate parent auth + child profiles + progress to Supabase (Postgres + Supabase
+  Auth), resolving ADR-003~~ — new parent login page (`renderAuthForm` on
+  `signIn`/`signUp`) + children screen (`src/ui/childrenScreen.ts`); server verifies
+  Supabase JWTs and reads/writes Postgres with the service-role key; see
+  [server-auth-supabase.md](./docs/context/server-auth-supabase.md) — done 2026-07-20.
+  **Coordinate with Ermoni/Gabby** on their Supabase task above: `src/lib/supabase.ts`
+  is the one shared browser client, meant to be extended for Storage (level/zone
+  images) rather than duplicated. **Still needs:** a real Supabase project's URL/keys
+  weren't available this session — paste `supabase/migrations/0001_children_progress.sql`
+  into the project's SQL editor and set the 5 new env vars before the live
+  register→login→add-child flow can be exercised end to end.
 - [ ] Deploy the app so users can play and test it: stand up a hosted environment
   for the **Vite client + Hono API** (`trunorth/server/`), configure env vars from
-  `trunorth/.env.example`, verify health + `/api/companion` in production, and share
-  the test URL (demo mode: `?demo=1`) with the team.
+  `trunorth/.env.example` (now including the Supabase vars above), verify health +
+  `/api/companion` + `/api/health/supabase` in production, and share the test URL
+  (demo mode: `?demo=1`) with the team.
 
 ### Vandy — Product management (research & game vision)
 
@@ -149,10 +166,10 @@ These rules exist so `product.md` stays trustworthy and consistent across every 
 | Project root | `trunorth/` (repo root = DallasAITeam15 monorepo wrapper) |
 | Spec source of truth | **Product/SEL/safety intent:** `docs/specs/TruNorth Master Spec.md` (Draft v2). **Engineering intent:** `docs/specs/Consolidated TruNorth-Technical-Specification.md` (v3.0). Conflict order per that doc's own hierarchy: Master Spec → SME/counsel rulings → Consolidated tech spec → ADRs → repo README. ⚠️ `docs/specs/TruNorth Technical Specification.md` is **Draft v1 and superseded** by the Consolidated v3.0 — do not review against it. Coverage audit: [spec-coverage.md](./docs/context/spec-coverage.md) |
 | Level 1 script | `docs/scripts/Updated-Script-6-8anxiety .docx` → **The Little Dragon Who Wouldn't Stop Guarding** (integrated 2026-07-18, supersedes the original Singing Bridge script) |
-| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API with parent auth, child profiles, remote-progress endpoints (server-built, client not wired), companion + reflect + together routes, SQLite**; Docker; 57 unit tests + content validate. **Scored Ask-for-Help beat** on the Ch.1 path (`dp_ask_grownup` → cross-cutting `ask_for_help` skill, no meter) and **distress-aware resume** (`resumeCheckin` screen when a session ended in `safetyFlag: distress`; re-entry copy is SME-draft) added 2026-07-19. **Phase 2 (widened interaction curve, 2026-07-19):** Ch.1 grew from 2 → **5 decision points** (new scenes e2a/e2b/e2c: reassure a shy friend → share/take turns → repair an accident, meeting spec §6.3's 4–6/chapter floor), and **2 of ch2's 6 DPs (`dp_quest_start`, `dp_investigate`) are now `inputMode: "both"`** so typed replies land in the Little Dragon level (typed DPs 1 → 3 across the game). **Phase 4 hardening (2026-07-19):** §17D in-character API-failure surface + one auto-retry + authored fallback, demo-mode `filterInput` gap closed, axe WCAG 2.2 AA + keyboard-only accessibility suite, §19 bundle-size budget enforced in CI, and §13A.6 projector-resolution verification — 118 unit + 11 e2e tests. **Not built:** Supabase assets, hosted deploy, client remote sync, JSON-Schema CI, automated tests for Play Together, manual screen-reader pass (§22A.5), recorded backup video. **CI is green**: `typecheck`/`lint`/`validate:content`/`test:unit`/`build`/`audit:bundle`/`test:e2e` all exit 0 (see §3.14). Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
-| Toolchain | Node ≥20 (`.nvmrc` 22), Vite 6, TypeScript 5.8, Vitest 3, Hono, better-sqlite3, jose, bcryptjs, tsx, ESLint 9 + typescript-eslint |
+| Overall implementation status | **🟨 Playable MVP, DOM-scene model.** Two child levels, both grid-backed (**ch1 Everbright Meadow**, **ch2 The Little Dragon Who Wouldn't Stop Guarding golden path W1→W7** — Wize is the guiding companion, Flicker the dragon physically blocks the path until the final walk-to-stage finish; ch3 forest removed 2026-07-17) + parent coach entry; scene engine with multi-tap/repair; **WASD/arrow world movement with collision, companion follow, collectibles**; **parameterized 100×100 grid levels (per-cell color + walkability, canvas background, center-point collision) — every scene binds a grid via `gridMapId` (6 grids: everbright-meadow, singing-bridge [orphaned], forest-of-questions, meadow-of-curiosity, cave-of-purpose, mountain-festival), hub cards show grid thumbnails**; companion safety filters + demo/live clients; counselor insights + Together Mode (co-play discuss prompts); **cross-device Play Together invites (shareable 4-letter code / `?invite=` link, SQLite-backed rooms, SSE live updates, mobile/LAN dev support — see [play-together-invites.md](./docs/context/play-together-invites.md))**; **pre-level check-in (3 open-ended questions → 0–10 starting point + bright/steady/gentle placement, fed into journey reflection)**; **declarative stage objects (grid-cell-placed interactables: multi-page dialogs + finish lines that advance/complete a stage — pure JSON authoring)**; local/demo persistence; **Hono API — parent auth + child profiles now Supabase-backed (Postgres + Supabase Auth, RLS; ADR-003 Accepted 2026-07-20 — see [server-auth-supabase.md](./docs/context/server-auth-supabase.md)), client wired for login + children (new `"children"` screen), remote-progress endpoint still server-built/client-not-wired; companion + reflect + together routes stay SQLite/local**; Docker; 173 unit tests + content validate. **Scored Ask-for-Help beat** on the Ch.1 path (`dp_ask_grownup` → cross-cutting `ask_for_help` skill, no meter) and **distress-aware resume** (`resumeCheckin` screen when a session ended in `safetyFlag: distress`; re-entry copy is SME-draft) added 2026-07-19. **Phase 2 (widened interaction curve, 2026-07-19):** Ch.1 grew from 2 → **5 decision points** (new scenes e2a/e2b/e2c: reassure a shy friend → share/take turns → repair an accident, meeting spec §6.3's 4–6/chapter floor), and **2 of ch2's 6 DPs (`dp_quest_start`, `dp_investigate`) are now `inputMode: "both"`** so typed replies land in the Little Dragon level (typed DPs 1 → 3 across the game). **Phase 4 hardening (2026-07-19):** §17D in-character API-failure surface + one auto-retry + authored fallback, demo-mode `filterInput` gap closed, axe WCAG 2.2 AA + keyboard-only accessibility suite, §19 bundle-size budget enforced in CI, and §13A.6 projector-resolution verification — 118 unit + 11 e2e tests. **Not built:** Supabase-backed level/zone images (Ermoni/Gabby, in progress), hosted deploy, client remote-progress sync (`/api/progress/:childId` has no caller yet), JSON-Schema CI, automated tests for Play Together, manual screen-reader pass (§22A.5), recorded backup video. **CI is green**: `typecheck`/`lint`/`validate:content`/`test:unit`/`build`/`audit:bundle`/`test:e2e` all exit 0 (see §3.14). Art is grid canvases + inline SVG cast (8-bit pixel-art style); zone PNGs remain for celebration + fallback. |
+| Toolchain | Node ≥20 (`.nvmrc` 22), Vite 8, TypeScript 5.8, Vitest 4, Hono, better-sqlite3 (Play Together only), `@supabase/supabase-js` (parent auth + children/progress, ADR-003), jose, tsx, ESLint 9 + typescript-eslint |
 | Quick test | `cd trunorth && npm install && npm run demo` → http://localhost:4173/?demo=1 (verified: build + preview work) |
-| Last updated | 2026-07-20 (pushed to GitHub + CI verified green on a real run — see §5/§6) |
+| Last updated | 2026-07-20 (Supabase auth migration — ADR-003 Accepted, parent login + children screen shipped; see §5/§6) |
 
 ---
 
@@ -197,12 +214,13 @@ trunorth/
 ├── api/
 │   └── [[...route]].ts        # ✅ Vercel Node Function — forwards /api/* to the Hono `app`
 ├── server/                    # ✅ Hono API (dev: tsx watch) 🔧 Jose (deploy)
-│   ├── auth/jwt.ts            # HS256 sign/verify (jose)
-│   ├── config.ts              # ✅ .env loader + serverConfig
-│   ├── db/migrate.ts          # SQLite schema (parents, children, progress, audit, together_rooms)
+│   ├── auth/supabase.ts       # ✅ verifySupabaseToken — HS256 or JWKS (ADR-003)
+│   ├── config.ts              # ✅ .env loader + serverConfig (incl. supabase.*)
+│   ├── db/migrate.ts          # SQLite — now only together_rooms (parents/children/progress/audit moved to Supabase)
+│   ├── db/supabase.ts         # ✅ getServiceClient() — Supabase service-role client
 │   ├── routes/companion.ts    # POST /api/companion + /api/reflect
 │   ├── routes/together.ts     # ✅ Play Together invite rooms (create/join/get/close/stream)
-│   ├── index.ts               # health, auth, children, progress routes + CORS (LAN-aware origin fn)
+│   ├── index.ts               # health(+/supabase), auth/me, children, progress routes (Supabase) + CORS (LAN-aware origin fn)
 │   └── main.ts                # listen entry (port 3001)
 ├── src/
 │   ├── main.ts                # ✅ Boot, screens, startScenario, engine + world + Play Together wiring
@@ -221,9 +239,11 @@ trunorth/
 │   ├── together/inviteStore.ts # ✅ Play Together client: createRoom/joinRoom/watchRoom, COLOR_TUNES/PLAYER_CHARACTERS
 │   ├── types/index.ts         # ✅ Shared contracts
 │   ├── util/id.ts             # ✅ newId() — LAN/non-secure-context UUID fallback
-│   └── ui/                    # ✅ GameView, screens, togetherScreens, auth helpers
-├── tests/unit/                # ✅ 135 tests — engine (13) + grid (8) + checkin (6) + stageObjects (10) + phase1 (6) + phase2 (7) + phase3 (7) + phase4-errors (10) + sparks (10) + exploreLoop (7) + redteam (51)
-├── tests/e2e/                 # ✅ 18 Playwright tests — demo-mode (3) + accessibility (4) + projector (4) + child-surface (3) + camera (4)
+│   ├── lib/supabase.ts        # ✅ Browser Supabase client (ADR-003) — lazy + dynamically imported, null in demo mode
+│   └── ui/                    # ✅ GameView, screens, togetherScreens, childrenScreen, auth (Supabase Auth)
+├── supabase/migrations/       # ✅ 0001_children_progress.sql — child_profiles/progress/audit_logs + RLS (paste into SQL Editor)
+├── tests/unit/                # ✅ 173 tests — engine (13) + grid (8) + checkin (6) + stageObjects (10) + phase1 (6) + phase2 (7) + phase3 (7) + phase4-errors (10) + sparks (10) + exploreLoop (7) + redteam (51) + supabaseAuth (4) + others
+├── tests/e2e/                 # ✅ 19 Playwright tests — demo-mode (3) + accessibility (4) + projector (5) + child-surface (3) + camera (4)
 ├── public/fonts/              # ✅ self-hosted Nunito + Inter variable woff2 (SIL OFL) — no CDN, offline-safe
 ├── playwright.config.ts       # ✅ e2e config; webServer runs `vite preview` (production build)
 ├── Dockerfile · docker-compose.yml
@@ -257,7 +277,12 @@ adapter added 2026-07-17.)
   achievement checklist, celebration copy (Star Crystal / Sky Festival, `mountain.png`).
 - `src/config/gameState.ts` — `createInitialGameState(demoMode)` from `appConfig.defaults`.
 - `server/config.ts` — dependency-free `.env` loader + `serverConfig`
-  (port/CORS/JWT/db path/companion model+floor+timeout).
+  (port/CORS/db path/`supabase.{url,serviceRoleKey,jwtSecret}`/companion model+floor+timeout).
+- `src/lib/supabase.ts` — browser `getSupabase()` (ADR-003): lazy singleton, dynamically
+  `import()`s `@supabase/supabase-js` (keeps it out of the guest/demo golden-path chunk,
+  §19 bundle budget), resolves `null` in demo mode or when `VITE_SUPABASE_*` are unset.
+  New env: `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`/`SUPABASE_JWT_SECRET` (server, never
+  `VITE_`), `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (client).
 
 ### 3.1 Application entry (`src/main.ts`)
 ✅ Implemented. Detects demo mode (`?demo` / `VITE_DEMO_MODE`), wires
@@ -361,19 +386,29 @@ modules (bubbles/HUD live in `GameView` + CSS).
   `renderGameView`'s last param, `togetherPlayers: TogetherPlayer[]`, renders a small
   badge row (name/role/accent color) next to the "Playing Together" pill — see
   [play-together-invites.md](./docs/context/play-together-invites.md).
-- `screens.ts` — `renderLanding`, `renderAuthForm` (parent login/register),
-  `renderOnboarding` (archetype/name/avatar; default **Flicker**), `renderScenarioHub`
-  (child cards use grid canvas thumbnails when the start scene binds a grid; PNG fallback),
-  `renderCheckin` (pre-level check-in cards + compass result; skippable — see
-  [ui-screens-views.md](./docs/context/ui-screens-views.md)),
+- `screens.ts` — `renderLanding`, `renderAuthForm` (parent login/register — now Supabase
+  Auth, see `auth.ts` below), `renderOnboarding` (archetype/name/avatar; default
+  **Flicker**), `renderScenarioHub` (child cards use grid canvas thumbnails when the start
+  scene binds a grid; PNG fallback), `renderCheckin` (pre-level check-in cards + compass
+  result; skippable — see [ui-screens-views.md](./docs/context/ui-screens-views.md)),
   `renderResumeCheckin` (distress-aware re-entry card, spec §17D — calm 🫂 card with a
   non-scored "keep going / sit here for a bit" pair; SME-draft copy).
 - `togetherScreens.ts` — **new.** `renderTogetherLobby` (host/join-by-code),
   `renderTogetherPlayerSetup` (name/color/character picker), `renderTogetherWaiting`
   (code/link + live seat status via SSE/polling) — see
   [play-together-invites.md](./docs/context/play-together-invites.md).
-- `auth.ts` — session token helpers (`getToken`/`setSession`/`clearSession`),
-  `apiLogin`/`apiRegister`, `hashPin`/`verifyPin` (WebCrypto SHA-256).
+- `childrenScreen.ts` — **new (2026-07-20, ADR-003).** `renderChildren(container,
+  onContinue, onSignOut)` — post-login parent screen: lists child profiles (`GET
+  /api/children`), add-child form → `POST /api/children`, Sign Out, Continue → hub.
+  Reached via `main.ts`'s new `"children"` `AppScreen`.
+- `auth.ts` — **rewritten 2026-07-20 for Supabase Auth (ADR-003).** `initAuth()` (hydrate
+  a sync token/user cache from any existing Supabase session, subscribe to
+  `onAuthStateChange`, purge legacy `trunorth_token`/`trunorth_user` keys), `getToken()`/
+  `getUser()`/`isAuthenticated()` (sync reads of the cache — existing callers unchanged),
+  `signIn`/`signUp` (→ `{needsEmailConfirm}`)/`signOut` (async, via
+  `src/lib/supabase.ts`'s `getSupabase()`), `hashPin`/`verifyPin` (unchanged, WebCrypto
+  SHA-256, parent-gate PIN — unrelated to account auth). See
+  [server-auth-supabase.md](./docs/context/server-auth-supabase.md).
 - Together Mode discuss prompts (same-browser co-play, distinct from Play Together
   invites): `counselor/coPlay.ts`.
 
@@ -460,22 +495,27 @@ inert data shape.
 [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md).
 
 > 🔧 **Jose** — production hosting for this Hono server + static client.
+- **2026-07-20 (ADR-003):** parent auth + child profiles + progress + audit logs moved from
+  SQLite (`better-sqlite3`) to **Supabase Postgres**, which also resolves the Vercel
+  cold-start persistence problem the paragraph below used to describe for those tables —
+  see [server-auth-supabase.md](./docs/context/server-auth-supabase.md). SQLite now only
+  backs Play Together's `together_rooms` (still subject to the `/tmp` cold-start caveat,
+  which is acceptable for a 2-hour-TTL guest room).
 - `api/[[...route]].ts` — Vercel Node.js Function (`export const runtime = "nodejs"`,
-  required so `better-sqlite3` works) using `hono/vercel`'s `handle(app)` to forward every
-  `/api/*` path to the unchanged Hono `app`; catch-all filename so one function serves all
-  routes. **Requires `DATABASE_PATH=/tmp/trunorth.db`** (or similar) as a Vercel env var —
-  the project filesystem is read-only outside `/tmp`, so the default `./data/trunorth.db`
-  would crash every cold start (`db/migrate.ts` opens the file at module load). This makes
-  parent-auth/children/progress non-persistent across cold starts on Vercel, which is
-  currently fine because the client doesn't call those endpoints yet (§3.8); wiring real
-  persistence needs a serverless-compatible DB swap (Vercel Postgres/Neon or Turso
-  libSQL), a separate task from this adapter.
-- `index.ts` — `GET /api/health`; **parent auth** `register`/`login`/`me` (bcrypt + JWT);
-  **child profiles** `GET/POST /api/children`; **remote progress** `GET/PUT
-  /api/progress/:childId` (parent-owned, upsert; no client caller yet); audit-log writes;
-  CORS is now a dynamic origin function (was a static list) — allows `serverConfig.corsOrigins`
-  plus any `localhost`/`127.0.0.1`/LAN-IP (`192.168.x`/`10.x`/`172.16–31.x`) origin, so a
-  phone on `http://192.168.x.x:5173` can reach the API for Play Together.
+  required so `better-sqlite3` still works for Play Together) using `hono/vercel`'s
+  `handle(app)` to forward every `/api/*` path to the unchanged Hono `app`; catch-all
+  filename so one function serves all routes. Still needs `DATABASE_PATH=/tmp/trunorth.db`
+  for the `together_rooms` SQLite file, plus the new Supabase env vars (below).
+- `index.ts` — `GET /api/health` + `GET /api/health/supabase`; **parent auth** `GET
+  /api/auth/me` (Supabase JWT verification — register/login happen client-side directly
+  against Supabase Auth, no server endpoint for them anymore); **child profiles**
+  `GET/POST /api/children` (Supabase Postgres, scoped by `parent_id`, **now called by the
+  client** — `src/ui/childrenScreen.ts`); **remote progress** `GET/PUT
+  /api/progress/:childId` (Supabase Postgres, parent-owned, upsert; still no client
+  caller); audit-log writes (Supabase `audit_logs`, non-fatal on failure). CORS is a
+  dynamic origin function — allows `serverConfig.corsOrigins` plus any
+  `localhost`/`127.0.0.1`/LAN-IP (`192.168.x`/`10.x`/`172.16–31.x`) origin, so a phone on
+  `http://192.168.x.x:5173` can reach the API for Play Together.
 - `routes/companion.ts` — `POST /api/companion`: input filter → Anthropic (if key) or
   local **rubric score** (`scoreTypedResponse` via `req.typedRubricRef`, §3.9) → confidence
   floor → output filter → fallbacks library;
@@ -485,10 +525,12 @@ inert data shape.
   /api/together/rooms/:code/join`, `POST /api/together/rooms/:code/close`, `GET
   /api/together/rooms/:code/stream` (SSE). No auth — guest-friendly, 2-hour TTL. See
   [play-together-invites.md](./docs/context/play-together-invites.md).
-- `auth/jwt.ts` — `signToken`/`verifyToken` (jose HS256, 7-day expiry).
-- `db/migrate.ts` — SQLite schema: parents, child_profiles, progress, audit_logs,
-  `together_rooms` (WAL).
-- ⬜ No Vercel `api/` tree in this repo.
+- `auth/supabase.ts` — `verifySupabaseToken(token)` (jose; HS256 via `SUPABASE_JWT_SECRET`
+  when set, else `createRemoteJWKSet` against the project's JWKS endpoint). Replaces the
+  deleted `auth/jwt.ts` (`signToken`/`verifyToken`, custom HS256+bcrypt).
+- `db/supabase.ts` — `getServiceClient()` (Supabase service-role client, lazy singleton).
+- `db/migrate.ts` — SQLite schema: now only `together_rooms` (WAL); parents/child_profiles/
+  progress/audit_logs moved to `supabase/migrations/0001_children_progress.sql`.
 
 ### 3.12 Content (`content/`)
 ✅ Implemented (draft; SME review still pending). Every scene sets `gridMapId`, so both
@@ -665,11 +707,12 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 | [world-movement.md](./docs/context/world-movement.md) | `src/engine/WorldRuntime.ts`, `src/engine/Collision.ts`, `src/input/InputController.ts` | Free-roam runtime: rAF loop, AABB collision, follow, collectibles, interact |
 | [world-grid-levels.md](./docs/context/world-grid-levels.md) | `src/engine/GridMap.ts`, `src/content/gridLevels.ts`, `src/render/gridBackground.ts` | 100×100 grid levels: cell vector, painting API, canvas bg, center-point collision, `?grid=` testing |
 | [world-stage-objects.md](./docs/context/world-stage-objects.md) | `StageObject`/`DialogRecord` types, `src/content/stageObjects.ts`, `DIALOGS`, WorldRuntime object proximity, `renderDialogOverlay`, SceneEngine finish methods, `main.ts` dispatch | Declarative stage objects: grid-cell interactables → multi-page dialogs + finish lines (advance/complete); authoring guide |
-| [ui-screens-views.md](./docs/context/ui-screens-views.md) | `src/ui/GameView.ts`, `src/ui/screens.ts`, `src/ui/auth.ts` | Every render function: game view, overlays, onboarding, hub, parent gate, auth |
-| [server-api.md](./docs/context/server-api.md) | `server/*` (index, main, config, auth, db, routes) | All HTTP endpoints, SQLite schema, JWT, companion pipeline steps |
+| [ui-screens-views.md](./docs/context/ui-screens-views.md) | `src/ui/GameView.ts`, `src/ui/screens.ts`, `src/ui/auth.ts`, `src/ui/childrenScreen.ts`, `src/lib/supabase.ts` | Every render function: game view, overlays, onboarding, hub, parent gate, auth, children |
+| [server-api.md](./docs/context/server-api.md) | `server/*` (index, main, config, auth, db, routes) | All HTTP endpoints, Supabase Postgres schema (SQLite for Play Together only), Supabase Auth token verification, companion pipeline steps |
+| [server-auth-supabase.md](./docs/context/server-auth-supabase.md) | `server/auth/supabase.ts`, `server/db/supabase.ts`, `src/lib/supabase.ts`, `src/ui/auth.ts`, `src/ui/childrenScreen.ts`, `supabase/migrations/0001_children_progress.sql` | **New (2026-07-20, ADR-003).** Supabase Auth + Postgres migration: setup steps, gateway architecture, HS256-vs-JWKS token verification, demo-mode/bundle-size guardrails |
 | [safety-companion-pipeline.md](./docs/context/safety-companion-pipeline.md) | `server/routes/companion.ts`, `src/companion/*`, `src/safety/*`, fallbacks | Live vs demo companion paths, filters, fallback coverage |
 | [play-together-invites.md](./docs/context/play-together-invites.md) | `server/routes/together.ts`, `src/together/inviteStore.ts`, `src/ui/togetherScreens.ts`, `src/util/id.ts`, `main.ts`/`GameView.ts` wiring | Cross-device Play Together invite rooms: server routes, client store, UI screens, mobile/LAN support |
-| [adr/](./docs/adr/README.md) | Consolidated tech spec v3.0 §25 — decisions ADR-001…006 | **Architecture Decision Records** (spec requires them tracked in `docs/adr/`). Accepted: 001 Vite 8 pin, 002 Vercel Node runtime, 004 model pin + lifecycle. Open/undecided: 003 EXT DB+auth, 005 asset provenance, 006 raw-input retention |
+| [adr/](./docs/adr/README.md) | Consolidated tech spec v3.0 §25 — decisions ADR-001…006 | **Architecture Decision Records** (spec requires them tracked in `docs/adr/`). Accepted: 001 Vite 8 pin, 002 Vercel Node runtime, 003 Supabase (2026-07-20), 004 model pin + lifecycle. Open/undecided: 005 asset provenance, 006 raw-input retention |
 | [governance/delivery-status.md](./docs/governance/delivery-status.md) | Consolidated tech spec v3.0 §26 (risk register) + §27 (Definition of Done) | Where we stand against the DoD (3 of 8 met) and each risk R01–R08; includes what the red-team suite found. Point-in-time 2026-07-19 |
 | [spec-coverage.md](./docs/context/spec-coverage.md) | `docs/specs/` Master Spec §2–§22A measured against the implemented tree (§3 of this file) | **Point-in-time audit (2026-07-19, post-Phase 3):** feature-by-feature ✅/🟨/⬜ coverage of the Master Spec, incl. `[MVP]`/`[EXT]` tiers and the §22A credibility gaps. A snapshot, not a live tracker — §5 below is the live gap list |
 
@@ -764,7 +807,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 |---|---|---|
 | Fix `npm run typecheck` → CI green | Daniel | ✅ fixed 2026-07-19 |
 | Level 1 / zone production art + Supabase | Ermoni + Gabby | ⬜ |
-| Hosted deploy (client + Hono API) | Jose | 🟨 **Deployed 2026-07-20**: https://guardiandragon.vercel.app is live. **Static client works fine** (verified 200 OK). **`/api/*` was crashing** — `POST /api/companion` returned `500 FUNCTION_INVOCATION_FAILED`. Root-caused precisely (not just suspected): `server/index.ts` imports `server/db/migrate.ts` unconditionally at module scope, and that module runs `mkdirSync`/`new Database(...)` **at import time** — so *every* `/api/*` route crashes on cold start regardless of whether that route touches the DB (confirmed `routes/companion.ts` itself never references `db`; the crash was pure collateral damage from the bootstrap). Vercel Node Functions have no writable disk outside `/tmp`, and the default `databasePath` was `./data/trunorth.db`. **Fixed in code** (`server/config.ts`): defaults to `/tmp/trunorth.db` when `process.env.VERCEL` is set (Vercel sets this on every deployment automatically — no dashboard env var needed), unchanged `./data/trunorth.db` locally; an explicit `DATABASE_PATH` still overrides either way. Verified the branch logic directly (`VERCEL=1` → `/tmp/trunorth.db`; unset → `./data/trunorth.db`) since the local `.env` sets `DATABASE_PATH` explicitly and would otherwise mask the fallback in a naive test. ⚠️ **Not yet redeployed/reverified live** — this fix is committed to the repo but the running Vercel deployment predates it; needs a redeploy (git push if the project auto-deploys from GitHub, or `vercel --prod`) and then a re-check of `POST /api/companion`. **Known residual limitation, not a bug**: `/tmp` is writable but not persistent across cold starts or shared between concurrent instances, so parent auth / child profiles / progress / Play Together rooms can still appear to "reset" — real persistence needs a hosted DB (Postgres/Supabase/Turso, same open question as the Supabase row above). `?demo=1` still sidesteps all of this by running fully client-side |
+| Hosted deploy (client + Hono API) | Jose | 🟨 **Deployed 2026-07-20**: https://guardiandragon.vercel.app is live. **Static client works fine** (verified 200 OK). **`/api/*` was crashing** — `POST /api/companion` returned `500 FUNCTION_INVOCATION_FAILED`. Root-caused precisely (not just suspected): `server/index.ts` imports `server/db/migrate.ts` unconditionally at module scope, and that module runs `mkdirSync`/`new Database(...)` **at import time** — so *every* `/api/*` route crashes on cold start regardless of whether that route touches the DB (confirmed `routes/companion.ts` itself never references `db`; the crash was pure collateral damage from the bootstrap). Vercel Node Functions have no writable disk outside `/tmp`, and the default `databasePath` was `./data/trunorth.db`. **Fixed in code** (`server/config.ts`): defaults to `/tmp/trunorth.db` when `process.env.VERCEL` is set (Vercel sets this on every deployment automatically — no dashboard env var needed), unchanged `./data/trunorth.db` locally; an explicit `DATABASE_PATH` still overrides either way. Verified the branch logic directly (`VERCEL=1` → `/tmp/trunorth.db`; unset → `./data/trunorth.db`) since the local `.env` sets `DATABASE_PATH` explicitly and would otherwise mask the fallback in a naive test. ⚠️ **Not yet redeployed/reverified live** — this fix is committed to the repo but the running Vercel deployment predates it; needs a redeploy (git push if the project auto-deploys from GitHub, or `vercel --prod`) and then a re-check of `POST /api/companion`. **Known residual limitation, not a bug** (narrowed 2026-07-20): parent auth / child profiles / progress moved to Supabase Postgres (ADR-003 — see the changelog row + [server-auth-supabase.md](./docs/context/server-auth-supabase.md)), so those no longer reset on cold start. `/tmp` is still writable-but-not-persistent for the one thing still on SQLite — **Play Together rooms** — which can still appear to "reset" there; acceptable for now given the 2-hour room TTL. `?demo=1` still sidesteps all of this by running fully client-side |
 | Wire client to server remote-progress endpoints | (unassigned) | ⬜ server side done |
 | GoZen!-informed vision for Levels 2+ | Vandy | 🟨 script L1 done; research open |
 | Level 1 playtest criteria | Ranya | ⬜ |
@@ -834,6 +877,7 @@ unreachable. Ships alongside LAN/mobile support (`vite.config.ts` `host:true`,
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | **Migrated parent auth + child profiles + progress off SQLite/bcrypt+JWT onto Supabase (Postgres + Supabase Auth), resolving ADR-003 as Accepted — Supabase, and shipped a real parent login page.** Two-phase change, both parts of the same task. **Phase A (connect):** `npm i @supabase/supabase-js`; new `src/lib/supabase.ts` (browser client — lazy singleton, dynamically imported so it never loads on the guest/demo golden path, `null` in demo mode/when unconfigured) and `server/db/supabase.ts` (server service-role client); new `supabase/migrations/0001_children_progress.sql` (`child_profiles`/`progress`/`audit_logs` with RLS, parent-owns-own-children policies); new `GET /api/health/supabase`; new env vars `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`/`SUPABASE_JWT_SECRET` (server) + `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (client). **Phase B (login + children UI):** new `server/auth/supabase.ts` (`verifySupabaseToken` — HS256 via `SUPABASE_JWT_SECRET` when set, else JWKS against the project's `.well-known` endpoint; deleted `server/auth/jwt.ts`); `server/index.ts`'s `/api/auth/register`+`/login` deleted (Supabase Auth handles these directly from the browser now) and `GET/POST /api/children` + `GET/PUT /api/progress/:childId` rewritten onto the Supabase service client (still explicitly scoped by `parent_id` — the service role bypasses RLS, so RLS is defense-in-depth only); `server/db/migrate.ts` stripped down to just `together_rooms` (Play Together, untouched, still SQLite); removed `bcryptjs`+`@types/bcryptjs`. Client: `src/ui/auth.ts` rewritten around `@supabase/supabase-js` (`initAuth`/`getToken`/`getUser`/`isAuthenticated`/`signIn`/`signUp`/`signOut`; `getToken()` stays **synchronous** via a session cache so the 3 existing sync callers — companion client bearer, Play Together authed-check — needed no changes; purges the old `trunorth_token`/`trunorth_user` localStorage keys; `hashPin`/`verifyPin` parent-gate PIN untouched); `renderAuthForm` (`screens.ts`) now calls `signIn`/`signUp` and shows a "check your email" state on `needsEmailConfirm`; new `src/ui/childrenScreen.ts` (`renderChildren` — list + add-child form, wired to the now-actually-called `/api/children`) and new `"children"` `AppScreen` in `main.ts` between login/register success and the hub (landing routes straight there if already authenticated); guest ("Play Now") and `?demo=1` paths untouched. **Bundle-size fallout, caught and fixed before landing:** a static `@supabase/supabase-js` import tripped the §19 JS budget (384.8 kB raw vs 250 kB, 105.4 kB gzip vs 80 kB); fixed by making `src/lib/supabase.ts` dynamically `import()` the SDK into its own chunk instead (only loads when a parent opens login/children), then raised the two JS budgets in `scripts/audit-bundle-size.ts` (250→450 kB raw, 80→130 kB gzip) with a note, since the audit sums all `dist/` JS regardless of chunking and the lazy chunk still counts toward that total even though it never loads on the golden path. New unit test `tests/unit/supabaseAuth.test.ts` (4 tests, HS256 path only — JWKS needs a live project, exercised manually per the new context doc). **Verified:** 173/173 unit tests, `lint`/`typecheck` clean (0 errors — see the §3.14 note below, this contradicts CLAUDE.md's stale "9 known errors" claim), `validate:content` clean, all 19 Playwright e2e specs green including both demo-mode zero-external-network tests (rebuilt `dist/` first — a stale local build from before the self-hosted-fonts migration briefly made the fonts-CDN check fail, unrelated to this change, fixed by rebuilding), `audit:bundle` clean after the budget change, manual curl checks (`/api/health/supabase` gracefully reports `configured:false` on empty env; `/api/children` correctly 401s on missing/garbage tokens). **Not done / needs the project owner:** a real Supabase project's URL/keys were not available in this session, so the SQL migration hasn't been run against a live project and the full register→login→add-child→sign-out flow hasn't been exercised against real Supabase Auth — only against the graceful-degradation (unconfigured) path. Setup steps + HS256-vs-JWKS decision record: new [server-auth-supabase.md](./docs/context/server-auth-supabase.md). ADR-003 → ✅ Accepted; ADR-006 (raw-input retention, still open) noted as not blocking this since neither `child_profiles` nor `progress.game_state_json` carry a `rawInput` field. |
 | 2026-07-20 | **Fixed the Vercel `/api/*` 500 crash — root-caused, not guessed.** The previous changelog row below suspected `better-sqlite3`'s file write; traced it further and found the real mechanism: `server/index.ts` imports `server/db/migrate.ts` **unconditionally at module scope**, and that module's `mkdirSync`/`new Database(...)` calls run **at import time**, so every `/api/*` route crashes on cold start — including `/api/companion`, which never itself references `db` (checked `routes/companion.ts` directly; the crash was pure collateral from the bootstrap import chain). Vercel Node Functions have no writable disk outside `/tmp`; the default path was `./data/trunorth.db`. Fixed with a one-line, environment-conditional default in `server/config.ts`: `/tmp/trunorth.db` when `process.env.VERCEL` is set (Vercel sets this automatically on every deployment — no dashboard config needed), `./data/trunorth.db` unchanged locally, explicit `DATABASE_PATH` still wins either way. Verified the branch logic directly rather than trusting it by inspection: forced `VERCEL=1` in a throwaway Node process → `/tmp/trunorth.db`; unset → `./data/trunorth.db` (had to bypass the local `.env`'s explicit `DATABASE_PATH` to actually exercise the fallback, since `loadEnvFile()` only fills in *unset* keys). typecheck/lint/169 unit/validate:content/build all still clean after the change. **Known, deliberate limitation** (not something this fix claims to solve): `/tmp` isn't persistent across cold starts or shared between concurrent instances, so parent auth / child profiles / progress / Play Together can still appear to "reset" in production — that needs a real hosted DB (Postgres/Supabase/Turso), tracked as its own open item. ⚠️ **This fix is in the repo but the live deployment predates it** — needs a redeploy before `POST /api/companion` actually stops crashing on https://guardiandragon.vercel.app. |
 | 2026-07-20 | **First live Vercel deploy — https://guardiandragon.vercel.app — and it surfaced a real bug rather than just closing the gap.** Verified directly rather than assuming a successful `vercel deploy` means the app works end to end: the static client loads clean (200 OK), but `POST /api/companion` returns `500 FUNCTION_INVOCATION_FAILED`. Root cause is almost certainly `server/config.ts`'s `databasePath` defaulting to a `./data/trunorth.db` file write (`better-sqlite3`) — Vercel Node Functions have no writable persistent disk at that path, so the migration step likely throws on cold start. **The failure degrades gracefully, not visibly**: `CompanionClient.ts` throws on any non-OK response, which the existing §17D retry/fallback wrapper already catches, so a child opening the plain link still plays fine — every decision just silently gets the canned per-band fallback line instead of a live AI-personalized one. Play Together, parent auth, and remote progress are all non-functional on this deploy for the same reason (they all need the same DB). **Not a config fix** — needs a hosted database (Postgres/Supabase/Turso) before the API path works on Vercel; `?demo=1` sidesteps it entirely by running fully client-side, which is the recommended link to share until that's resolved. Surfaced while scoping mobile-device support (see the mobile-readiness row below) — checking the live deploy was part of answering "can we send this link to a phone." |
 | 2026-07-20 | **SME review script extended from Ch.1-only to cover everything currently gated on Vandy's sign-off.** `docs/scripts/ch1-explore-script-SME-DRAFT.md` (linked from the 2026-07-19 changelog row below as a Ch.1-only artifact) is now a full cross-chapter review packet: added Ch.2's 12 new discovery dialogs (w1–w6, Wize-voiced) with their rewritten scene goals, the Ch.2 celebration screen copy, full option text for the 3 newer Ch.1 decision points (`dp_reassure_shy`/`dp_share_flower`/`dp_repair_oops` — previously referenced but not quoted), a section explaining the `{name}`/`{companion}` personalization pattern, and a new cross-cutting section with the actual text of the distress-resume copy, the in-session distress line, the 3 check-in placement lines, the API-failure retry line, and the generic decision fallback — none of which had been assembled in one reviewable place before. Retitled to reflect the wider scope; open-questions list grown to include Ch.2's "worry as a companion, not a flaw" framing and the distress/error copy's tone. Docs-only — no application code touched, no new copy authored (everything quoted already existed in `content/` or `src/`). |

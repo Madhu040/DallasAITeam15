@@ -1,6 +1,7 @@
 # UI screens & game view
 
-**Sources:** `trunorth/src/ui/GameView.ts`, `trunorth/src/ui/screens.ts`, `trunorth/src/ui/auth.ts`
+**Sources:** `trunorth/src/ui/GameView.ts`, `trunorth/src/ui/screens.ts`, `trunorth/src/ui/auth.ts`,
+`trunorth/src/ui/childrenScreen.ts`, `trunorth/src/lib/supabase.ts`
 
 All UI is imperative DOM construction (no framework). Dynamic text goes through
 `textContent` or a local `escapeText`/`escapeHtml` helper before `innerHTML`.
@@ -66,7 +67,8 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
 - `renderLanding(container, onPlay, onPlayTogether, onAuth)` — landing card with Play,
   Play Together, demo hint, and parent Login / Create Account buttons.
 - `renderAuthForm(container, mode, onSuccess, onBack)` — email+password form calling
-  `apiLogin`/`apiRegister`, stores session via `setSession`.
+  `signIn`/`signUp` (Supabase Auth, ADR-003); on `signUp`'s `needsEmailConfirm` shows a
+  "check your email" notice instead of navigating.
 - `renderOnboarding(container, onComplete)` — 3 steps: companion archetype
   (dragon/fox/sprite), companion name (default from `appConfig.defaults`), avatar skin tone;
   returns collected profile data.
@@ -82,14 +84,32 @@ All UI is imperative DOM construction (no framework). Dynamic text goes through
   `filterInput`-checked, keyword-scored; distress → supportive line + flag). Ends on a
   compass result screen (bright/steady/gentle label, 10-dot 0–10 starting-point scale,
   companion line) → `onDone(CheckinRecord)`; "Skip and start playing" → `onDone(null)`.
-- `isAuthenticated()` / `logout()` — thin wrappers over `auth.ts` (currently unused by callers).
-- Local `type Screen = landing|login|register|dashboard` — **"dashboard" is not an `AppScreen`
-  in `main.ts`, which is one of the open typecheck errors.**
+- `isAuthenticated()` / `logout()` — thin wrappers over `auth.ts`'s `isAuthenticated`/`signOut`.
+- Local `type Screen = "landing" | "login" | "register"` — matches `main.ts`'s `AppScreen`
+  (this doc previously noted a stale `"dashboard"` variant that no longer exists; `typecheck`
+  is currently a clean 0 errors, contradicting the "9 known errors" note elsewhere — code wins).
 
-## `auth.ts`
+## `childrenScreen.ts`
 
-- `AuthSession { token, user }`; session persisted in `localStorage["trunorth_session"]`.
-- `getToken` / `setSession` / `clearSession` — session helpers.
-- `apiRegister(email, password)` / `apiLogin(email, password)` — POST to
-  `{VITE_API_URL}/api/auth/*`, throw server `error` message on failure.
-- `hashPin(pin)` / `verifyPin(pin, hash)` — SHA-256 via WebCrypto, used by the parent gate.
+- `renderChildren(container, onContinue, onSignOut)` — the post-login parent screen
+  (`main.ts`'s `"children"` `AppScreen`, reached after sign-in/sign-up, or directly from
+  landing if already authenticated). Lists child profiles (`GET /api/children`), an
+  add-child form (name ≤30 chars, age band select) → `POST /api/children` → refetch,
+  **Continue** → hub, **Sign Out** → `signOut()` then `onSignOut()`.
+
+## `auth.ts` (rewritten 2026-07-20 for Supabase Auth — ADR-003)
+
+- Wraps `@supabase/supabase-js` (`src/lib/supabase.ts`, dynamically imported so it never
+  loads on the guest/demo golden path — see bundle-size note in
+  [server-auth-supabase.md](./server-auth-supabase.md)). No more custom JWT or localStorage
+  session — supabase-js owns its own session storage; this module keeps a **sync** token/user
+  cache (`initAuth()` hydrates it via `getSession()` + subscribes to `onAuthStateChange`) so
+  existing sync callers (`getToken()` — companion client bearer, Play Together auth check)
+  don't need to become async.
+- `initAuth()` — call once at boot (skipped in demo mode); also purges the legacy
+  `trunorth_token`/`trunorth_user` localStorage keys from the pre-Supabase auth.
+- `getToken()` / `getUser()` / `isAuthenticated()` — sync reads of the cache.
+- `signIn(email, password)` / `signUp(email, password) → {needsEmailConfirm}` / `signOut()` —
+  async, delegate to Supabase Auth; all throw/no-op gracefully when Supabase is unconfigured.
+- `hashPin(pin)` / `verifyPin(pin, hash)` — unchanged, SHA-256 via WebCrypto, used by the
+  parent gate (a separate local PIN mechanism, not part of the Supabase migration).

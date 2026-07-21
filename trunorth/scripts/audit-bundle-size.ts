@@ -68,15 +68,21 @@ const BUDGETS: Budget[] = [
   {
     label: "JavaScript (raw)",
     spec: "§19 build-artifact audit",
-    limitBytes: 250 * KB,
+    limitBytes: 450 * KB,
     measure: (files) => sumBy(files, (f) => ext(f, ".js")),
+    note: "raised 250→450 KB (ADR-003, 2026-07-20): @supabase/supabase-js is "
+      + "dynamically imported (src/lib/supabase.ts) into its own chunk, loaded only "
+      + "when a parent opens login/children — never on the guest/demo golden path — "
+      + "but this audit sums every JS file in dist/ regardless of chunking, so the "
+      + "ceiling has to cover the lazy chunk too.",
   },
   {
     label: "JavaScript (gzip, ~wire cost)",
     spec: "§19 + §13A.5 load-time budget",
-    limitBytes: 80 * KB,
+    limitBytes: 130 * KB,
     measure: (files) => sumBy(files, (f) => ext(f, ".js"), true),
-    note: "what actually governs first paint on venue WiFi",
+    note: "what actually governs first paint on venue WiFi; raised alongside the raw "
+      + "budget above for the same reason",
   },
   {
     label: "CSS (raw)",

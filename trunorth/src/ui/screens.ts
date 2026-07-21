@@ -1,4 +1,4 @@
-import { apiLogin, apiRegister, setSession, clearSession, getToken } from "./auth.js";
+import { signIn, signUp, signOut, isAuthenticated as authIsAuthenticated } from "./auth.js";
 import { SCENARIOS } from "../content/scenarios.js";
 import { getScene } from "../content/index.js";
 import { getGridLevel } from "../content/gridLevels.js";
@@ -123,14 +123,24 @@ export function renderAuthForm(
   submit.className = "btn-primary";
   submit.textContent = mode === "login" ? "Sign In" : "Create Account";
   submit.onclick = async () => {
+    error.textContent = "";
+    submit.disabled = true;
     try {
-      const session = mode === "login"
-        ? await apiLogin(emailInput.value, passInput.value)
-        : await apiRegister(emailInput.value, passInput.value);
-      setSession(session);
-      onSuccess();
+      if (mode === "login") {
+        await signIn(emailInput.value, passInput.value);
+        onSuccess();
+      } else {
+        const { needsEmailConfirm } = await signUp(emailInput.value, passInput.value);
+        if (needsEmailConfirm) {
+          error.textContent = "Check your email to confirm your account, then sign in.";
+        } else {
+          onSuccess();
+        }
+      }
     } catch (e) {
-      error.textContent = e instanceof Error ? e.message : "Error";
+      error.textContent = e instanceof Error ? e.message : "Something went wrong.";
+    } finally {
+      submit.disabled = false;
     }
   };
   card.appendChild(submit);
@@ -433,11 +443,11 @@ export function renderResumeCheckin(
 }
 
 export function isAuthenticated(): boolean {
-  return !!getToken();
+  return authIsAuthenticated();
 }
 
 export function logout(): void {
-  clearSession();
+  void signOut();
 }
 
 export function renderScenarioHub(

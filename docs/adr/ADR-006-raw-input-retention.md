@@ -22,7 +22,16 @@ Current state:
 - So today the product is **more conservative than the spec's schema**, which is a safe place
   to be sitting while this is undecided.
 
-The decision bites the moment the EXT backend (ADR-003) begins persisting anything.
+**2026-07-20 update:** ADR-003 is now Accepted (Supabase) and the EXT backend exists —
+`child_profiles` (parent-entered display_name/age_band/avatar_json, not child-derived) and
+`progress.game_state_json` (the same derived-only `GameState`/`GameEvent` shape above — still
+no `rawInput` field). **This ADR is still open and still gates the decision** — nothing here
+resolves it — but flagging that the schema persisted today happens to already sit on the
+conservative side (decision driver 1). The client has no caller for `/api/progress/:childId`
+yet (`product.md` §3.8), so no game state has actually been written server-side either way.
+
+The decision still bites the moment anything with a genuine `rawInput` field is added to what
+the EXT backend persists.
 
 ## Options considered
 

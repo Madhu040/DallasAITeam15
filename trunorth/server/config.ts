@@ -65,6 +65,19 @@ export const serverConfig = {
     "http://127.0.0.1:5173",
     "http://127.0.0.1:4173",
   ]),
+  supabase: {
+    url: envString("SUPABASE_URL", ""),
+    // New Supabase projects call this the "secret key" (SUPABASE_SECRET_KEY in the
+    // dashboard); older projects call it the "service_role key". Same purpose either
+    // way — bypasses RLS, server-only.
+    serviceRoleKey: envString("SUPABASE_SERVICE_ROLE_KEY", process.env.SUPABASE_SECRET_KEY ?? ""),
+    // Empty ⇒ verify tokens against the project's JWKS endpoint (new asymmetric
+    // signing keys). Set only for legacy projects still on the shared HS256 secret.
+    jwtSecret: envString("SUPABASE_JWT_SECRET", ""),
+    // Newer projects hand you this directly (SUPABASE_JWKS_URL in the dashboard) —
+    // when set, use it as-is instead of guessing the path from SUPABASE_URL.
+    jwksUrl: envString("SUPABASE_JWKS_URL", ""),
+  },
   companion: {
     apiKey: envString("ANTHROPIC_API_KEY", ""),
     // Pinned dated model ID (Consolidated tech spec v3.0 / Appendix F): a floating

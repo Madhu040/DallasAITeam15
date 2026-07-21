@@ -1,11 +1,19 @@
 # ADR-003 — EXT database & auth provider (Supabase vs Neon + Clerk)
 
-- **Status:** ⬜ **Open** — decision owed by Owner + Build
-- **Owner:** Owner + Build
-- **Gate:** Before any remote-progress work starts (spec §25)
+- **Status:** ✅ **Accepted — Supabase** (2026-07-20)
+- **Owner:** Jose
+- **Gate:** Before any remote-progress work starts (spec §25) — cleared
 
-> This ADR is deliberately **undecided**. It records the context and the trade-offs so the
-> owner can choose; it must not be resolved by whoever picks up the ticket next.
+> **Decision (2026-07-20):** Supabase. Postgres + Auth + RLS in one vendor was the deciding
+> factor — RLS maps directly onto "a parent can only read their own child's rows" (decision
+> driver 1 below), enforced in the database rather than only in application code. The
+> existing Hono API is kept as a **gateway** rather than replaced: the browser authenticates
+> directly against Supabase Auth, and the gateway verifies the resulting JWT and reads/writes
+> Supabase Postgres with the service-role key (RLS stays on as defense-in-depth; the gateway
+> scopes every query by `parent_id` explicitly, since the service role bypasses RLS). Full
+> walkthrough: [server-auth-supabase.md](../context/server-auth-supabase.md). This also fixes
+> the SQLite-on-Vercel cold-start problem noted below — Play Together's `together_rooms` table
+> is the only thing still on SQLite.
 
 ## Context
 

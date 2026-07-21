@@ -28,6 +28,7 @@ import {
   renderCheckin,
   renderResumeCheckin,
 } from "./ui/screens.js";
+import { renderChildren } from "./ui/childrenScreen.js";
 import {
   renderTogetherLobby,
   renderTogetherPlayerSetup,
@@ -43,7 +44,7 @@ import {
   type TogetherRole,
   type TogetherRoom,
 } from "./together/inviteStore.js";
-import { getToken } from "./ui/auth.js";
+import { getToken, initAuth, isAuthenticated } from "./ui/auth.js";
 import { speakLine, stopSpeaking } from "./audio/speech.js";
 import { playSfx, sfxForBand, startAmbience, stopAmbience } from "./audio/sfx.js";
 import { buildJourneyReflection } from "./counselor/insights.js";
@@ -63,6 +64,7 @@ type AppScreen =
   | "reflection"
   | "login"
   | "register"
+  | "children"
   | "togetherLobby"
   | "togetherSetup"
   | "togetherWaiting";
@@ -462,7 +464,7 @@ function render(): void {
             navigate("hub");
           }
         },
-        (s) => navigate(s),
+        (s) => navigate(isAuthenticated() ? "children" : s),
       );
       break;
 
@@ -647,17 +649,23 @@ function render(): void {
       break;
 
     case "login":
-      renderAuthForm(app, "login", () => navigate("hub"), () => navigate("landing"));
+      renderAuthForm(app, "login", () => navigate("children"), () => navigate("landing"));
       break;
 
     case "register":
-      renderAuthForm(app, "register", () => navigate("hub"), () => navigate("landing"));
+      renderAuthForm(app, "register", () => navigate("children"), () => navigate("landing"));
+      break;
+
+    case "children":
+      renderChildren(app, () => navigate("hub"), () => navigate("landing"));
       break;
   }
 }
 
 // Restore saved profile if present
 void (async () => {
+  if (!demoMode) await initAuth();
+
   const saved = await new LocalProgressStore().load();
   let endedInDistress = false;
   if (saved) {
