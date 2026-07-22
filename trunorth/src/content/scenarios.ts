@@ -1,6 +1,10 @@
 import type { ScenarioMeta } from "../types/index.js";
 
-/** Level 1 — The Little Dragon Who Wouldn't Stop Guarding, split into 3 playable phases. */
+/**
+ * Consolidated Level 1 hub:
+ * - Madhu's 3 Little Dragon phase names / biomes / starts (Forest → Valley → Mountain)
+ * - Daniel's Singing Bridge quest clarity (Shimmer Crystal, look → sort → breathe → cross)
+ */
 export const SCENARIOS: ScenarioMeta[] = [
   {
     id: "ch2",
@@ -8,7 +12,7 @@ export const SCENARIOS: ScenarioMeta[] = [
     title: "Forest of Questions",
     subtitle: "Phase 1 · Curiosity",
     description:
-      "Explorer Nova sets out for Star Crystals. When Flicker alarms about getting lost, ask curious questions — then inspect worry-flowers in the Meadow of Curiosity.",
+      "Say YES to the Shimmer Crystal quest with Flicker the Worry Dragon. Look carefully at the Singing Bridge, then sort FACT, MAYBE, and STORY with Wize the Wise Owl.",
     startSceneId: "w1",
     ageBand: "5-7",
     skills: ["worry_brave", "calm", "courage"],
@@ -20,10 +24,10 @@ export const SCENARIOS: ScenarioMeta[] = [
     title: "Valley of Welcome",
     subtitle: "Phase 2 · Kindness",
     description:
-      "Invite Flicker beside you in the Valley of Welcome, then thank your guardian in the Cave of Purpose — anxiety has a job, not a fight.",
+      "In the Valley and Cave of Purpose, help Flicker's body calm down — then choose KEEP GOING while still nervous.",
     startSceneId: "w4",
     ageBand: "5-7",
-    skills: ["empathy", "calm", "self_worth", "worry_brave"],
+    skills: ["empathy", "calm", "self_worth", "worry_brave", "courage"],
     estimatedMinutes: 5,
   },
   {
@@ -32,7 +36,7 @@ export const SCENARIOS: ScenarioMeta[] = [
     title: "Mountain of Helpers",
     subtitle: "Phase 3 · Courage",
     description:
-      "Comfort Flicker on the mountain, then take the Sky Festival stage one step at a time. Courage means going together — not feeling zero fear.",
+      "Cross the Singing Bridge one step at a time. Reach the Shimmer Crystal and earn Courage Feather #1.",
     startSceneId: "w6",
     ageBand: "5-7",
     skills: ["courage", "worry_brave", "self_worth"],

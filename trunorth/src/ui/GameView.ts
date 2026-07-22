@@ -1,5 +1,5 @@
 import type { DecisionPoint, DialogRecord, GameState, Scene, ScenePhase } from "../types/index.js";
-import { getDecisionPoint, getDialog } from "../content/index.js";
+import { getDecisionPoint, getDialog, chapterPath, pathIndexForScene } from "../content/index.js";
 import { objectSprite, objectWorldPos, sceneObjects } from "../content/stageObjects.js";
 import { renderFullBodyCharacter } from "../render/characters.js";
 import type { JourneyReflection } from "../counselor/insights.js";
@@ -95,9 +95,27 @@ export function renderGameView(
 
   const brownie = document.createElement("div");
   brownie.className = "brownie-counter crystal-counter";
-  brownie.setAttribute("aria-label", `Crystals collected: ${state.progress.browniePoints}`);
-  brownie.textContent = `💎 ${state.progress.browniePoints}`;
+  brownie.setAttribute("aria-label", `Courage stars earned: ${state.progress.browniePoints}`);
+  brownie.textContent = `⭐ ${state.progress.browniePoints}`;
+  brownie.title = "Courage stars — earned by brave, careful choices";
   viewport.appendChild(brownie);
+
+  /** Always-visible quest objective so the child knows what to do next. */
+  if (scene?.goal) {
+    const quest = document.createElement("div");
+    quest.className = "quest-banner";
+    const path = chapterPath(scene.chapterId);
+    const idx = pathIndexForScene(scene.chapterId, scene.id);
+    const step =
+      path.length > 0 && idx >= 0
+        ? `Step ${idx + 1} of ${path.length} · `
+        : scene.order
+          ? `Step ${scene.order} · `
+          : "";
+    quest.innerHTML = `<span class="quest-label">🎯 Quest</span><span class="quest-goal">${escapeText(step + personalize(scene.goal, { childName: state.profile.childDisplayName, companionName: state.profile.companionName }))}</span>`;
+    quest.setAttribute("aria-label", `Quest objective: ${scene.goal}`);
+    viewport.appendChild(quest);
+  }
 
   /**
    * Discovery counter — "🔍 1 of 3". Tells the child there IS something to look for and
@@ -120,12 +138,24 @@ export function renderGameView(
   const gridLevel = scene ? resolveGridLevel(scene) : null;
 
   // A scene can recast the follower companion (ch2: Wize guides while Flicker
-  // blocks the bridge) — show that cast's name, not the profile's.
+  // is the Worry Dragon) — show that cast's name, not the profile's.
   const companionName = scene?.characters
     .find((c) => c.id === "companion")
     ?.assetRef.includes("wize")
     ? "Wize"
     : state.profile.companionName;
+
+  /** Kid-facing role chip: owl = wise helper, dragon = worry that keeps you safe. */
+  if (scene && ["ch2", "ch3", "ch4"].includes(scene.chapterId)) {
+    const roles = document.createElement("div");
+    roles.className = "role-legend";
+    roles.innerHTML = `
+      <span class="role-chip"><strong>🦉 Wize</strong> Wise Owl — helps you think carefully</span>
+      <span class="role-chip"><strong>🐉 Flicker</strong> Worry Dragon — shouts when he wants you safe</span>
+    `;
+    roles.setAttribute("aria-label", "Wize is the Wise Owl. Flicker is the Worry Dragon.");
+    viewport.appendChild(roles);
+  }
 
   const stageTag = document.createElement("div");
   stageTag.className = "stage-tag";
@@ -305,11 +335,15 @@ export function renderGameView(
       label.className = "char-label";
       label.textContent =
         ch.id === "companion"
-          ? companionName
+          ? companionName === "Wize"
+            ? "Wize · Wise Owl"
+            : companionName
           : ch.id === "avatar"
             ? state.profile.childDisplayName || "You"
-            : ch.id === "wize"
-              ? "Wize"
+            : ch.id === "flicker"
+              ? "Flicker · Worry Dragon"
+              : ch.id === "wize"
+              ? "Wize · Wise Owl"
               : ch.id === "leftout"
                 ? "Friend"
                 : ch.id === "hothead"
@@ -321,7 +355,7 @@ export function renderGameView(
                       : ch.id === "helper_deer"
                         ? "Deer"
                         : ch.id === "worry_cloud"
-                          ? ""
+                          ? "Worry cloud"
                           : ch.id === "robin"
                             ? "Fox"
                             : ch.id.charAt(0).toUpperCase() + ch.id.slice(1);

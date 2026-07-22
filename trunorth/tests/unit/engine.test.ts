@@ -7,10 +7,10 @@ import { insightForStep, buildJourneyReflection } from "../../src/counselor/insi
 import { renderFullBodyCharacter } from "../../src/render/characters.js";
 
 describe("DecisionResolver", () => {
-  it("resolves strong choice when inspecting a worry-flower", () => {
+  it("resolves strong choice when sorting a fear-story", () => {
     const resolver = new DecisionResolver();
     const dp = getDecisionPoint("dp_fact_sort")!;
-    expect(resolver.resolveChoice(dp, "opt_tiny")).toBe("strong");
+    expect(resolver.resolveChoice(dp, "opt_story")).toBe("strong");
   });
 
   it("applies meter deltas on strong band for investigate", () => {
@@ -52,15 +52,16 @@ describe("Safety filters", () => {
 });
 
 describe("Golden path", () => {
-  it("has all Little Dragon showcase scenes", () => {
+  it("has all Singing Bridge showcase scenes", () => {
     for (const id of GOLDEN_PATH) {
       expect(SCENES[id]).toBeDefined();
     }
     expect(GOLDEN_PATH).toEqual(["w1", "w2", "w3", "w4", "w5", "w6", "w7"]);
   });
 
-  it("splits Little Dragon into three chapter phases", () => {
+  it("splits consolidated Level 1 into Madhu's three chapter phases", () => {
     expect(SCENES.w1.chapterId).toBe("ch2");
+    expect(SCENES.w2.chapterId).toBe("ch2");
     expect(SCENES.w3.chapterId).toBe("ch2");
     expect(SCENES.w4.chapterId).toBe("ch3");
     expect(SCENES.w5.chapterId).toBe("ch3");

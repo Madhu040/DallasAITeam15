@@ -127,20 +127,20 @@ export function getDialog(id: string): DialogRecord | undefined {
   return DIALOGS[id];
 }
 
-/** Level 1 — The Little Dragon Who Wouldn't Stop Guarding (ages 5–7), 3 phases */
+/** Level 1 — Madhu phases + Singing Bridge quest (ages 5–8) */
 export const GOLDEN_PATH = ["w1", "w2", "w3", "w4", "w5", "w6", "w7"];
 
 export const CHAPTER_FINALE: Record<string, string> = {
   ch1: "e3",
   ch2: "w3",
   ch3: "w5",
-  /** Phase 3 ends by walking to the w7 finish checkmark after dp_crossing. */
+  /** Phase 3 ends at the Shimmer Crystal finish object on w7. */
   ch4: "w7",
 };
 
 /**
  * Decisions that complete their chapter on a strong resolve.
- * Phase 3 (ch4) has none: after dp_crossing the player walks to the w7 checkmark.
+ * Phase 3 (ch4) has none: after crossing, the player walks to the crystal.
  */
 export const CHAPTER_COMPLETE_DECISION: Record<string, string> = {
   ch1: "dp_ask_grownup",
@@ -150,6 +150,8 @@ export const CHAPTER_COMPLETE_DECISION: Record<string, string> = {
 
 /** Multi-step mini-games: required taps before a strong resolve */
 export const MULTI_TAP_REQUIRED: Record<string, number> = {
+  dp_investigate: 4,
+  dp_fact_sort: 3,
   dp_breathe: 5,
   dp_crossing: 4,
 };

@@ -1,42 +1,42 @@
 {
   "id": "dp_breathe",
-  "prompt": "{companion} feels left out. Show kindness \u2014 each choice restores a little color. How do you welcome {companion}?",
+  "prompt": "Flicker's heart still races — thinking didn't erase the worry. Help his body. Match slow breaths with him:",
   "inputMode": "choice",
   "themeSensitivity": "standard",
   "selSkills": [
-    "empathy",
     "calm",
+    "empathy",
     "worry_brave"
   ],
   "options": [
     {
-      "id": "kind_1",
-      "label": "\u2764\ufe0f Hug {companion}",
+      "id": "breath_1",
+      "label": "💨 In… 2… 3…",
       "selScore": "partial"
     },
     {
-      "id": "kind_2",
-      "label": "\u2b50 Listen",
+      "id": "breath_2",
+      "label": "💨 Out… 2… 3…",
       "selScore": "partial"
     },
     {
-      "id": "kind_3",
-      "label": "\ud83c\udf4e Share a dragon snack",
+      "id": "breath_3",
+      "label": "💨 In again… slow",
       "selScore": "partial"
     },
     {
-      "id": "kind_4",
-      "label": "\ud83c\udf88 Sit beside {companion}",
+      "id": "breath_4",
+      "label": "💨 Out… soft fire",
       "selScore": "partial"
     },
     {
-      "id": "kind_5",
-      "label": "\ud83e\udd1d Walk beside \u2014 not ahead or behind",
+      "id": "breath_5",
+      "label": "💨 One more calm breath ⭐",
       "selScore": "strong"
     }
   ],
   "companionContext": {
-    "situation": "Valley of Welcome \u2014 invite Flicker beside Nova; kindness restores color to rejected guardian dragons",
+    "situation": "Singing Bridge — physiological regulation with Worry Dragon while nervous feelings remain",
     "npcEmotion": "lonely-hopeful",
     "ageBand": "5-7"
   },
@@ -48,8 +48,8 @@
         "calm_wave"
       ],
       "meterDeltas": {
-        "empathy": 0.75,
-        "calm": 0.5,
+        "calm": 0.75,
+        "empathy": 0.4,
         "worry_brave": 0.25
       }
     },
@@ -57,8 +57,7 @@
       "band": "partial",
       "sceneId": "w4",
       "meterDeltas": {
-        "empathy": 0.2,
-        "calm": 0.15
+        "calm": 0.2
       }
     },
     {
@@ -68,17 +67,17 @@
     }
   ],
   "emotionalArc": {
-    "childStateEntering": "seeing rejected dragons feel lost",
+    "childStateEntering": "Flicker's body still scared",
     "childStateExiting": {
-      "strong": "Flicker smiling beside Nova",
-      "partial": "color returning",
-      "poor": "encouraged to keep welcoming"
+      "strong": "nervous but slower heart",
+      "partial": "breathing together",
+      "poor": "keep trying gently"
     },
     "companionStance": {
-      "strong": "smiling for the first time",
-      "partial": "warming",
-      "poor": "waiting nearby"
+      "strong": "sighs — still nervous",
+      "partial": "tail loosening",
+      "poor": "waiting for help"
     },
-    "recoveryCadence": "ignoring anxiety makes it louder; kindness changes it"
+    "recoveryCadence": "feeling nervous isn't a stop sign — help the body, then choose"
   }
 }

@@ -1,6 +1,6 @@
 {
   "id": "dp_fact_sort",
-  "prompt": "A huge flower shouts: \"What if everyone laughs?\" Inspect it with your magnifying glass. What do you discover?",
+  "prompt": "Wize: \"Let's think together.\" Sort each idea — is it a FACT, a MAYBE, or a STORY your Worry Dragon told?",
   "inputMode": "choice",
   "themeSensitivity": "standard",
   "selSkills": [
@@ -10,23 +10,28 @@
   "pivotLockMs": 1200,
   "options": [
     {
-      "id": "opt_tiny",
-      "label": "\ud83d\udd0d It's a tiny nervous flower",
+      "id": "opt_fact",
+      "label": "⭐ FACT — \"The bridge makes noises\"",
+      "selScore": "partial"
+    },
+    {
+      "id": "opt_maybe",
+      "label": "⭐ MAYBE — \"We might fall\"",
+      "selScore": "partial"
+    },
+    {
+      "id": "opt_story",
+      "label": "⭐ STORY — \"The bridge WILL break\"",
       "selScore": "strong"
     },
     {
-      "id": "opt_clue",
-      "label": "\ud83d\udd0d Worries can be clues",
-      "selScore": "strong"
-    },
-    {
-      "id": "opt_fight",
-      "label": "\u270a Yank the flower out!",
+      "id": "opt_wrong",
+      "label": "The bridge WILL break is a FACT!",
       "selScore": "poor"
     }
   ],
   "companionContext": {
-    "situation": "Meadow of Curiosity \u2014 investigate animated worry-flowers instead of fighting them; worries shrink when inspected",
+    "situation": "Singing Bridge fact-sort — separate facts, possibilities, and fear-stories (cognitive flexibility)",
     "npcEmotion": "curious-scared",
     "ageBand": "5-7"
   },
@@ -59,17 +64,17 @@
     }
   ],
   "emotionalArc": {
-    "childStateEntering": "facing big scary-looking worries",
+    "childStateEntering": "sorting thoughts with Wize",
     "childStateExiting": {
-      "strong": "curious, worries look smaller",
-      "partial": "learning to look",
-      "poor": "safe retry \u2014 fighting grew more flowers"
+      "strong": "sees stories vs facts",
+      "partial": "learning the sort",
+      "poor": "gentle retry"
     },
     "companionStance": {
-      "strong": "amazed the flower shrank",
-      "partial": "peeking with Nova",
-      "poor": "still bristling"
+      "strong": "blushing but proud",
+      "partial": "listening",
+      "poor": "still tangled"
     },
-    "recoveryCadence": "curiosity transforms the flower; fighting makes more grow"
+    "recoveryCadence": "minds tell stories before we know all the facts"
   }
 }

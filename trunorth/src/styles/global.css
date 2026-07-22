@@ -344,6 +344,62 @@ body {
   z-index: 10;
 }
 
+.quest-banner {
+  position: absolute;
+  top: max(36px, calc(48 * var(--px)));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  max-width: min(92%, 640px);
+  padding: calc(8 * var(--px)) calc(14 * var(--px));
+  border-radius: 14px;
+  background: rgba(20, 28, 40, 0.78);
+  color: #fff8e7;
+  text-align: center;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.quest-label {
+  font-size: clamp(10px, calc(11 * var(--px)), 12px);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffd76a;
+}
+
+.quest-goal {
+  font-size: clamp(12px, calc(15 * var(--px)), 16px);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.role-legend {
+  position: absolute;
+  left: max(8px, calc(12 * var(--px)));
+  bottom: max(56px, calc(72 * var(--px)));
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: min(46%, 280px);
+  pointer-events: none;
+}
+
+.role-chip {
+  background: rgba(250, 248, 245, 0.92);
+  color: #243041;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: clamp(10px, calc(12 * var(--px)), 12px);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
 /* In demo mode the demo pill owns the top-center spot — drop the tag below it. */
 .demo-pill ~ .stage-tag {
   top: max(32px, calc(44 * var(--px)));

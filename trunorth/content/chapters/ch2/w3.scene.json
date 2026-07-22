@@ -5,7 +5,7 @@
   "movementTier": "B",
   "background": "bg_meadow",
   "gridMapId": "meadow-of-curiosity",
-  "narration": "Meadow of Curiosity. Giant worry-flowers fill the field \u2014 some tiny, some huge. Pulling them only makes more grow. Wize smiles: \"You can't get rid of worries by fighting them. Investigate instead.\"",
+  "narration": "Meadow of Curiosity beside the bridge path. You have looked at wood, ropes, river, and birds. Wize gathers everyone: \"Let's think together.\" Some ideas are facts. Some are maybes. Some are stories Flicker's worry tells.",
   "characters": [
     {
       "assetRef": "char_wize",
@@ -169,9 +169,10 @@
   "decisionPoints": [
     "dp_fact_sort"
   ],
-  "goal": "These worry-flowers look strange up close. Let's go take a proper look, {name} \u2014 before I talk us into running.",
+  "goal": "Next: press E — sort FACT, MAYBE, and STORY. Stars appear when you sort well!",
   "spawnCell": [
     90,
     31
-  ]
+  ],
+  "nextSceneId": "w4"
 }

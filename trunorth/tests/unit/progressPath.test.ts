@@ -21,7 +21,10 @@ describe("progress path (spec §7.7)", () => {
     expect(pathIndexForScene("ch1", "e2c")).toBe(1);
   });
 
-  it("covers the w-path phases (ch2/ch3/ch4)", () => {
+  it("covers Madhu Singing Bridge phases on ch2/ch3/ch4", () => {
+    expect(chapterPath("ch2")).toEqual(["w1", "w2", "w3"]);
+    expect(chapterPath("ch3")).toEqual(["w4", "w5"]);
+    expect(chapterPath("ch4")).toEqual(["w6", "w7"]);
     expect(pathIndexForScene("ch2", "w2")).toBe(1);
     expect(pathIndexForScene("ch3", "w5")).toBe(1);
     expect(pathIndexForScene("ch4", "w7")).toBe(1);

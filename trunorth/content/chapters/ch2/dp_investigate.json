@@ -1,6 +1,6 @@
 {
   "id": "dp_investigate",
-  "prompt": "{companion} says: \"What if we get lost?\" Use a Question Feather. Tap a curiosity question \u2014 or type your own.",
+  "prompt": "Flicker shouts STOP! The Singing Bridge creaks. Wize the Wise Owl says: \"Thank you, Flicker — you noticed something important.\" Look carefully. What do you check?",
   "inputMode": "both",
   "themeSensitivity": "standard",
   "typedRubricRef": "curiosity",
@@ -10,23 +10,28 @@
   ],
   "options": [
     {
-      "id": "opt_think",
-      "label": "\u2b50 What makes you think that?",
-      "selScore": "strong"
+      "id": "look_bridge",
+      "label": "👀 Look at the wood planks",
+      "selScore": "partial"
     },
     {
-      "id": "opt_before",
-      "label": "\u2b50 Has this happened before?",
-      "selScore": "strong"
+      "id": "look_rope",
+      "label": "🪵 Check the thick ropes",
+      "selScore": "partial"
     },
     {
-      "id": "opt_help",
-      "label": "\u2b50 What would help us if it did?",
+      "id": "look_river",
+      "label": "🌊 Watch the gentle river",
+      "selScore": "partial"
+    },
+    {
+      "id": "look_birds",
+      "label": "🐦 Watch birds land on the bridge",
       "selScore": "strong"
     }
   ],
   "companionContext": {
-    "situation": "Forest of Questions \u2014 Flicker blocks the path with lost-worry; Nova uses curiosity questions to shrink dark clouds",
+    "situation": "Singing Bridge — Flicker alarms; Wize validates worry then guides careful looking (reality testing)",
     "npcEmotion": "anxiety",
     "ageBand": "5-7"
   },
@@ -35,19 +40,19 @@
       "band": "strong",
       "sceneId": "w3",
       "fx": [
-        "curiosity_glow",
-        "worry_cloud_shrink"
+        "curiosity_glow"
       ],
       "meterDeltas": {
-        "worry_brave": 0.4,
-        "calm": 0.15
+        "worry_brave": 0.35,
+        "calm": 0.2
       }
     },
     {
       "band": "partial",
       "sceneId": "w3",
       "meterDeltas": {
-        "worry_brave": 0.15
+        "worry_brave": 0.15,
+        "calm": 0.1
       }
     },
     {
@@ -57,17 +62,17 @@
     }
   ],
   "emotionalArc": {
-    "childStateEntering": "blocked by worry",
+    "childStateEntering": "blocked by Flicker's alarm",
     "childStateExiting": {
-      "strong": "curious, connected",
-      "partial": "still asking",
-      "poor": "invited to try again"
+      "strong": "gathered clues together",
+      "partial": "still investigating",
+      "poor": "encouraged to look again"
     },
     "companionStance": {
-      "strong": "clouds smaller, feels heard",
-      "partial": "opening up",
-      "poor": "still guarding"
+      "strong": "calming as facts appear",
+      "partial": "peeking with you",
+      "poor": "still flapping"
     },
-    "recoveryCadence": "anxiety quiets when it feels heard \u2014 not when it disappears"
+    "recoveryCadence": "worry is thanked, then checked with careful looking"
   }
 }

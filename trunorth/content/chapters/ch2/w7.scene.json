@@ -5,7 +5,7 @@
   "movementTier": "A",
   "background": "bg_mountain",
   "gridMapId": "mountain-festival",
-  "narration": "Flicker steps up beside Nova with a shy, proud smile \u2014 nervous and still going! Walk onto the Sky Festival stage and reach the Star Crystal.",
+  "narration": "Bridge crossed! At the Sky Festival clearing the Shimmer Crystal glows. Flicker looks back, eyes shiny: \"I thought we couldn't… but we did.\" Wize: \"You can feel afraid — and still keep walking.\"",
   "characters": [
     {
       "assetRef": "char_wize",
@@ -103,14 +103,14 @@
   ],
   "objects": [
     {
-      "id": "obj_festival_finish",
+      "id": "obj_shimmer_crystal",
       "cell": [
         50,
-        16
+        12
       ],
       "assetRef": "finish_check",
-      "label": "Level Complete",
-      "hint": "Press E to finish the level",
+      "label": "Shimmer Crystal",
+      "hint": "Press E to claim your Courage Feather",
       "interaction": {
         "kind": "finish",
         "mode": "complete"
@@ -118,5 +118,9 @@
     }
   ],
   "decisionPoints": [],
-  "goal": "One more step, {name}. Let's walk out onto that stage together."
+  "goal": "Walk to the Shimmer Crystal and press E for your Courage Feather!",
+  "spawnCell": [
+    50,
+    92
+  ]
 }

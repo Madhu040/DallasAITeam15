@@ -1,6 +1,6 @@
 {
   "id": "dp_quest_start",
-  "prompt": "{companion} frets: \"What if something terrible happens?\" {name} still wants the Sky Festival. Ready to begin the Star Crystal quest \u2014 with {companion} along? Tap a choice, or type what you'd tell {companion}.",
+  "prompt": "Flicker the Worry Dragon wakes up. Across the valley, the Shimmer Crystal glows! Ready for today's adventure — with Flicker along?",
   "inputMode": "both",
   "themeSensitivity": "standard",
   "typedRubricRef": "brave_start",
@@ -11,18 +11,17 @@
   "options": [
     {
       "id": "opt_yes",
-      "label": "Yes \u2014 let's go together!",
-      "icon": "icon_spark",
+      "label": "YES! Let's go together!",
       "selScore": "strong"
     },
     {
       "id": "opt_listen",
-      "label": "First tell {companion}: I hear you",
+      "label": "I hear you, Flicker — come with me",
       "selScore": "strong"
     }
   ],
   "companionContext": {
-    "situation": "Opening of The Little Dragon Who Wouldn't Stop Guarding \u2014 Nova seeks Star Crystals for the Sky Festival while Flicker sounds alarms",
+    "situation": "Singing Bridge opening — Nova accepts the Shimmer Crystal quest with Worry Dragon Flicker",
     "npcEmotion": "worried-hopeful",
     "ageBand": "5-7"
   },
@@ -31,7 +30,7 @@
       "band": "strong",
       "sceneId": "w2",
       "meterDeltas": {
-        "courage": 0.15,
+        "courage": 0.2,
         "worry_brave": 0.1
       }
     },
@@ -48,17 +47,17 @@
     }
   ],
   "emotionalArc": {
-    "childStateEntering": "excited and a little unsure",
+    "childStateEntering": "excited for adventure",
     "childStateExiting": {
-      "strong": "eager, accompanied",
+      "strong": "quest begun with Flicker",
       "partial": "warming up",
       "poor": "still invited"
     },
     "companionStance": {
       "strong": "worried but included",
       "partial": "listening",
-      "poor": "soft welcome"
+      "poor": "waiting"
     },
-    "recoveryCadence": "adventure begins by inviting the protector along"
+    "recoveryCadence": "adventure starts by inviting the Worry Dragon along"
   }
 }
