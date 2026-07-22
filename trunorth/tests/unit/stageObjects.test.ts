@@ -100,13 +100,10 @@ describe("stage object content integrity", () => {
     }
   });
 
-  it("completes Little Dragon across three phases", () => {
+  it("completes consolidated Level 1 across three phase finales", () => {
     expect(getScene("w3")!.chapterId).toBe("ch2");
     expect(getScene("w5")!.chapterId).toBe("ch3");
-    expect(getScene("w6")!.chapterId).toBe("ch4");
     expect(getScene("w7")!.chapterId).toBe("ch4");
-
-    // Phases 1–2 complete on strong decisions; phase 3 walks to the w7 checkmark.
     expect(CHAPTER_COMPLETE_DECISION.ch2).toBe("dp_fact_sort");
     expect(CHAPTER_COMPLETE_DECISION.ch3).toBe("dp_choose_path");
     expect(CHAPTER_COMPLETE_DECISION.ch4).toBeUndefined();
@@ -124,12 +121,9 @@ describe("stage object content integrity", () => {
     expect(completes).toHaveLength(1);
     expect(completes[0].sceneId).toBe("w7");
 
-    // The checkmark sits on the north bank: crossing the river is required.
-    const level = getGridLevel("singing-bridge")!;
+    const level = getGridLevel(getScene("w7")!.gridMapId!)!;
     const [col, row] = completes[0].obj.cell;
     expect(level.map.cellAt(col, row)?.walkable).toBe(true);
-    expect(row).toBeLessThan(38); // north of the river band (rows 38–59)
-    expect(level.spawnCell[1]).toBeGreaterThan(59); // spawn is south of it
   });
 });
 

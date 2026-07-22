@@ -50,27 +50,13 @@ export const contentConfig = {
     },
   ] as ZoneConfig[],
   achievementChecklist: [
-    "Asked Flicker curious questions",
-    "Inspected a worry-flower",
-    "Welcomed Flicker beside you",
-    "Thanked Flicker for helping",
-    "Took festival steps while nervous",
-    "Earned a Star Crystal",
+    "Said YES to the adventure with Flicker",
+    "Looked carefully at the Singing Bridge",
+    "Sorted facts, maybes, and stories",
+    "Breathed with Flicker while nervous",
+    "Chose to keep going",
+    "Earned Courage Feather #1",
   ] as const,
-  /**
-   * Per-chapter celebration copy.
-   *
-   * This used to be a single hardcoded block describing **Chapter 2** — so a child who
-   * finished Chapter 1 (meeting Jamie, sharing a flower, apologising, asking a grown-up)
-   * was congratulated for asking Flicker curious questions and inspecting a worry-flower.
-   * None of which happened, about a character who wasn't in the chapter. For a five-year-old
-   * that turns the payoff moment into a confusing non-sequitur.
-   *
-   * ⚠️ **Ch.1 copy below is an SME DRAFT — not signed off.** Child-facing; spec §8.6 gates
-   * it behind SME review, like the distress re-entry copy and the three new Ch.1 decision
-   * points. `companionLesson` is spoken in the companion's voice, so it must stay warm and
-   * situational, never identity-claiming (§9.8).
-   */
   celebrations: {
     ch1: {
       backgroundImage: "/assets/zones/meadow.png",
@@ -90,21 +76,49 @@ export const contentConfig = {
       quote: "Being kind isn't something you are. It's something you do, one moment at a time.",
     },
     ch2: {
+      backgroundImage: "/assets/zones/forest.png",
+      trophyLabel: "👀 Look Carefully",
+      title: "Forest Phase Complete!",
+      companionName: "Flicker",
+      companionLesson: "Thank you for listening when I shouted STOP — looking carefully helps us both.",
+      playerLesson: "I can thank my Worry Dragon and check facts before I decide.",
+      achievements: [
+        "Said YES to the Shimmer Crystal quest",
+        "Looked carefully at the Singing Bridge",
+        "Sorted FACT, MAYBE, and STORY",
+        "Ready for the Valley of Welcome",
+      ],
+      quote: "Worry is information — looking carefully comes next.",
+    },
+    ch3: {
+      backgroundImage: "/assets/zones/meadow.png",
+      trophyLabel: "💨 Calm Body",
+      title: "Valley Phase Complete!",
+      companionName: "Flicker",
+      companionLesson: "My body still felt scared — and you helped me breathe anyway.",
+      playerLesson: "I can calm my body and still choose to keep going.",
+      achievements: [
+        "Breathed with Flicker five times",
+        "Remembered Flicker has a purpose",
+        "Chose KEEP GOING while nervous",
+        "Ready for the Mountain of Helpers",
+      ],
+      quote: "Feeling nervous isn't a stop sign — it's your Worry Dragon asking you to pay attention.",
+    },
+    ch4: {
       backgroundImage: "/assets/zones/mountain.png",
-      trophyLabel: "⭐ Star Crystal",
-      title: "Adventure Complete",
+      trophyLabel: "🪶 Courage Feather #1",
+      title: "Bridge Crossed!",
       companionName: "Flicker",
       companionLesson: "I don't have to stop my child every time I feel scared — I can walk beside them.",
-      playerLesson: "I can feel nervous and still take the next step with Flicker.",
+      playerLesson: "I can feel nervous and still take the next step.",
       achievements: [
-        "Asked Flicker curious questions",
-        "Inspected a worry-flower",
-        "Welcomed Flicker beside you",
-        "Thanked Flicker for helping",
-        "Took festival steps while nervous",
-        "Earned a Star Crystal",
+        "Took careful steps across the bridge",
+        "Kept going while still nervous",
+        "Reached the Shimmer Crystal",
+        "Earned Courage Feather #1",
       ],
-      quote: "The secret isn't getting rid of your Guardian. It's learning how to listen to them.",
+      quote: "Today wasn't about proving there was nothing to fear — it was learning you can feel afraid and still keep walking.",
     },
   },
 } as const;
@@ -112,8 +126,8 @@ export const contentConfig = {
 export type CelebrationConfig =
   (typeof contentConfig.celebrations)[keyof typeof contentConfig.celebrations];
 
-/** Falls back to ch2 (the showcase chapter) for any chapter without authored copy. */
+/** Falls back to ch4 (Courage Feather finale) for any chapter without authored copy. */
 export function celebrationFor(chapterId: string): CelebrationConfig {
   const table = contentConfig.celebrations as Record<string, CelebrationConfig | undefined>;
-  return table[chapterId] ?? contentConfig.celebrations.ch2;
+  return table[chapterId] ?? contentConfig.celebrations.ch4;
 }

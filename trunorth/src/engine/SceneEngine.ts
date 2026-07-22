@@ -110,10 +110,14 @@ export class SceneEngine {
       if (taps < requiredTaps && !isFinalOption) {
         const progressLine =
           decisionPointId === "dp_breathe"
-            ? `Kindness ${taps}… Flicker's color returns.`
+            ? `Breath ${taps}… Flicker's heart slows a little.`
             : decisionPointId === "dp_crossing"
               ? `Step ${taps}… still nervous, still going.`
-              : `Step ${taps} — keep going!`;
+              : decisionPointId === "dp_investigate"
+                ? `Clue ${taps} found… keep looking carefully.`
+                : decisionPointId === "dp_fact_sort"
+                  ? `Star ${taps}… sorted! Keep going.`
+                  : `Step ${taps} — keep going!`;
         this.callbacks.onCompanionLine(progressLine);
         this.emitInsight(dp, "partial");
         return;
@@ -264,10 +268,12 @@ export class SceneEngine {
     if (repairAction) {
       const repairLine =
         dp.id === "dp_choose_path"
-          ? "I'm not broken — I care a lot. Can we try a thank-you instead?"
+          ? "We can always go back. But if we never cross, we'll never discover whether Flicker's worry was right this time. Would you like to take one careful step together?"
           : dp.id === "dp_fact_sort"
-            ? "Yanking made more flowers. Let's try looking with the magnifying glass instead."
-            : "Let's try a kinder way together.";
+            ? "Hmm — \"the bridge WILL break\" is a story Flicker's worry told. Let's try sorting FACT, MAYBE, and STORY again."
+            : dp.id === "dp_investigate"
+              ? "Let's keep looking carefully — wood, ropes, river, and birds can each tell us something."
+              : "Let's try a kinder way together.";
       this.callbacks.onCompanionLine(repairLine);
       this.setPhase("decision");
       return;

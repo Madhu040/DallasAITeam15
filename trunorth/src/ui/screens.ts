@@ -457,7 +457,7 @@ export function renderScenarioHub(
   header.className = "hub-header";
   header.innerHTML = `
     <h1>🧭 Your Journey</h1>
-    <p>${playMode === "together" ? "Pick a phase to explore side by side with your child." : "Choose a Little Dragon phase (or the bonus meadow), or open the parent coach corner."}</p>
+    <p>${playMode === "together" ? "Pick a phase to explore side by side with your child." : "Choose a Forest → Valley → Mountain phase (or the bonus meadow), or open the parent coach corner."}</p>
   `;
   surface.appendChild(header);
 

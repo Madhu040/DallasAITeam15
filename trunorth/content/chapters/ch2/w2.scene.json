@@ -5,7 +5,7 @@
   "movementTier": "B",
   "background": "bg_forest",
   "gridMapId": "forest-of-questions",
-  "narration": "Forest of Questions. Flicker blocks the path: \"What if we get lost?\" Wize the owl whispers: protectors feel less scared when we ask curious questions. Dark clouds swirl around Flicker.",
+  "narration": "Forest of Questions. The Singing Bridge creaks ahead. Flicker shouts STOP! \"What if it breaks? What if we fall?\" Wize smiles: \"Thank you, Flicker — you noticed something important. That is what Worry Dragons do. Now let's look carefully.\"",
   "characters": [
     {
       "assetRef": "char_wize",
@@ -178,9 +178,10 @@
   "decisionPoints": [
     "dp_investigate"
   ],
-  "goal": "That worry cloud isn't going anywhere on its own. Come on, let's go see what's actually there.",
+  "goal": "Next: walk to the glowing spot and press E — look carefully at the bridge with Wize.",
   "spawnCell": [
     90,
     31
-  ]
+  ],
+  "nextSceneId": "w3"
 }

@@ -5,7 +5,7 @@
   "movementTier": "B",
   "background": "bg_cave",
   "gridMapId": "cave-of-purpose",
-  "narration": "Cave of Purpose. Glowing memories show Flicker warning about cliffs, storms, and real danger. Nova realizes: Flicker isn't broken \u2014 Flicker has a job. The hard part is telling danger from possibility. Thank Flicker.",
+  "narration": "Cave of Purpose glows with memories of when Flicker helped for real. Flicker sighs: \"I still feel nervous.\" Wize: \"You probably will. Feeling nervous is not a stop sign — it is your Worry Dragon asking you to pay attention. Now we choose.\"",
   "characters": [
     {
       "assetRef": "char_wize",
@@ -169,9 +169,10 @@
   "decisionPoints": [
     "dp_choose_path"
   ],
-  "goal": "These crystals are trying to show us something, {name}. Let's walk through and see what I've been remembering.",
+  "goal": "Next: press E — choose KEEP GOING or GO BACK.",
   "spawnCell": [
     90,
     31
-  ]
+  ],
+  "nextSceneId": "w6"
 }

@@ -119,7 +119,7 @@ describe("Crystals — scattered pickups that never pollute the spark tally", ()
   });
 
   it("excludes crystals from the chapter spark total", () => {
-    for (const chapterId of ["ch1", "ch2"]) {
+    for (const chapterId of ["ch1", "ch2", "ch3", "ch4"]) {
       const scenes = allScenes.filter((s) => s.chapterId === chapterId);
       const sparkCount = scenes.reduce(
         (n, s) => n + s.collectibles.filter((c) => c.kind === "kindness_spark").length,
@@ -156,14 +156,14 @@ describe("Celebration copy matches the chapter the child actually played", () =>
     expect(ch1Text).toContain("jamie");
   });
 
-  it("keeps Chapter 2's original copy intact", () => {
-    const ch2 = celebrationFor("ch2");
-    expect(ch2.achievements).toContain("Inspected a worry-flower");
-    expect(ch2.trophyLabel).toContain("Star Crystal");
+  it("keeps Chapter 4's Courage Feather celebration intact", () => {
+    const ch4 = celebrationFor("ch4");
+    expect(ch4.achievements).toContain("Earned Courage Feather #1");
+    expect(ch4.trophyLabel).toContain("Courage Feather");
   });
 
-  it("falls back to the showcase chapter for an unknown id", () => {
-    expect(celebrationFor("ch_nonexistent")).toEqual(contentConfig.celebrations.ch2);
+  it("falls back to the Courage Feather finale for an unknown id", () => {
+    expect(celebrationFor("ch_nonexistent")).toEqual(contentConfig.celebrations.ch4);
   });
 
   it("has one achievement line per authored chapter", () => {

@@ -5,7 +5,7 @@
   "movementTier": "B",
   "background": "bg_meadow",
   "gridMapId": "meadow-of-curiosity",
-  "narration": "Valley of Welcome. Other creatures pushed their Guardian Dragons away \u2014 the dragons sit gray and sad on distant hills. Flicker still follows Nova. The Turtle Sage says: \"Guardians don't leave, because they care too much. Invite them beside you.\"",
+  "narration": "Valley of Welcome. Flicker's heart still races — thinking alone did not erase the worry. Other Guardian Dragons sit gray on distant hills. Wize: \"Flicker's body still thinks we are in danger. Let's help him breathe — then invite him beside you.\"",
   "characters": [
     {
       "assetRef": "char_wize",
@@ -178,9 +178,10 @@
   "decisionPoints": [
     "dp_breathe"
   ],
-  "goal": "Some Guardian Dragons got left behind on the hills. Let's walk the valley first and see what a real welcome looks like.",
+  "goal": "Next: press E — breathe slowly with Flicker five times.",
   "spawnCell": [
     90,
     31
-  ]
+  ],
+  "nextSceneId": "w5"
 }
