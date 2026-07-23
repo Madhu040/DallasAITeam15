@@ -1,12 +1,11 @@
 import { Hono } from "hono";
 import type { Context } from "hono";
 import { cors } from "hono/cors";
-import bcrypt from "bcryptjs";
-import { randomUUID } from "crypto";
-import { db } from "./db/migrate.js";
-import { signToken, verifyToken } from "./auth/jwt.js";
+import { getServiceClient, isSupabaseConfigured } from "./db/supabase.js";
+import { verifySupabaseToken } from "./auth/supabase.js";
 import { companionRoutes } from "./routes/companion.js";
 import { togetherRoutes } from "./routes/together.js";
+import { checkinRoutes } from "./routes/checkin.js";
 import { serverConfig } from "./config.js";
 import type { AuthUser } from "../src/types/index.js";
 
@@ -41,50 +40,34 @@ app.get("/api/health", (c) =>
   }),
 );
 
-// --- Parent Auth (parent-only; children never authenticate directly) ---
-
-app.post("/api/auth/register", async (c) => {
-  const { email, password } = await c.req.json<{ email: string; password: string }>();
-
-  if (!email?.includes("@") || !password || password.length < 8) {
-    return c.json({ error: "Valid email and password (8+ chars) required" }, 400);
+app.get("/api/health/supabase", async (c) => {
+  if (!isSupabaseConfigured()) {
+    return c.json({ configured: false, reachable: false });
   }
-
-  const existing = db.prepare("SELECT id FROM parents WHERE email = ?").get(email);
-  if (existing) return c.json({ error: "Email already registered" }, 409);
-
-  const id = randomUUID();
-  const hash = await bcrypt.hash(password, 12);
-  db.prepare("INSERT INTO parents (id, email, password_hash) VALUES (?, ?, ?)").run(id, email, hash);
-
-  const token = await signToken({ id, email, role: "parent" });
-  return c.json({ token, user: { id, email, role: "parent" } }, 201);
+  try {
+    const { error } = await getServiceClient()
+      .from("child_profiles")
+      .select("id", { count: "exact", head: true });
+    if (error) return c.json({ configured: true, reachable: false, error: error.message });
+    return c.json({ configured: true, reachable: true });
+  } catch (err) {
+    return c.json({
+      configured: true,
+      reachable: false,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 });
 
-app.post("/api/auth/login", async (c) => {
-  const { email, password } = await c.req.json<{ email: string; password: string }>();
-
-  const parent = db.prepare("SELECT * FROM parents WHERE email = ?").get(email) as {
-    id: string; email: string; password_hash: string; role: string;
-  } | undefined;
-
-  if (!parent || !(await bcrypt.compare(password, parent.password_hash))) {
-    return c.json({ error: "Invalid credentials" }, 401);
-  }
-
-  const token = await signToken({
-    id: parent.id,
-    email: parent.email,
-    role: parent.role as "parent",
-  });
-  return c.json({ token, user: { id: parent.id, email: parent.email, role: parent.role } });
-});
+// --- Parent Auth (Supabase Auth; parent-only, children never authenticate directly) ---
+// Register/login/session refresh are handled client-side by supabase-js against
+// Supabase Auth directly — this API only verifies the resulting access token.
 
 app.get("/api/auth/me", async (c) => {
   const auth = c.req.header("Authorization");
   if (!auth?.startsWith("Bearer ")) return c.json({ error: "Unauthorized" }, 401);
 
-  const user = await verifyToken(auth.slice(7));
+  const user = await verifySupabaseToken(auth.slice(7));
   if (!user) return c.json({ error: "Invalid token" }, 401);
   return c.json({ user });
 });
@@ -94,21 +77,36 @@ const authMiddleware = async (c: Context<{ Variables: Variables }>, next: () => 
   const auth = c.req.header("Authorization");
   if (!auth?.startsWith("Bearer ")) return c.json({ error: "Unauthorized" }, 401);
 
-  const user = await verifyToken(auth.slice(7));
+  const user = await verifySupabaseToken(auth.slice(7));
   if (!user) return c.json({ error: "Invalid token" }, 401);
 
   c.set("user", user);
   await next();
 };
 
-// --- Child Profiles (parent-managed) ---
+// --- Child Profiles (parent-managed, Supabase Postgres) ---
+// The service-role key bypasses RLS, so every query below scopes explicitly by
+// parent_id — RLS (supabase/migrations/0001_children_progress.sql) is a safety net,
+// not the only enforcement.
 
-app.get("/api/children", authMiddleware, (c) => {
+interface ChildRow {
+  id: string;
+  display_name: string;
+  age_band: string;
+  avatar_json: Record<string, unknown>;
+  created_at: string;
+}
+
+app.get("/api/children", authMiddleware, async (c) => {
   const user = c.get("user");
-  const children = db.prepare(
-    "SELECT id, display_name, age_band, avatar_json, created_at FROM child_profiles WHERE parent_id = ?",
-  ).all(user.id);
-  return c.json({ data: children });
+  const { data, error } = await getServiceClient()
+    .from("child_profiles")
+    .select("id, display_name, age_band, avatar_json, created_at")
+    .eq("parent_id", user.id)
+    .returns<ChildRow[]>();
+
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ data });
 });
 
 app.post("/api/children", authMiddleware, async (c) => {
@@ -121,34 +119,49 @@ app.post("/api/children", authMiddleware, async (c) => {
     return c.json({ error: "Display name required (max 30 chars)" }, 400);
   }
 
-  const id = randomUUID();
-  db.prepare(
-    "INSERT INTO child_profiles (id, parent_id, display_name, age_band, avatar_json) VALUES (?, ?, ?, ?, ?)",
-  ).run(id, user.id, displayName, ageBand ?? "8-10", avatarJson ?? "{}");
+  const { data, error } = await getServiceClient()
+    .from("child_profiles")
+    .insert({
+      parent_id: user.id,
+      display_name: displayName,
+      age_band: ageBand ?? "8-10",
+      avatar_json: avatarJson ? JSON.parse(avatarJson) : {},
+    })
+    .select("id")
+    .single<{ id: string }>();
 
-  db.prepare(
-    "INSERT INTO audit_logs (actor_id, action, resource_id) VALUES (?, ?, ?)",
-  ).run(user.id, "child_profile.create", id);
+  if (error || !data) return c.json({ error: error?.message ?? "Failed to create child" }, 500);
 
-  return c.json({ id, displayName, ageBand }, 201);
+  const { error: auditError } = await getServiceClient()
+    .from("audit_logs")
+    .insert({ actor_id: user.id, action: "child_profile.create", resource_id: data.id });
+  if (auditError) console.error("audit_logs insert failed:", auditError.message);
+
+  return c.json({ id: data.id, displayName, ageBand: ageBand ?? "8-10" }, 201);
 });
 
-// --- Remote Progress (parent-authenticated) ---
+// --- Remote Progress (parent-authenticated, Supabase Postgres) ---
 
-app.get("/api/progress/:childId", authMiddleware, (c) => {
+app.get("/api/progress/:childId", authMiddleware, async (c) => {
   const user = c.get("user");
   const childId = c.req.param("childId");
 
-  const child = db.prepare(
-    "SELECT id FROM child_profiles WHERE id = ? AND parent_id = ?",
-  ).get(childId, user.id);
+  const { data: child } = await getServiceClient()
+    .from("child_profiles")
+    .select("id")
+    .eq("id", childId)
+    .eq("parent_id", user.id)
+    .maybeSingle();
   if (!child) return c.json({ error: "Not found" }, 404);
 
-  const row = db.prepare("SELECT game_state_json, updated_at FROM progress WHERE child_id = ?").get(childId) as
-    | { game_state_json: string; updated_at: string } | undefined;
+  const { data: row } = await getServiceClient()
+    .from("progress")
+    .select("game_state_json, updated_at")
+    .eq("child_id", childId)
+    .maybeSingle<{ game_state_json: unknown; updated_at: string }>();
 
   if (!row) return c.json({ data: null });
-  return c.json({ data: JSON.parse(row.game_state_json), updatedAt: row.updated_at });
+  return c.json({ data: row.game_state_json, updatedAt: row.updated_at });
 });
 
 app.put("/api/progress/:childId", authMiddleware, async (c) => {
@@ -156,21 +169,24 @@ app.put("/api/progress/:childId", authMiddleware, async (c) => {
   const childId = c.req.param("childId");
   const { gameState } = await c.req.json<{ gameState: unknown }>();
 
-  const child = db.prepare(
-    "SELECT id FROM child_profiles WHERE id = ? AND parent_id = ?",
-  ).get(childId, user.id);
+  const { data: child } = await getServiceClient()
+    .from("child_profiles")
+    .select("id")
+    .eq("id", childId)
+    .eq("parent_id", user.id)
+    .maybeSingle();
   if (!child) return c.json({ error: "Not found" }, 404);
 
-  db.prepare(`
-    INSERT INTO progress (child_id, game_state_json, updated_at)
-    VALUES (?, ?, datetime('now'))
-    ON CONFLICT(child_id) DO UPDATE SET game_state_json = excluded.game_state_json, updated_at = datetime('now')
-  `).run(childId, JSON.stringify(gameState));
+  const { error } = await getServiceClient()
+    .from("progress")
+    .upsert({ child_id: childId, game_state_json: gameState, updated_at: new Date().toISOString() });
 
+  if (error) return c.json({ error: error.message }, 500);
   return c.json({ ok: true });
 });
 
 app.route("/api", companionRoutes);
 app.route("/api", togetherRoutes);
+app.route("/api", checkinRoutes);
 
 export { app };

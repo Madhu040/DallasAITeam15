@@ -1,14 +1,14 @@
-import { apiLogin, apiRegister, setSession, clearSession, getToken } from "./auth.js";
+import { signIn, signUp, signOut, isAuthenticated as authIsAuthenticated, getToken } from "./auth.js";
 import { SCENARIOS } from "../content/scenarios.js";
 import { getScene } from "../content/index.js";
 import { getGridLevel } from "../content/gridLevels.js";
 import { createGridThumbnail } from "../render/gridBackground.js";
 import { backgroundImageUrl } from "../content/assetManifest.js";
 import { zoneForChapter } from "../content/zones.js";
-import { appConfig } from "../config/app.js";
+import { appConfig, isDemoMode } from "../config/app.js";
 import {
   questionsForChapter,
-  scoreTypedCheckinAnswer,
+  checkTypedSafety,
   buildCheckinResult,
   checkinPlacementLabel,
   checkinCompanionLine,
@@ -16,7 +16,9 @@ import {
   RESUME_DISTRESS,
   type CheckinAnswer,
 } from "../counselor/checkin.js";
-import type { ScenarioMeta, CheckinRecord } from "../types/index.js";
+import { LiveCheckinScorer, DemoCheckinScorer, scoreCheckinBatch } from "../companion/CheckinScorer.js";
+import { showCaption, clearCaption } from "./captions.js";
+import type { ScenarioMeta, CheckinRecord, AgeBand } from "../types/index.js";
 
 type Screen = "landing" | "login" | "register";
 
@@ -123,14 +125,24 @@ export function renderAuthForm(
   submit.className = "btn-primary";
   submit.textContent = mode === "login" ? "Sign In" : "Create Account";
   submit.onclick = async () => {
+    error.textContent = "";
+    submit.disabled = true;
     try {
-      const session = mode === "login"
-        ? await apiLogin(emailInput.value, passInput.value)
-        : await apiRegister(emailInput.value, passInput.value);
-      setSession(session);
-      onSuccess();
+      if (mode === "login") {
+        await signIn(emailInput.value, passInput.value);
+        onSuccess();
+      } else {
+        const { needsEmailConfirm } = await signUp(emailInput.value, passInput.value);
+        if (needsEmailConfirm) {
+          error.textContent = "Check your email to confirm your account, then sign in.";
+        } else {
+          onSuccess();
+        }
+      }
     } catch (e) {
-      error.textContent = e instanceof Error ? e.message : "Error";
+      error.textContent = e instanceof Error ? e.message : "Something went wrong.";
+    } finally {
+      submit.disabled = false;
     }
   };
   card.appendChild(submit);
@@ -233,13 +245,27 @@ export function renderCheckin(
   container: HTMLElement,
   scenario: ScenarioMeta,
   companionName: string,
+  companionArchetype: string,
+  ageBand: AgeBand,
+  childName: string | undefined,
   onDone: (result: CheckinRecord | null) => void,
   onBack: () => void,
 ): void {
   container.innerHTML = "";
   const questions = questionsForChapter(scenario.id);
   const answers: CheckinAnswer[] = [];
+  /** Typed answers that passed the safety filter and are awaiting the batch score
+   * call at the end of the check-in (spec: one LLM call scoring all of them together,
+   * not one call per question — see CheckinScorer.ts). */
+  const pendingTyped: { questionId: string; prompt: string; text: string }[] = [];
+  /** Personalized LLM greeting for the results screen — set only on the live,
+   * authenticated, filter-passed path; otherwise the existing authored line is used. */
+  let greeting: string | undefined;
   let index = 0;
+
+  const scorer = isDemoMode()
+    ? new DemoCheckinScorer()
+    : new LiveCheckinScorer(appConfig.apiUrl, getToken() ?? undefined);
 
   const surface = document.createElement("div");
   surface.className = "onboarding";
@@ -248,12 +274,61 @@ export function renderCheckin(
 
   function recordAnswer(answer: CheckinAnswer): void {
     answers.push(answer);
+    advance();
+  }
+
+  /** Safety-checked, not-yet-scored typed answer — points arrive later from the batch call. */
+  function recordPendingTyped(questionId: string, prompt: string, text: string): void {
+    pendingTyped.push({ questionId, prompt, text });
+    advance();
+  }
+
+  function advance(): void {
     index++;
     if (index < questions.length) {
       renderQuestion();
     } else {
-      renderResult();
+      void finish();
     }
+  }
+
+  async function finish(): Promise<void> {
+    if (pendingTyped.length > 0) {
+      renderThinking();
+      const result = await scoreCheckinBatch(scorer, {
+        chapterId: scenario.id,
+        ageBand,
+        companion: { name: companionName, archetype: companionArchetype },
+        childName,
+        answers: pendingTyped,
+      });
+      for (const item of pendingTyped) {
+        const scored = result.scores.get(item.questionId);
+        answers.push({
+          questionId: item.questionId,
+          points: scored?.points ?? 1,
+          source: "typed",
+          safetyFlag: "none",
+        });
+        // Dev/verification aid only — never rendered in the UI, so it can't run afoul
+        // of the "no assessment language in front of the child" rule the rest of the
+        // app follows. Its mere presence also confirms the live LLM path actually ran
+        // (the offline/demo fallback never supplies a reason).
+        if (scored?.reason) {
+          console.log(`[checkin] ${item.questionId}: ${scored.points} pts — ${scored.reason}`);
+        }
+      }
+      greeting = result.greeting;
+    }
+    renderResult();
+  }
+
+  function renderThinking(): void {
+    card.innerHTML = "";
+    const progress = document.createElement("div");
+    progress.className = "checkin-progress";
+    progress.textContent = `${companionName} is thinking about what you shared…`;
+    card.appendChild(progress);
   }
 
   function renderQuestion(): void {
@@ -301,8 +376,19 @@ export function renderCheckin(
       say.textContent = `Tell ${companionName}`;
       say.onclick = () => {
         if (!input.value.trim()) return;
-        const scored = scoreTypedCheckinAnswer(input.value);
-        recordAnswer({ questionId: q.id, points: scored.points, source: "typed", safetyFlag: scored.safetyFlag });
+        const safety = checkTypedSafety(input.value);
+        if (safety.blockedPoints !== null) {
+          // Caught by the local filter (e.g. distress) — never sent anywhere, scored
+          // instantly with the same fallback rule the server would apply.
+          recordAnswer({
+            questionId: q.id,
+            points: safety.blockedPoints,
+            source: "typed",
+            safetyFlag: safety.safetyFlag,
+          });
+        } else {
+          recordPendingTyped(q.id, q.prompt, safety.text);
+        }
       };
       card.appendChild(say);
       input.onkeydown = (e) => { if (e.key === "Enter") say.click(); };
@@ -348,9 +434,17 @@ export function renderCheckin(
     card.appendChild(scale);
 
     const line = document.createElement("p");
-    line.className = "checkin-companion-line";
-    line.textContent = checkinCompanionLine(result.placement, companionName);
+    // A live, personalized greeting gets its own emphasized treatment (see
+    // .checkin-greeting in global.css) — it's the whole point of the LLM check-in
+    // scoring, so it should read as the headline moment, not blend into ordinary copy.
+    const lineText = greeting ?? checkinCompanionLine(result.placement, companionName);
+    line.className = greeting ? "checkin-companion-line checkin-greeting" : "checkin-companion-line";
+    line.textContent = lineText;
     card.appendChild(line);
+    // Persistent: this screen stays up until the child taps "Start" below, a real
+    // "still speaking" condition (mirrors the stage-object dialog case in GameView.ts) —
+    // cleared explicitly there rather than on a timer.
+    showCaption(companionName, lineText, true);
 
     if (result.safetyFlag === "distress") {
       const support = document.createElement("p");
@@ -362,7 +456,10 @@ export function renderCheckin(
     const start = document.createElement("button");
     start.className = "btn-primary";
     start.textContent = `Start ${scenario.title}!`;
-    start.onclick = () => onDone(result);
+    start.onclick = () => {
+      clearCaption();
+      onDone(result);
+    };
     card.appendChild(start);
   }
 
@@ -433,11 +530,11 @@ export function renderResumeCheckin(
 }
 
 export function isAuthenticated(): boolean {
-  return !!getToken();
+  return authIsAuthenticated();
 }
 
 export function logout(): void {
-  clearSession();
+  void signOut();
 }
 
 export function renderScenarioHub(

@@ -291,6 +291,38 @@ export interface CompanionResponse {
   safetyFlag: SafetyFlag;
 }
 
+/** One pre-level check-in answer sent for LLM scoring — only answers that already
+ * passed the local safety filter are ever sent (see `checkTypedSafety`). */
+export interface CheckinScoreRequestItem {
+  questionId: string;
+  prompt: string;
+  text: string;
+}
+
+export interface CheckinScoreRequest {
+  chapterId: string;
+  ageBand: AgeBand;
+  companion: { name: string; archetype: string };
+  /** Child's display name, for the personalized greeting. Omitted/generic when unset. */
+  childName?: string;
+  answers: CheckinScoreRequestItem[];
+}
+
+export interface CheckinScoreResult {
+  questionId: string;
+  points: 0 | 1 | 2;
+  /** Short internal rationale — dev/verification aid only, never shown to the child. */
+  reason?: string;
+}
+
+export interface CheckinScoreResponse {
+  scores: CheckinScoreResult[];
+  /** Personalized, LLM-generated hello referencing the child's answers — present only
+   * on the live-scored, authenticated path; absent on any fallback (offline heuristic,
+   * no key, unauthenticated, or a model response the output filter rejected). */
+  greeting?: string;
+}
+
 export interface ScenarioMeta {
   id: string;
   audience: "child" | "parent";

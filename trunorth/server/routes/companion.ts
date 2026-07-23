@@ -5,6 +5,7 @@ import { filterInput, filterOutput } from "../../src/safety/filters.js";
 import { insightForStep } from "../../src/counselor/insights.js";
 import { scoreTypedResponse } from "../../src/counselor/typedScoring.js";
 import { serverConfig } from "../config.js";
+import { verifySupabaseToken } from "../auth/supabase.js";
 import type {
   CompanionRequest,
   CompanionResponse,
@@ -41,7 +42,15 @@ companion.post("/companion", async (c) => {
     return c.json(response);
   }
 
-  if (!apiKey) {
+  // The Anthropic API key is only ever spent on an authenticated (logged-in parent)
+  // session — the guest path (no login, the default way most children play) always
+  // gets the offline rubric scorer instead, same as when no key is configured at all.
+  // This is purely a cost/abuse control on who can trigger paid API usage; it has no
+  // effect on safety filtering above, which always runs regardless of auth state.
+  const auth = c.req.header("Authorization");
+  const user = auth?.startsWith("Bearer ") ? await verifySupabaseToken(auth.slice(7)) : null;
+
+  if (!apiKey || !user) {
     return c.json(scoreLocally(req));
   }
 
