@@ -112,9 +112,11 @@ fallback point rule and is excluded from the Anthropic call, mirroring `/api/com
    No `reason`, no `greeting` — their absence IS the tell that this was the offline path.
 2. Key present AND authenticated → one Claude call with a system prompt asking for BOTH,
    in a single response: a 0-2 score + one-sentence internal `reason` per answer ("never a
-   grade, never a diagnosis, judge only the feeling conveyed"), and one short (≤160 char)
-   personalized `greeting` in the companion's voice, addressed to `childName` and
-   referencing what they actually said. Strict JSON object contract:
+   grade, never a diagnosis, judge only the feeling conveyed"), and one short (≤240 char)
+   personalized `greeting` in the companion's voice, addressed to `childName` and weaving in
+   a specific detail from EACH answer given (2026-07-23: previously asked for "something
+   specific" from just one answer — now explicitly instructed to reference every question
+   answered, with the char budget raised from 160 to fit). Strict JSON object contract:
    `{"scores":[{"questionId","points":0-2,"reason"}],"greeting"}`.
 3. `parseModelResponse` validates each score entry (`questionId` must be one the request
    asked about, `points` must be exactly 0/1/2) and **falls back to the offline heuristic

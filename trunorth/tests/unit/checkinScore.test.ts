@@ -112,6 +112,6 @@ describe("parseModelResponse — greeting", () => {
       greeting: "Hi! ".repeat(100),
     });
     const { greeting } = parseModelResponse(text, [items[0]]);
-    expect(greeting?.length).toBeLessThanOrEqual(200);
+    expect(greeting?.length).toBeLessThanOrEqual(260);
   });
 });

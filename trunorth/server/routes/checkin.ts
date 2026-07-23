@@ -94,10 +94,11 @@ Strict rules for scoring:
 - Judge only the FEELING conveyed by the words, never spelling/grammar/correctness.
 - Never mention clinical terms, diagnoses, or treatment.
 
-TASK 2 — Write ONE short, warm "greeting" (max 160 characters) in your own voice as
-${req.companion.name}, saying hello to ${childName} personally. Reference something
-specific from what they just shared (in your own words, without repeating anything scary
-or heavy back to them) so it feels like you were really listening.
+TASK 2 — Write ONE short, warm "greeting" (max 240 characters) in your own voice as
+${req.companion.name}, saying hello to ${childName} personally. Weave in a specific detail
+from EACH of their answers below — not just one of them — (in your own words, without
+repeating anything scary or heavy back to them) so it feels like you were really listening
+to everything they shared, not just skimming it.
 
 Strict rules for the greeting:
 - Never diagnose, label, or use clinical language (e.g. "anxiety", "therapy", "diagnosis").
@@ -150,7 +151,7 @@ export function parseModelResponse(
   // this route used to have — it goes through the same output filter as the companion
   // pipeline. An unsafe or missing greeting is simply omitted; the client already falls
   // back to the existing authored placement copy whenever no greeting comes back.
-  const rawGreeting = typeof parsed.greeting === "string" ? parsed.greeting.trim().slice(0, 200) : "";
+  const rawGreeting = typeof parsed.greeting === "string" ? parsed.greeting.trim().slice(0, 260) : "";
   const greeting = rawGreeting && filterOutput(rawGreeting) ? rawGreeting : undefined;
 
   return { scores, greeting };
