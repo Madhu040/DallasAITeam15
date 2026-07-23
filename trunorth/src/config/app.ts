@@ -101,6 +101,14 @@ export const appConfig = {
      * inside the §13A.5 stage budget alongside the 8s server-side timeout.
      */
     companionRetryDelayMs: viteNumber("VITE_COMPANION_RETRY_DELAY_MS", 600),
+    /**
+     * How long the persistent speech-captions box (`src/ui/captions.ts`) stays visible
+     * for a non-persistent line (the companion bubble) before auto-hiding. Needs to be a
+     * genuine reading window, not tied to the underlying game phase — `consequence`/
+     * `awaitingCompanion` can flip to `exploring` within a single render pass (see
+     * `SceneEngine.resolveDecision`), far too fast to read anything against.
+     */
+    captionMinVisibleMs: viteNumber("VITE_CAPTION_MIN_VISIBLE_MS", 4500),
   },
   world: {
     /** Avatar speed in scene pixels per second (1920×1080 space). */

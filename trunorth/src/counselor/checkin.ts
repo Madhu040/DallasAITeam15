@@ -123,18 +123,43 @@ const HEAVY_WORDS = [
 ];
 
 /**
- * Score a typed (own-words) answer with the same keyword heuristic style as the
- * demo companion. Runs the safety input filter first; distress always wins.
+ * Pure keyword scorer for already-safety-checked text (0-2, same scale as the tappable
+ * options). Shared by the local/demo fallback below AND the server's LLM-scoring route
+ * (`server/routes/checkin.ts`) as its no-key/parse-failure/timeout fallback — single
+ * source of truth for the word lists so both paths never drift apart.
  */
-export function scoreTypedCheckinAnswer(raw: string): { points: number; safetyFlag: SafetyFlag } {
+export function scoreCheckinTextLocally(text: string): 0 | 1 | 2 {
+  const lower = text.toLowerCase();
+  if (HEAVY_WORDS.some((w) => lower.includes(w))) return 0;
+  if (WOBBLY_WORDS.some((w) => lower.includes(w))) return 1;
+  if (BRIGHT_WORDS.some((w) => lower.includes(w))) return 2;
+  return 1;
+}
+
+/**
+ * Safety-only check for a typed answer, run IMMEDIATELY on submit (never deferred to a
+ * network round-trip — a distress disclosure must be caught the instant it's typed).
+ * `blockedPoints` is non-null when the filter caught something and no further scoring
+ * (local or LLM) should happen for this answer; `null` means it's clear to be scored.
+ */
+export function checkTypedSafety(
+  raw: string,
+): { text: string; blockedPoints: 0 | 1 | null; safetyFlag: SafetyFlag } {
   const text = sanitizeChildInput(raw).toLowerCase();
   const filter = filterInput(text || raw);
-  if (filter.safetyFlag === "distress") return { points: 0, safetyFlag: "distress" };
-  if (!filter.allowed) return { points: 1, safetyFlag: filter.safetyFlag };
-  if (HEAVY_WORDS.some((w) => text.includes(w))) return { points: 0, safetyFlag: "none" };
-  if (WOBBLY_WORDS.some((w) => text.includes(w))) return { points: 1, safetyFlag: "none" };
-  if (BRIGHT_WORDS.some((w) => text.includes(w))) return { points: 2, safetyFlag: "none" };
-  return { points: 1, safetyFlag: "none" };
+  if (filter.safetyFlag === "distress") return { text, blockedPoints: 0, safetyFlag: "distress" };
+  if (!filter.allowed) return { text, blockedPoints: 1, safetyFlag: filter.safetyFlag };
+  return { text, blockedPoints: null, safetyFlag: "none" };
+}
+
+/**
+ * Score a typed (own-words) answer entirely offline — the demo-mode / no-API-key /
+ * network-failure fallback. Runs the safety input filter first; distress always wins.
+ */
+export function scoreTypedCheckinAnswer(raw: string): { points: number; safetyFlag: SafetyFlag } {
+  const safety = checkTypedSafety(raw);
+  if (safety.blockedPoints !== null) return { points: safety.blockedPoints, safetyFlag: safety.safetyFlag };
+  return { points: scoreCheckinTextLocally(safety.text), safetyFlag: "none" };
 }
 
 export function buildCheckinResult(chapterId: string, answers: CheckinAnswer[]): CheckinRecord {

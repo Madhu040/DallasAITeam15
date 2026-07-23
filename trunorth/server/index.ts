@@ -5,6 +5,7 @@ import { getServiceClient, isSupabaseConfigured } from "./db/supabase.js";
 import { verifySupabaseToken } from "./auth/supabase.js";
 import { companionRoutes } from "./routes/companion.js";
 import { togetherRoutes } from "./routes/together.js";
+import { checkinRoutes } from "./routes/checkin.js";
 import { serverConfig } from "./config.js";
 import type { AuthUser } from "../src/types/index.js";
 
@@ -186,5 +187,6 @@ app.put("/api/progress/:childId", authMiddleware, async (c) => {
 
 app.route("/api", companionRoutes);
 app.route("/api", togetherRoutes);
+app.route("/api", checkinRoutes);
 
 export { app };

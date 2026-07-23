@@ -299,6 +299,33 @@ body {
 }
 
 /**
+ * Persistent speech captions (`src/ui/captions.ts`) — a translucent, click-through pill
+ * fixed to the bottom-center of the viewport, independent of the TTS voice toggle. Sits
+ * above modal overlays (100) so a line stays legible even during a dialog pop-up. Kept
+ * small/translucent/pill-shaped (movie-subtitle style) rather than a big card so it reads
+ * as a caption, not a competing UI panel.
+ */
+.speech-captions {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  max-width: min(480px, 86vw);
+  padding: 8px 20px;
+  background: rgba(15, 15, 20, 0.5);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+  z-index: 101;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.speech-captions.visible { opacity: 1; }
+
+/**
  * Child-facing variant: this is the companion talking to their friend, not a report card.
  * Warmer, softer, no clinical chrome. The grown-up version keeps the coach styling above
  * and only appears in Together Mode, where a parent is deliberately watching (§12.4, §1.1).
@@ -1007,6 +1034,18 @@ body {
   border-radius: 8px;
   font-size: 14px;
 }
+.child-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.child-play-btn {
+  width: auto;
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 13px;
+}
 
 .onboarding {
   min-height: 100vh;
@@ -1043,6 +1082,17 @@ body {
 }
 .checkin-dot.filled { background: var(--accent); }
 .checkin-companion-line { font-style: italic; }
+.checkin-greeting {
+  font-style: normal;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.5;
+  background: rgba(255,214,10,0.1);
+  border: 1px solid rgba(255,214,10,0.3);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 12px 0;
+}
 .checkin-support {
   background: rgba(255,214,10,0.12);
   border-radius: 12px;

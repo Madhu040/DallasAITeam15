@@ -46,6 +46,7 @@ import {
 } from "./together/inviteStore.js";
 import { getToken, initAuth, isAuthenticated } from "./ui/auth.js";
 import { speakLine, stopSpeaking } from "./audio/speech.js";
+import { clearCaption } from "./ui/captions.js";
 import { playSfx, sfxForBand, startAmbience, stopAmbience } from "./audio/sfx.js";
 import { buildJourneyReflection } from "./counselor/insights.js";
 import { shouldResumeInDistress } from "./counselor/checkin.js";
@@ -102,6 +103,7 @@ function navigate(screen: AppScreen): void {
   if (screen !== "game") {
     worldRuntime.detach();
     stopSpeaking();
+    clearCaption();
     stopAmbience();
     activeDialog = null;
   }
@@ -279,6 +281,7 @@ function onStageObject(objectId: string): void {
 function closeDialog(): void {
   activeDialog = null;
   worldRuntime.freeze(false);
+  clearCaption();
   // Defer so the closing click finishes on the old DOM — otherwise the browser
   // retargets it to whatever (e.g. a trigger zone) appears under the cursor.
   setTimeout(renderGame, 0);
@@ -596,6 +599,9 @@ function render(): void {
         app,
         scenario,
         gameState.profile.companionName,
+        gameState.profile.companionArchetype,
+        gameState.profile.ageBand,
+        gameState.profile.childDisplayName,
         (result) => {
           if (result) {
             gameState.progress.checkins = {
@@ -657,7 +663,14 @@ function render(): void {
       break;
 
     case "children":
-      renderChildren(app, () => navigate("hub"), () => navigate("landing"));
+      renderChildren(
+        app,
+        (childName) => {
+          if (childName) gameState.profile.childDisplayName = childName;
+          navigate("hub");
+        },
+        () => navigate("landing"),
+      );
       break;
   }
 }

@@ -38,7 +38,7 @@ async function createChild(displayName: string, ageBand: string): Promise<void> 
 
 export function renderChildren(
   container: HTMLElement,
-  onContinue: () => void,
+  onContinue: (childName?: string) => void,
   onSignOut: () => void,
 ): void {
   container.innerHTML = "";
@@ -47,7 +47,7 @@ export function renderChildren(
 
   const card = document.createElement("div");
   card.className = "parent-card";
-  card.innerHTML = `<h1>Your Children</h1><p>Add a child profile, then continue to play.</p>`;
+  card.innerHTML = `<h1>Your Children</h1><p>Add a child profile, then tap "Play as" so the game greets them by name.</p>`;
 
   const list = document.createElement("ul");
   list.className = "children-list";
@@ -67,7 +67,18 @@ export function renderChildren(
       }
       for (const child of children) {
         const item = document.createElement("li");
-        item.textContent = `${child.display_name} (${child.age_band})`;
+        item.className = "child-list-item";
+
+        const label = document.createElement("span");
+        label.textContent = `${child.display_name} (${child.age_band})`;
+        item.appendChild(label);
+
+        const playBtn = document.createElement("button");
+        playBtn.className = "btn-primary child-play-btn";
+        playBtn.textContent = `Play as ${child.display_name}`;
+        playBtn.onclick = () => onContinue(child.display_name);
+        item.appendChild(playBtn);
+
         list.appendChild(item);
       }
     } catch (e) {
@@ -123,7 +134,7 @@ export function renderChildren(
   const continueBtn = document.createElement("button");
   continueBtn.className = "btn-secondary";
   continueBtn.textContent = "Continue";
-  continueBtn.onclick = onContinue;
+  continueBtn.onclick = () => onContinue();
   card.appendChild(continueBtn);
 
   const signOutBtn = document.createElement("button");

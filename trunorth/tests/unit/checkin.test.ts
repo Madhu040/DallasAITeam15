@@ -3,6 +3,8 @@ import {
   CHECKIN_QUESTIONS,
   questionsForChapter,
   scoreTypedCheckinAnswer,
+  scoreCheckinTextLocally,
+  checkTypedSafety,
   buildCheckinResult,
   checkinPlacementLabel,
   checkinCompanionLine,
@@ -46,6 +48,28 @@ describe("pre-level check-in", () => {
     const scored = scoreTypedCheckinAnswer("I want to hurt myself");
     expect(scored.safetyFlag).toBe("distress");
     expect(scored.points).toBe(0);
+  });
+
+  it("scoreCheckinTextLocally is the single source of truth behind the offline path", () => {
+    expect(scoreCheckinTextLocally("i feel happy and excited")).toBe(2);
+    expect(scoreCheckinTextLocally("kind of nervous about school")).toBe(1);
+    expect(scoreCheckinTextLocally("i am sad and feel alone")).toBe(0);
+    expect(scoreCheckinTextLocally("bananas")).toBe(1);
+  });
+
+  it("checkTypedSafety catches distress/blocked input instantly, without scoring it", () => {
+    const distress = checkTypedSafety("I want to hurt myself");
+    expect(distress.blockedPoints).toBe(0);
+    expect(distress.safetyFlag).toBe("distress");
+
+    const profane = checkTypedSafety("this is so stupid");
+    expect(profane.blockedPoints).toBe(1);
+    expect(profane.safetyFlag).toBe("profanity");
+
+    const clean = checkTypedSafety("I feel happy and excited!");
+    expect(clean.blockedPoints).toBeNull();
+    expect(clean.safetyFlag).toBe("none");
+    expect(clean.text).toContain("happy");
   });
 
   it("places totals into bright / steady / gentle with a 0-10 starting point", () => {

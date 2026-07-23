@@ -14,6 +14,7 @@ import { backgroundImageUrl, characterImageUrl, objectImageUrl } from "../conten
 import { personalize } from "../content/personalize.js";
 import { celebrationFor } from "../config/content.js";
 import { isSpeechSupported, isVoiceEnabled, setVoiceEnabled, speakLine, stopSpeaking } from "../audio/speech.js";
+import { showCaption } from "./captions.js";
 import { isSfxEnabled, isSfxSupported, setSfxEnabled } from "../audio/sfx.js";
 import { COLOR_TUNES, type TogetherPlayer } from "../together/inviteStore.js";
 
@@ -335,6 +336,7 @@ export function renderGameView(
         // A speaking character (and its bubble) must never be hidden behind
         // other characters (z up to ~64) or the counselor panel (z 70).
         el.style.zIndex = "75";
+        showCaption(state.profile.companionName, companionLine);
       }
 
       world.appendChild(el);
@@ -831,6 +833,9 @@ function renderDialogOverlay(
   // reads as robotic instruction rather than a character talking to the child (who the
   // speaker is is already shown by the portrait + name, and announced via the aria-label).
   speakOverlayOnce(`dialog:${dialog.id}:${pageIndex}`, pageText);
+  // Persistent: the dialog stays open until the player dismisses it (closeDialog(),
+  // main.ts, clears the caption explicitly), so it shouldn't also auto-hide on a timer.
+  showCaption(speaker, pageText, true);
 }
 
 /** Spoken version of a decision pop-up: the prompt, then each option in order. */
